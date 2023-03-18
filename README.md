@@ -86,7 +86,7 @@ Computer Wash is a maintenance script that only uses Windows commands to try to 
 
       L1  - Computer Wash                     - start shell:AppsFolder\Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge -private  https://computerwash.wixsite.com/computer-wash
 
-      L2  - Computer Wash Discord             - start shell:AppsFolder\Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge -private  https://computerwash.wixsite.com/computer-wash/dev
+      L2  - Computer Wash Update              - start shell:AppsFolder\Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge -private  https://computerwash.wixsite.com/computer-wash/dev
 
  ----------------------------------------------------------------------------------------------------------------
 
