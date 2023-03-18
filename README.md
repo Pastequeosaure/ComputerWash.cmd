@@ -1,5 +1,8 @@
 # ComputerWash.cmd
-Computer Wash c'est un script de maintenance qui utilise uniquement des commande Windows pour tentez d'optimiser et de réparé ce dernier.
+
+----------------------------------------------------------------------------------------------------------------
+
+Computer Wash est un script de maintenance qui utilise uniquement les commandes Windows pour essayer de l'optimiser et de le réparer.
 
 ----------------------------------------------------------------------------------------------------------------
 
