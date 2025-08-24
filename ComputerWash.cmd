@@ -43,13 +43,18 @@ set wmicsoftwarelicensingservice=1
 set Color=1
 :: |                                                      |
 :: |    0) OFF 1) ON ( default )                          |
+:: |______________________________________________________|
+:: |                                                      |
+:: |    From this point I advise you not to make          |
+:: |    any changes.                                      |
+:: |                                                      |
+:: |    ( A vos risques et perils ! ! ! ! )               |
+:: |    ( At your own risk ! ! ! ! )                      |
 :: \______________________________________________________/
 
 :: - Computerwash Start - Admin mode ? -
 title Computer wash ERR ADMIN
 cd /D "%~dp0".
-set langue=1
-set Log=1
 call :Color
 goto :full_mode_admin
 
