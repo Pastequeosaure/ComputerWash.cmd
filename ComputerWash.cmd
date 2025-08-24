@@ -685,6 +685,7 @@ if /I "%valeur%"=="Antivirus Malware Scan" (
 	)
 if /I "%valeur%"=="Dignostic RAM" (
 	set mdsched=1
+	set shutdownrr=1
 	set choix=C
 	)
 if /I "%valeur%"=="Maintenance disk c" (

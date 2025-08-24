@@ -113,7 +113,10 @@ The program is organized into three levels: Automatic Tasks (A1–A5), Specific 
 
 ## 📘 Notes
 
-- Some commands may take several minutes to execute (Chkdsk, Mrt.exe, DISM, Sfc…).  
-- The program requires administrative privileges to function correctly.  
-- Winget commands will install or update software if enabled.  
-- Cleanup and reset commands may modify the system and delete temporary files: make sure to back up your important data.
+- The script automatically displays the order of commands and their execution status (ON/OFF).
+- You have 30 seconds to close Computer Wash after launching.
+- Verify all Shutdown parameters before starting the process.
+- Some commands may take several minutes to execute (Chkdsk, Mrt.exe, DISM, Sfc…).
+- Administrative privileges are required for proper execution.
+- Winget commands will install or update software if enabled.
+- Cleanup and reset commands may modify the system and delete temporary files: back up your important data.
