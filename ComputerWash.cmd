@@ -36,7 +36,7 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.08.25.22.22
+set V=V.2025.08.25.22.25
 :: |______________________________________________________|
 :: |                                                      |
 :: | Update  : PastequeOsaure V 2025.08.24.21.16          |
@@ -945,6 +945,7 @@ goto :END_Menu
  set print=0
  set Ligne_Menu=%Reset_Ligne_Menu%
  set /p choix=%SRESET% Select washing program : %SRESET%
+ if "%choix%"=="" ( set choix=A999 )
  if "%choix%"==" " ( set choix=A999 )
  :: Enlever les espaces
  set "choix=%choix: =%"
