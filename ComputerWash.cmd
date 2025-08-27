@@ -36,10 +36,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.08.25.22.25
+set V=V.2025.08.27.22.45
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2025.08.24.21.16          |
+:: | Update  : PastequeOsaure V 2025.08.27.22.45          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -47,12 +47,20 @@ set V=V.2025.08.25.22.25
 :: |    | ChatGpt    : Quiz Secret -----------   24/08/25 |
 :: |______________________________________________________|
 :: |                                                      |
-:: | Copy computerwash to system32 0 = OFF 1 = ON         |
+:: | Log ?                                                |
+:: |                                                      |
+:: | 0) OFF 1) ON ( default )                             |
+:: |                                                      |
+set Log=1
+:: |______________________________________________________|
+:: |                                                      |
+:: | Copy computerwash to system32 0 = OFF ( default )    |
+:: |                               1 = ON                 |
 :: |                                                      |
 set copy=0
 :: |______________________________________________________|
 :: |                                                      |
-:: | System info 0 = OFF 1 = ON                           |
+:: | System info 0 = OFF 1 = ON  ( default )              |
 :: |                                                      |
 set wmicsoftwarelicensingservice=1
 :: |______________________________________________________|
@@ -96,7 +104,7 @@ call :Chkdsk
 call :Defragmentation
 call :cleanmgr
 call :DISM
-call :Sfc
+call :Sfcscannow
 call :findstr
 call :Mrt
 call :SignatureUpdate
@@ -105,7 +113,7 @@ call :MpCmdRunScanType
 call :pnpunattendauditsystem
 call :mode
 call :mdsched
-call :bcdboot
+call :bcdbootsfall
 call :wsreset
 call :rstrui
 call :AllUpdateAPP
@@ -129,7 +137,7 @@ call :advfirewallreset
 call :ipconfigrelease
 call :ipconfigflushdns
 call :iwinhttp
-call :bitsadmin
+call :bitsadminresetallusers
 call :DLLWindowsUp
 call :wuauservStart
 call :cryptSvcStart
@@ -144,6 +152,7 @@ call :Pause
 call :USB
 call :Exit
 call :AutoLigneMenu C Ligne_MenuC
+call :Spinner_OFF
 goto :eof
 
 :: ===============================
@@ -257,10 +266,32 @@ If _%1_==_payload_  goto :copy
 :: 🔧 Copy puis Initialisation des variables
 :: ===============================
 :copy
- title Computer wash Ultimate %V%
+if /I "%LOG%"=="1" (
+	echo . > "%CD%\Computer Wash Log.txt"
+	echo "  ______________________________________________________  " >> "%CD%\Computer Wash Log.txt"
+	echo " /                                                      \ " >> "%CD%\Computer Wash Log.txt"
+	echo " | Computer Wash LOG EDITION V 0.5 - %DATE%         | " >> "%CD%\Computer Wash Log.txt"
+	echo " |______________________________________________________| " >> "%CD%\Computer Wash Log.txt"
+	echo " |----------------|                                     | " >> "%CD%\Computer Wash Log.txt"
+	echo " |   %date%   | Computer                            | " >> "%CD%\Computer Wash Log.txt"
+	echo " |  %TIME%   |           Wash                      | " >> "%CD%\Computer Wash Log.txt"
+	echo " |----------------|_____________________________________| " >> "%CD%\Computer Wash Log.txt"
+	echo " |                                                      | " >> "%CD%\Computer Wash Log.txt"
+	echo " | Created : Computer Wash - - - - - - - - - - - - - - -| " >> "%CD%\Computer Wash Log.txt"
+	echo " |______________________________________________________| " >> "%CD%\Computer Wash Log.txt"
+	echo " |----------------|                                     | " >> "%CD%\Computer Wash Log.txt"
+	echo " |----------------| Nom du PC : %COMPUTERNAME% " >> "%CD%\Computer Wash Log.txt"
+	echo " |----------------|                                     | " >> "%CD%\Computer Wash Log.txt"
+)
+
+ title Computer Wash %V%
  verify on
  if /I "%copy%"=="1" (
 	xcopy "ComputerWash.cmd" "%windir%\system32\"  /s /h /y
+)
+if exist stop.txt (
+	del stop.txt
+	goto :eof
 )
 goto :Var
 
@@ -296,7 +327,9 @@ goto :Var
  set D=Colorblind Mode
  set R=Return to the main menu
  set Quiz=Quiz
-
+ set Lymbiratus=Lymbiratus
+ set ArispBypass=ArispBypass
+ set THE_HAUNTED_COMPUTER=THE_HAUNTED_COMPUTER
 
 :: 5Ed5wEu5Q6
  set C=C
@@ -422,6 +455,7 @@ set C%nb%=%SFCGREEN%Start%SRESET%
  )
 
  set choix=0
+ set Spinner=0
  set Start?=0
  set verify=1
  set Security=1
@@ -704,6 +738,18 @@ if "%valeur%"=="" (
 	set "choix= "
     goto :mode_console
 )
+if /I "%valeur%"=="ArispBypass" ( 
+	set Anyreproductionisstrictlyprohibited=0
+	set choix=A999
+	)
+if /I "%valeur%"=="THE_HAUNTED_COMPUTER" (
+	call :THE_HAUNTED_COMPUTER
+	set choix=A999
+	)
+if /I "%valeur%"=="Lymbiratus" (
+	call :Lymbiratus
+	set choix=A999
+	)
 if /I "%valeur%"=="Quiz" (
 	call :Quiz
 	set choix=A999
@@ -908,6 +954,7 @@ goto :ARGC_mode_?
  IF [%3]==[] (
 	goto :Interface
  ) else (
+	call :Spinner_Start
 	set Choix=%~3
 	shift
 	goto :Preparateur_de_variable
@@ -983,11 +1030,11 @@ set "arg=%~2"
 if "%arg%"=="only" exit /b
 call :separatorIn_progress %1
 exit /b
-
 :: ===============================
 :: 🔧 Fonction Affichage In progress...
 :: ===============================
 :separatorIn_progress
+call :Log %1
 echo|set /p="%SRESET%%date% %TIME%"
 echo.
 echo.
@@ -1041,12 +1088,16 @@ goto :eof
 :: ===============================
 :Spinner_Start
 cd /D "%~dp0".
+if /i "%Spinner%"=="1" (
+	goto :eof
+)
 if exist stop.txt (
 	del stop.txt
 	goto :eof
 )
 if exist Spinner.cmd (
-	start "" Spinner.cmd
+	set Spinner=1
+	start Spinner.cmd
 ) else (
 	echo|set /p="%SRESET% %NFCRED%Spinner.cmd Disabled %SRESET% !"
 	echo.
@@ -1065,6 +1116,7 @@ if exist Spinner.cmd (
 	echo.
 	echo.
 )
+set Spinner=0
 goto :eof
 
 :: ===============================
@@ -1109,6 +1161,489 @@ echo.
 echo|set /p="[0m                               [31m\_/[0m "
 echo.
 goto :eof
+
+:: =========================================
+:: 🏰 Lymbiratus - Knight’s Dungeon Quest
+:: Rogue-like CMD adventure
+:: =========================================
+:Lymbiratus
+cls
+:: --- Player stats ---
+set HP=15
+set MAXHP=15
+set ATK=3
+set DEF=0
+set GOLD=10
+set KEYS=0
+set ROOM=1
+set MAXROOM=100
+
+:: --- Room names ---
+set "ROOMNAME0=The Dark Hall"
+set "ROOMNAME1=The Glittering Chamber"
+set "ROOMNAME2=The Forsaken Library"
+set "ROOMNAME3=The Mossy Dungeon"
+set "ROOMNAME4=The Crystal Cavern"
+set "ROOMNAME5=The Shadowed Corridor"
+set "ROOMNAME6=The Forgotten Armory"
+set "ROOMNAME7=The Bloodstained Hall"
+set "ROOMNAME8=The Ancient Chapel"
+set "ROOMNAME9=The Spider’s Nest"
+
+:: --- Enemies ---
+set "ENEMY0=Goblin"
+set "ENEMY1=Skeleton"
+set "ENEMY2=Slime"
+set "ENEMY3=Dark Knight"
+set "ENEMY4=Bat"
+
+:: --- Events ---
+set "EVENT0=ENEMY"
+set "EVENT1=TREASURE"
+set "EVENT2=MERCHANT"
+set "EVENT3=KEYSHOP"
+set "EVENT4=TRAP"
+set "EVENT5=DOOR"
+
+:: --- Intro ---
+:INTRO
+cls
+echo %SFCYELLOW%=========================================%SRESET%
+echo %SFCMAGENTA%      🏰 Lymbiratus - Knight’s Dungeon Quest%SRESET%
+echo %SFCYELLOW%=========================================%SRESET%
+echo.
+echo %SFCWHITE% You enter a cursed dungeon...%SRESET%
+echo %SFCWHITE% Everything changes with each step you take.%SRESET%
+echo %SFCWHITE% Your goal: traverse the 100 rooms and find the treasure room!%SRESET%
+echo.
+echo %SFCCYAN% Press any key to begin your adventure...%SRESET%
+pause >nul
+goto GAME
+
+:: --- Game loop ---
+:GAME
+cls
+set /a IDX=%random% %%10
+echo %SFCYELLOW% =========================================%SRESET%
+echo %SFCYELLOW%       🏰 Lymbiratus - Room !ROOM! / !MAXROOM!%SRESET%
+echo %SFCYELLOW% =========================================%SRESET%
+call set ROOMNAME=%%ROOMNAME%IDX%%%
+echo Location: %SFCMAGENTA% !ROOMNAME!%SRESET%
+echo.
+echo %SFCGREEN% HP: !HP!/!MAXHP!%SRESET%   %SFCBLUE%ATK: !ATK!%SRESET%   %SFCMAGENTA%DEF: !DEF!%SRESET%   %SFCYELLOW%GOLD: !GOLD!%SRESET%   %SFCWHITE%Keys: !KEYS!%SRESET%
+echo.
+
+:: Random event
+set /a EVENTIDX=%random% %%6
+call set EVENT=%%EVENT%EVENTIDX%%%
+
+if "!EVENT!"=="ENEMY" goto ENEMY
+if "!EVENT!"=="TREASURE" goto TREASURE
+if "!EVENT!"=="MERCHANT" goto MERCHANT
+if "!EVENT!"=="KEYSHOP" goto KEYSHOP
+if "!EVENT!"=="TRAP" goto TRAP
+if "!EVENT!"=="DOOR" goto DOOR
+
+goto NEXTROOM
+
+:: --- Enemy encounter ---
+:ENEMY
+set /a ENEMYIDX=%random% %%5
+call set ENEMYNAME=%%ENEMY%ENEMYIDX%%%
+set /a ROOM_SCALE=ROOM/10
+
+if !ENEMYIDX! == 0 (set /a BASEHP=5 + !ROOM_SCALE! & set /a BASEATK=1 + !ROOM_SCALE!/2)
+if !ENEMYIDX! == 1 (set /a BASEHP=6 + !ROOM_SCALE! & set /a BASEATK=2 + !ROOM_SCALE!/2)
+if !ENEMYIDX! == 2 (set /a BASEHP=8 + !ROOM_SCALE! & set /a BASEATK=1 + !ROOM_SCALE!/3)
+if !ENEMYIDX! == 3 (set /a BASEHP=10 + !ROOM_SCALE! & set /a BASEATK=3 + !ROOM_SCALE!/2)
+if !ENEMYIDX! == 4 (set /a BASEHP=4 + !ROOM_SCALE! & set /a BASEATK=1 + !ROOM_SCALE!/4)
+
+set /a ENEMYHP=!BASEHP! + %random% %%3
+set /a ENEMYATK=!BASEATK! + %random% %%2
+
+:ENEMY_LOOP
+echo %SFCRED% ⚔️  A wild !ENEMYNAME! appears!%SRESET%
+echo %SFCRED% Enemy → HP: !ENEMYHP!   ATK: !ENEMYATK!%SRESET%
+echo.
+echo %SFCGREEN% HP: !HP!/!MAXHP!%SRESET%   %SFCBLUE%ATK: !ATK!%SRESET%   %SFCMAGENTA%DEF: !DEF!%SRESET%
+echo.
+set /a BRIBE=!ENEMYHP! + !ENEMYATK! + !DEF!
+echo %SRESET% 1) Attack
+echo %SRESET% 2) Flee
+echo %SRESET% 3) Bribe (!BRIBE! gold)
+echo.
+set /p choice=Choose: 
+
+if "!choice!"=="1" (
+    set /a ENEMYHP-=!ATK!
+    if !ENEMYHP! LEQ 0 (
+        echo %SFCGREEN% 🎉 You defeated the !ENEMYNAME!!%SRESET%
+        set /a GOLDGAIN=%random% %%10 + 1
+        set /a HPGAIN=%random% %%3 + 1
+        set /a KEYCHANCE=%random% %%10
+        set /a GOLD+=GOLDGAIN
+        set /a HP+=HPGAIN
+        if !HP! GTR !MAXHP! set HP=!MAXHP!
+        if !KEYCHANCE! EQU 0 (set /a KEYS+=1 & echo %SFCWHITE% 🗝️  Bonus Key obtained! Keys: !KEYS!%SRESET% )
+        echo.
+        echo %SFCYELLOW% 🏆 Rewards:%SRESET%
+        echo %SFCYELLOW% Gold: +!GOLDGAIN!%SRESET%
+        echo %SFCGREEN% HP recovered: +!HPGAIN!%SRESET%
+        goto ARMORYSHOP
+    )
+    set /a DAMAGE=ENEMYATK-DEF
+    if !DAMAGE! LSS 0 set DAMAGE=0
+    set /a HP-=DAMAGE
+    echo %SFCRED% !ENEMYNAME! attacks back! You take !DAMAGE! damage. HP: !HP!%SRESET%
+    if !HP! LEQ 0 goto GAMEOVER
+    goto ENEMY_LOOP
+)
+
+if "!choice!"=="2" (
+    set /a DAMAGE=ENEMYATK-DEF
+    if !DAMAGE! LSS 0 set DAMAGE=0
+    set /a FLEEDAMAGE=!DAMAGE!/2
+    set /a HP-=FLEEDAMAGE
+    echo %SFCCYAN% You fled safely !
+    echo %SFCCYAN% You take !FLEEDAMAGE! damage while escaping. HP: !HP!%SRESET%
+    if !HP! LEQ 0 goto GAMEOVER
+    goto NEXTROOM
+)
+
+if "!choice!"=="3" (
+    if !GOLD! GEQ !BRIBE! (
+        set /a GOLD-=BRIBE
+        echo %SFCYELLOW% 💰 You bribed the !ENEMYNAME! for !BRIBE! gold. You pass to the next room.%SRESET%
+        goto NEXTROOM
+    ) else (
+        echo %SFCRED% Not enough gold to bribe the monster!%SRESET%
+        goto ENEMY_LOOP
+    )
+)
+
+goto ENEMY_LOOP
+
+:: --- Armory Shop ---
+:ARMORYSHOP
+echo.
+echo %SFCYELLOW% -⚔️  Armory Shop -%SRESET%
+echo %SFCGREEN% HP: !HP!/!MAXHP!%SRESET%   %SFCBLUE%ATK: !ATK!%SRESET%   %SFCMAGENTA%DEF: !DEF!%SRESET%   %SFCYELLOW%GOLD: !GOLD!%SRESET%   %SFCWHITE%Keys: !KEYS!%SRESET%
+echo %NFCYELLOW% 1)%SRESET% Sword (+2 ATK) - 15 gold
+echo %NFCYELLOW% 2)%SRESET% Shield (+2 DEF) - 15 gold
+echo %NFCYELLOW% 3)%SRESET% Armor (+5 MAXHP) - 20 gold
+echo %NFCYELLOW% 4)%SRESET% Leave
+set /p shopchoice=Choose: 
+if "!shopchoice!"=="1" if !GOLD! GEQ 15 (set /a GOLD-=15 & set /a ATK+=2 & echo %SFCGREEN% You bought a Sword! ATK +2%SRESET% & goto NEXTROOM)
+if "!shopchoice!"=="2" if !GOLD! GEQ 15 (set /a GOLD-=15 & set /a DEF+=2 & echo %SFCGREEN% You bought a Shield! DEF +2%SRESET%) & goto NEXTROOM
+if "!shopchoice!"=="3" if !GOLD! GEQ 20 (set /a GOLD-=20 & set /a MAXHP+=5 & set HP=!MAXHP! & echo %SFCGREEN% You bought an Armor! MAXHP +5%SRESET% & goto NEXTROOM)
+if "!shopchoice!"=="4" goto NEXTROOM
+goto ARMORYSHOP
+
+:: --- Treasure ---
+:TREASURE
+set /a goldfound=%random% %%10 + 1
+echo %SFCYELLOW% 🎁 You found a chest with !goldfound! gold!%SRESET%
+set /a GOLD+=goldfound
+goto NEXTROOM
+
+:: --- Merchant ---
+:MERCHANT
+echo %SFCYELLOW% 🛒 You meet a traveling merchant!%SRESET%
+echo %NFCYELLOW% 1)%SRESET% Potion (5 gold) [+3 HP]
+echo %NFCYELLOW% 2)%SRESET% Sword (10 gold) [+1 ATK]
+echo %NFCYELLOW% 3)%SRESET% Shield (10 gold) [+1 DEF]
+echo %NFCYELLOW% 4)%SRESET% Leave
+set /p choice=Buy: 
+if "!choice!"=="1" if !GOLD! GEQ 5 (set /a GOLD-=5 & set /a HP+=3 & if !HP! GTR !MAXHP! set HP=!MAXHP! & echo %SFCGREEN% You drink a potion and recover 3 HP%SRESET% & goto NEXTROOM)
+if "!choice!"=="2" if !GOLD! GEQ 10 (set /a GOLD-=10 & set /a ATK+=1 & echo %SFCGREEN% You buy a sword! ATK +1%SRESET% & goto NEXTROOM)
+if "!choice!"=="3" if !GOLD! GEQ 10 (set /a GOLD-=10 & set /a DEF+=1 & echo %SFCGREEN% You buy a shield! DEF +1%SRESET% & goto NEXTROOM)
+if "!choice!"=="4" goto NEXTROOM
+goto MERCHANT
+
+:: --- Key Shop ---
+:KEYSHOP
+echo %SFCYELLOW% 🔑 You meet a locksmith!%SRESET%
+echo %NFCYELLOW% 1)%SRESET% Buy key (5 gold)
+echo %NFCYELLOW% 2)%SRESET% Leave
+set /p choice=Choose:
+if "!choice!"=="1" if !GOLD! GEQ 5 (set /a GOLD-=5 & set /a KEYS+=1 & echo %SFCGREEN% You buy a key! Keys: !KEYS!%SRESET%)
+if "!choice!"=="2" goto NEXTROOM
+goto NEXTROOM
+
+:: --- Trap ---
+:TRAP
+set /a damage=%random% %%3 +1
+set /a HP-=damage
+echo %SFCRED% 💀 A trap! You lose !damage! HP!%SRESET%
+if !HP! LEQ 0 goto GAMEOVER
+goto NEXTROOM
+
+:: --- Door / Key check ---
+:DOOR
+echo %SFCYELLOW% 🚪 You reach a locked door!%SRESET%
+set OPTIONS=1
+if !KEYS! GEQ 1 set OPTIONS=2
+echo %NFCYELLOW% 1)%SRESET% Pay 20 gold to open the door (greedy locksmith 😅)
+echo %NFCYELLOW% 2)%SRESET% Sacrifice 12 HP to pass (vampire locksmith 🧛‍♂️)
+if !KEYS! GEQ 1 echo %NFCYELLOW%3)%SRESET% Use a key to open the door
+if !ROOM! GEQ 2 echo %NFCYELLOW%4)%SRESET% Take a detour (-2 rooms)
+set /p choice=Choose:
+if "!choice!"=="4" if !ROOM! GEQ 2 (set /a ROOM-=3 & echo %SFCBLUE% You take a detour! Moving back 2 rooms.%SRESET% & pause & goto NEXTROOM)
+if "!choice!"=="1" if !GOLD! GEQ 20 (set /a GOLD-=20 & echo %SFCGREEN% 💰 You pay 20 gold to open the door. Greedy locksmith laughs 😅%SRESET% & pause & goto NEXTROOM)
+if "!choice!"=="1" if !GOLD! LSS 20 (echo %SFCRED%Not enough gold!%SRESET%  & pause & goto DOOR)
+if "!choice!"=="2" (set /a HP-=12 & echo %SFCRED% 🩸 You sacrifice 12 HP. The vampire locksmith smiles 😈%SRESET% & pause & goto NEXTROOM)
+if !KEYS! GEQ 1 if "!choice!"=="3" (set /a KEYS-=1 & echo %SFCGREEN% 🗝️  You use a key to open the door.%SRESET% & pause & goto NEXTROOM)
+goto DOOR
+
+:: --- Next Room ---
+:NEXTROOM
+set /a ROOM+=1
+if !ROOM! GTR !MAXROOM! goto WIN
+goto GAME
+
+:: --- Win ---
+:WIN
+cls
+:: launch fireworks
+for /l %%i in (1,1,30) do (
+    cls
+    call :FireworkTREASURE
+    timeout /t 1 >nul
+)
+goto END
+
+:: --- Firework celebration ---
+:FireworkTREASURE
+:: Choix de couleurs aléatoires pour chaque ligne
+for /L %%i in (1,1,6) do (
+    set /a r=%random% %%5
+    if !r! EQU 0 set c=%SFCRED%
+    if !r! EQU 1 set c=%SFCBLUE%
+    if !r! EQU 2 set c=%SFCGREEN%
+    if !r! EQU 3 set c=%SFCMAGENTA%
+    if !r! EQU 4 set c=%SFCCYAN%
+
+    if %%i==1 echo !c!%SBOLD% =========================================%SRESET%
+    if %%i==2 echo !c!         🏆 The Treasure Room !
+    if %%i==3 echo !c!%SRESET% =========================================%SRESET%
+    if %%i==4 echo !c! You have made it through all the rooms of the dungeon...
+    if %%i==5 echo !c! And here is the long-awaited treasure!
+    if %%i==6 (
+        echo.
+        echo !c!        $$$$$$$$$$$$$$$$$$$$$
+        echo !c!        $  🏰          💎  $
+        echo !c!        $      TREASURE     $
+        echo !c!        $  💎          🏰  $
+        echo !c!        $$$$$$$$$$$$$$$$$$$$$
+        echo.
+        echo !c! You finish the dungeon with:
+        echo !c! !HP! HP   !GOLD! gold   !KEYS! keys!%SRESET%
+    )
+)
+echo.
+echo !c! ✨ CONGRATULATIONS! ✨%SRESET%
+echo.
+exit /b
+
+:: --- Game Over ---
+:GAMEOVER
+echo %SFCRED% 💀 GAME OVER! You fell in the dungeon...%SRESET%
+goto END
+
+:END
+pause
+exit /b
+
+:: ===============================
+:: 🔧 Secret THE_HAUNTED_COMPUTER
+:: ===============================
+:THE_HAUNTED_COMPUTER
+:: The Haunted Computer 👻💻 - CMD Adventure Game
+:: Author: ChatGPT
+:: Description: Mini interactive story with multiple choices and endings
+:TITLE
+cls
+color 0a
+echo This game is cursed and it's not a joke !
+echo.
+echo ==========================================
+echo        👻  THE HAUNTED COMPUTER  💻
+echo ==========================================
+echo.
+echo An old terminal is blinking in front of you...
+echo.
+echo 1^) Explore the C:\Ancien directory
+
+echo 2^) Type a random command
+
+echo 3^) Restart the machine
+
+echo.
+set /p choice=What do you want to do? (1-3) : 
+if "%choice%"=="1" goto DIRECTORY
+if "%choice%"=="2" goto RANDOMCMD
+if "%choice%"=="3" goto REBOOT
+goto TITLE
+
+:DIRECTORY
+cls
+color 0e
+echo You open C:\Ancien ...
+echo.
+echo Inside, you find two strange files:
+echo - ghost.sys
+
+echo - memory.bat
+
+echo.
+echo 1^) Open ghost.sys
+
+echo 2^) Run memory.bat
+
+echo 3^) Leave this folder
+echo.
+set /p choice=Your choice (1-3) : 
+if "%choice%"=="1" goto GHOST
+if "%choice%"=="2" goto MEMORY
+if "%choice%"=="3" goto TITLE
+goto DIRECTORY
+
+:GHOST
+cls
+color 0c
+echo The file opens... suddenly a face appears.
+echo.
+echo 👻 "You weren't supposed to wake me..."
+echo.
+echo 👻 "I'm going to sleep... "
+call :CFGON
+timeout /t 10 /nobreak >nul
+shutdown /h
+goto :VIRUS
+
+:MEMORY
+cls
+color 0b
+echo The script runs... a message appears:
+echo.
+echo "Admin password: FREEDOM"
+echo.
+echo 1^) Return to main menu
+
+echo 2^) Try the password
+echo.
+set /p choice=Your choice (1-2) : 
+if "%choice%"=="1" goto TITLE
+if "%choice%"=="2" goto ADMIN
+
+:RANDOMCMD
+cls
+set /a rand=%random%%%3
+if %rand%==0 goto BUG
+if %rand%==1 goto CLUE
+if %rand%==2 goto VIRUS
+
+:BUG
+color 0c
+echo The machine displays a fatal error message...
+echo.
+tree c:
+echo.
+echo [CRITICAL_ERROR] SYSTEM HALTED
+echo.
+goto :GAMEOVER
+
+:CLUE
+color 0a
+echo.
+echo The command gives a clue:
+echo "Look inside C:\Ancien"
+echo.
+pause
+goto TITLE
+
+:VIRUS
+color 0c
+echo ⚠️  A virus is spreading... the screen blurs.
+echo You hear a voice: "Stay here forever..."
+echo "I will stay with you forever… "
+call :CFGOFF
+echo.
+goto :GAMEOVER
+
+:REBOOT
+cls
+color 07
+echo The machine is restarting...
+echo.
+ping -n 2 localhost >nul
+color 0a
+echo But instead of the BIOS, you fall into an endless loop.
+echo.
+echo You are trapped forever inside the computer.
+echo.
+shutdown /r /t 60 /c "👻 The computer haunts your restart... 60s left! "
+pause
+goto END
+
+:ADMIN
+cls
+call :CFGON
+:: launch fireworks
+for /l %%i in (1,1,30) do (
+    cls
+    call :Firework
+    timeout /t 1 >nul
+)
+
+pause
+goto END
+
+:GAMEOVER
+echo.
+echo *** GAME OVER ***
+echo.
+pause
+goto :THE_HAUNTED_COMPUTER
+
+:Firework
+set /a r=%random% %%5
+if !r! EQU 0 (set c=%SFCRED%) 
+if !r! EQU 1 (set c=%SFCBLUE%)
+if !r! EQU 2 (set c=%SFCGREEN%)
+if !r! EQU 3 (set c=%SFCMAGENTA%)
+if !r! EQU 4 (set c=%SFCCYAN%)
+echo %SFCYELLOW%%SBOLD%
+echo.
+echo|set /p="!c!      ██    ██  ██ ██████  ██████  ████████  ██████  ██████  ███████ "
+echo.
+echo|set /p="!c!      ██    ██  ██ ██   ██ ██   ██    ██    ██    ██ ██   ██ ██ "
+echo.
+echo|set /p="!c!      ██    ██  ██ ██████  ██████     ██    ██    ██ ██████  █████ "
+echo.
+echo|set /p="!c!       ██  ██   ██ ██      ██         ██    ██    ██ ██   ██ ██ "
+echo.
+echo|set /p="!c!        ████    ██ ██      ██         ██     ██████  ██   ██ ███████ "
+echo.
+echo.
+echo|set /p="!c!                       ✨ CONGRATULATIONS! ✨ "
+echo.
+echo|set /p="!c!            You have freed the soul of the haunted computer!%SRESET% "
+echo.
+echo.
+exit /b
+
+:CFGON
+powercfg.exe /hibernate on
+goto :eof
+
+:CFGOFF
+powercfg.exe /hibernate off
+goto :eof
+
+:END
+endlocal
+exit /b
 
 :: ===============================
 :: 🔧 Secret Quiz
@@ -1315,6 +1850,20 @@ for %%I in (1 2 3 4 5) do (
 )
 
 echo %SBOLD%Quiz finished! Your score: !score! / 5%SRESET%
+if !score! EQU 5 (
+	echo.
+	echo|set /p="[0m5/5 Unloked THE_HAUNTED_COMPUTER"
+	echo.
+	echo.
+	echo|set /p="Will you manage to free the soul of your haunted computer… and unlock the next game ? "
+	echo.
+	set "foot_head8=%%NFCGREEN%%  _____________________________________________________________________"
+	set "foot_head9=%%NFCGREEN%% ^/                                                                     ^\"
+	set "foot_head10=%%NFCGREEN%% ^| %%SRESET%% THE_HAUNTED_COMPUTER ) Will you manage to free the soul of your   %%NFCGREEN%% ^|"
+	set "foot_head11=%%NFCGREEN%% ^| %%SRESET%% haunted computer… and unlock the next game ?                      %%NFCGREEN%% ^|"
+	set "foot_head12=%%NFCGREEN%% \_____________________________________________________________________/"
+call :AutoLigneMenu foot_head Ligne_Menufoot_head noPrefix
+)
 pause
 goto :eof
 
@@ -1486,7 +2035,8 @@ if /I "%exit%"=="0" (
 if /I "%exit%"=="1" (
     set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 	if "%Start?%"=="2" (
-		exit
+		call :separator exit
+		goto :exitlog
 	)
 )
 goto :eof
@@ -1542,6 +2092,8 @@ if /I "%shutdown%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Shutdown /s"
 		Shutdown /s
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 )
 set /a nb-=1
@@ -1553,6 +2105,8 @@ if /I "%shutdownro%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Shutdown /r /o"
 		shutdown /r /o
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -1565,6 +2119,8 @@ if /I "%shutdownrr%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Shutdown /r"
 		Shutdown /r
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -1591,12 +2147,16 @@ if /I "%pause%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "The script has finished executing all the requested commands and will close as soon as you end the pause."
 		pause
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 )
 goto :eof
 
 :Create_Restore_Point
+set Temploop=0
 set /a nb+=1
+:Retry_Create_Restore_Point
 if /I "%valeur%"=="Wmic.exe" (
 set choix=C
 if /I "%Security%"=="0" (
@@ -1611,14 +2171,23 @@ if /I "%Security%"=="0" (
 )
 if /I "%Security%"=="1" (
     if "%Start?%"=="2" (
-		call :separator "Create Restore Point"
+		call :separator "Allows the creation of restore points on the drive if they have not already been created."
 		powershell -Command "if (-not (Get-ComputerRestorePoint -ErrorAction SilentlyContinue)) { Enable-ComputerRestore -Drive 'C:\' }"
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		call :separator "Silently start the System Restore service"
 		net start srservice >nul 2>&1
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 		set "DATETIME=%DATE:/=-%_%TIME::=-%"
 		set "DATETIME=%DATETIME: =0%"
 		call set "POINTNAME=AutoRestore_%%DATETIME%%"
 		call set "POINTNAME=%%POINTNAME:~0,40%%"
+		call :separator "Create Restore Point"
 		call powershell -Command "Checkpoint-Computer -Description '%%POINTNAME%%' -RestorePointType 'MODIFY_SETTINGS'"
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry Create_Restore_Point )
 	)
 	    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -1644,6 +2213,8 @@ if /I "%wmicsoftwarelicensingservice%"=="1" (
    		systeminfo | find /i "Microsoft windows"
    		echo|set /p="Windows KEY :                               "
    		powershell -Command "(Get-WmiObject -Query 'Select * from SoftwareLicensingService').OA3xOriginalProductKey"
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -1667,13 +2238,17 @@ if /I "%chkdsk%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Chkdsk C: /F /R /I"
 		echo O^R | chkdsk c: /F /R /I
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :Defragmentation
+set Temploop=0
 set /a nb+=1
+:Retry_Defragmentation
 if /I "%valeur%"=="Defragmentation" (
 set choix=C
 if /I "%defrag%"=="0" (
@@ -1690,6 +2265,9 @@ if /I "%defrag%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Defrag C: /U /V"
 		Defrag C: /U /V
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry Defragmentation )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -1713,13 +2291,17 @@ if /I "%cleanmgr%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Cleanmgr /sagerun:65535"
 		Cleanmgr /sagerun:65535
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :DISM
+set Temploop=0
 set /a nb+=1
+:Retry_DISM
 if /I "%valeur%"=="DISM" (
 set choix=C
 if /I "%DISM%"=="0" (
@@ -1736,13 +2318,18 @@ if /I "%DISM%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "DISM.exe /Online /Cleanup-image /Restorehealth"
 		DISM.exe /Online /Cleanup-image /Restorehealth
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry DISM )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
-:Sfc
+:Sfcscannow
+set Temploop=0
 set /a nb+=1
+:Retry_Sfcscannow
 if /I "%valeur%"=="sfc" (
 set choix=C
 if /I "%sfc%"=="0" (
@@ -1758,7 +2345,10 @@ if /I "%sfc%"=="0" (
 if /I "%sfc%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Sfc /scannow"
-		sfc /scannow
+		Sfc /scannow
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry Sfcscannow )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -1783,7 +2373,8 @@ if /I "%findstr%"=="1" (
 		Call :Spinner_Start
 		call :separator "Findstr /c:""[SR]"" %windir%\Logs\CBS\CBS.log In Progress..."
 		findstr /c:"[SR]" %windir%\Logs\CBS\CBS.log >"Compuer Wash Log sfc.txt"
-		
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 		call :Spinner_OFF
 		
 	)
@@ -1808,9 +2399,10 @@ if /I "%Mrt%"=="0" (
 if /I "%Mrt%"=="1" (
 	if "%Start?%"=="2" (
 		Call :Spinner_Start
-		call :separator "Mrt.exe /F:Y /Q (This may take several hours)"
+		call :separator "Mrt.exe This may take several hours"
 		Mrt.exe /F:Y /Q
-		
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 		call :Spinner_OFF
 		
 	)
@@ -1819,7 +2411,9 @@ if /I "%Mrt%"=="1" (
 goto :eof
 
 :SignatureUpdate
+set Temploop=0
 set /a nb+=1
+:Retry_SignatureUpdate
 if /I "%valeur%"=="SignatureUpdate" (
 set choix=C
 if /I "%SignatureUpdate%"=="0" (
@@ -1836,13 +2430,18 @@ if /I "%SignatureUpdate%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "MpCmdRun.exe -SignatureUpdate"
 		"%ProgramFiles%\Windows Defender\MpCmdRun.exe" -SignatureUpdate
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry SignatureUpdate )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :MpCmdRunBootSectorScan
+set Temploop=0
 set /a nb+=1
+:Retry_:MpCmdRunBootSectorScan
 if /I "%valeur%"=="MpCmdRunBootSectorScan" (
 set choix=C
 if /I "%MpCmdRunBootSectorScan%"=="0" (
@@ -1860,8 +2459,9 @@ if /I "%MpCmdRunBootSectorScan%"=="1" (
 		call :separator "MpCmdRun.exe -Scan -ScanType -BootSectorScan"
 		Call :Spinner_Start
 		"%ProgramFiles%\Windows Defender\MpCmdRun.exe" -Scan -ScanType -BootSectorScan
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 		call :Spinner_OFF
-		
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -1886,6 +2486,8 @@ if /I "%MpCmdRunScanType%"=="1" (
 		call :separator "MpCmdRun.exe -Scan -ScanType 2"
 		Call :Spinner_Start
 		"%ProgramFiles%\Windows Defender\MpCmdRun.exe" -Scan -ScanType 2
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 		call :Spinner_OFF
 		
 	)
@@ -1911,6 +2513,8 @@ if /I "%pnpunattend%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Pnpunattend auditsystem /s /l"
 		pnpunattend auditsystem /s /l
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -1934,6 +2538,8 @@ if /I "%mode%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Mode"
 		mode
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -1957,13 +2563,17 @@ if /I "%mdsched%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Mdsched"
 		mdsched
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
-:bcdboot
+:bcdbootsfall
+set Temploop=0
 set /a nb+=1
+:Retry_bcdbootsfall
 if /I "%valeur%"=="bcdboot" (
 set choix=C
 if /I "%bcdboot%"=="0" (
@@ -1980,7 +2590,9 @@ if /I "%bcdboot%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "bcdboot C:\Windows /s C: /f ALL"
 		bcdboot C:\Windows /s C: /f ALL
-
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry bcdbootsfall )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2005,7 +2617,8 @@ if /I "%wsreset%"=="1" (
 		Call :Spinner_Start
 		call :separator "Wsreset"
 		wsreset
-		
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 		call :Spinner_OFF
 		
 	)
@@ -2031,13 +2644,17 @@ if /I "%rstrui%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Rstrui.exe"
 		rstrui.exe
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :AllUpdateAPP
+set Temploop=0
 set /a nb+=1
+:Retry_AllUpdateAPP
 if /I "%valeur%"=="AllUpdateAPP" (
 set choix=C
 if /I "%ALL%"=="0" (
@@ -2055,6 +2672,9 @@ if /I "%ALL%"=="1" (
 	if "%Start?%"=="2" (
 	call :separator "All Update APP"
 	winget upgrade --all --silent --accept-package-agreements --accept-source-agreements
+	set temperror=!ERRORLEVEL!
+    Call :LOGERRORLEVEL !temperror!
+	if !temperror! GEQ 1 ( Call :Retry AllUpdateAPP )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2078,6 +2698,8 @@ if /I "%chrome%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "google.chrome"
 		winget install "Google.Chrome" --silent --accept-package-agreements --accept-source-agreements
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2101,6 +2723,8 @@ if /I "%Firefox%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Install Mozilla.Firefox"
 		winget install "Mozilla.Firefox" --silent --accept-package-agreements --accept-source-agreements
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2124,6 +2748,8 @@ if /I "%VLC%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Install VideoLAN.VLC"
 		winget install "VideoLAN.VLC" --silent --accept-package-agreements --accept-source-agreements
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2147,6 +2773,8 @@ if /I "%Acrobat%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Install Adobe.Acrobat.Reader.64-bit"
 		winget install "Adobe.Acrobat.Reader.64-bit" --silent --accept-package-agreements --accept-source-agreements
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 		set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2170,6 +2798,8 @@ if /I "%zip%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Install 7zip.7zip"
 		winget install "7zip.7zip" --silent --accept-package-agreements --accept-source-agreements
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2193,13 +2823,17 @@ if /I "%KeePass%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Install DominikReichl.KeePass"
 		winget install "DominikReichl.KeePass" --silent --accept-package-agreements --accept-source-agreements
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :wuauservStop
+set Temploop=0
 set /a nb+=1
+:Retry_wuauservStop
 if /I "%valeur%"=="wuauservStop" (
 set choix=C
 if /I "%wuauservStop%"=="0" (
@@ -2216,13 +2850,18 @@ if /I "%wuauservStop%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Stopping services... net stop wuauservStop"
 		net stop wuauserv 2>&1
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry wuauservStop )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :cryptSvcStop
+set Temploop=0
 set /a nb+=1
+:Retry_cryptSvcStop
 if /I "%valeur%"=="cryptSvcStop" (
 set choix=C
 if /I "%cryptSvcStop%"=="0" (
@@ -2239,13 +2878,18 @@ if /I "%cryptSvcStop%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Stopping services... net stop cryptSvc"
 		net stop cryptSvc 2>&1
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry cryptSvcStop )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :bitsStop
+set Temploop=0
 set /a nb+=1
+:Retry_bitsStop
 if /I "%valeur%"=="bitsStop" (
 set choix=C
 if /I "%bitsStop%"=="0" (
@@ -2262,13 +2906,18 @@ if /I "%bitsStop%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Stopping services... net stop bits"
 		net stop bits 2>&1
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry bitsStop )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :msiserverStop
+set Temploop=0
 set /a nb+=1
+:Retry_msiserverStop
 if /I "%valeur%"=="net stop msiserver" (
 set choix=C
 if /I "%msiserverStop%"=="0" (
@@ -2285,6 +2934,9 @@ if /I "%msiserverStop%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Stopping services... net stop msiserver"
 		net stop msiserver 2>&1
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry msiserverStop )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2308,6 +2960,8 @@ if /I "%del%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Del /S /F /Q %temp%"
 		del /S /F /Q %temp%
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2331,13 +2985,17 @@ if /I "%del2%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Del /S /F /Q %Windir%\Temp"
 		del /S /F /Q %Windir%\Temp
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :SoftwareDistribution
+set Temploop=0
 set /a nb+=1
+:Retry_SoftwareDistribution
 if /I "%valeur%"=="SoftwareDistribution" (
 set choix=C
 if /I "%SoftwareDistribution%"=="0" (
@@ -2354,13 +3012,18 @@ if /I "%SoftwareDistribution%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "rd /s /q %windir%\SoftwareDistribution"
 		rd /s /q %windir%\SoftwareDistribution
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry SoftwareDistribution )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :catroot2
+set Temploop=0
 set /a nb+=1
+:Retry_catroot2
 if /I "%valeur%"=="catroot2" (
 set choix=C
 if /I "%catroot2%"=="0" (
@@ -2377,13 +3040,18 @@ if /I "%catroot2%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "rd /s /q %windir%\System32\catroot2"
 		rd /s /q %windir%\System32\catroot2
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry catroot2 )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :winsockreset
+set Temploop=0
 set /a nb+=1
+:Retry_winsockreset
 if /I "%valeur%"=="winsockreset" (
 set choix=C
 if /I "%winsockreset%"=="0" (
@@ -2400,13 +3068,18 @@ if /I "%winsockreset%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Netsh winsock reset"
 		netsh winsock reset
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry winsockreset )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :interfaceipreset
+set Temploop=0
 set /a nb+=1
+:Retry_interfaceipreset
 if /I "%valeur%"=="interfaceipreset" (
 set choix=C
 if /I "%interfaceipreset%"=="0" (
@@ -2423,13 +3096,18 @@ if /I "%interfaceipreset%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Netsh interface ip reset"
 		netsh interface ip reset
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry interfaceipreset )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :advfirewallreset
+set Temploop=0
 set /a nb+=1
+:Retry_advfirewallreset
 if /I "%valeur%"=="advfirewallreset" (
 set choix=C
 if /I "%advfirewallreset%"=="0" (
@@ -2446,13 +3124,18 @@ if /I "%advfirewallreset%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Netsh advfirewall reset"
 		netsh advfirewall reset
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry advfirewallreset )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :ipconfigrelease
+set Temploop=0
 set /a nb+=1
+:Retry_ipconfigrelease
 if /I "%valeur%"=="ipconfigrelease" (
 set choix=C
 if /I "%ipconfigrelease%"=="0" (
@@ -2469,13 +3152,18 @@ if /I "%ipconfigrelease%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Ipconfig /release"
 		ipconfig /release
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry ipconfigrelease )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :ipconfigflushdns
+set Temploop=0
 set /a nb+=1
+:Retry_ipconfigflushdns
 if /I "%valeur%"=="ipconfigflushdns" (
 set choix=C
 if /I "%ipconfigflushdns%"=="0" (
@@ -2492,13 +3180,18 @@ if /I "%ipconfigflushdns%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "Ipconfig /flushdns"
 		ipconfig /flushdns
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry ipconfigflushdns )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :iwinhttp
+set Temploop=0
 set /a nb+=1
+:Retry_iwinhttp
 if /I "%valeur%"=="winhttp" (
 set choix=C
 if /I "%winhttp%"=="0" (
@@ -2515,13 +3208,18 @@ if /I "%winhttp%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "netsh winhttp reset proxy"
 		netsh winhttp reset proxy
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry iwinhttp )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
-:bitsadmin
+:bitsadminresetallusers
+set Temploop=0
 set /a nb+=1
+:Retry_bitsadminresetallusers
 if /I "%valeur%"=="bitsadmin" (
 set choix=C
 if /I "%bitsadmin%"=="0" (
@@ -2538,6 +3236,9 @@ if /I "%bitsadmin%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "bitsadmin /reset /allusers 2>&1"
 		bitsadmin /reset /allusers 2>&1
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry bitsadminresetallusers )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2559,7 +3260,7 @@ if /I "%DLLWindowsUp%"=="0" (
 )
 if /I "%DLLWindowsUp%"=="1" (
 	if "%Start?%"=="2" (
-		call :separator "Re-enregistrement des DLL Windows Update..."
+		call :separator "Re-registering Windows Update DLLs..."
 		call :ReRegister_WindowsUpdate_DLLs
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
@@ -2574,6 +3275,9 @@ for %%i in (
     wuapi.dll wuaueng.dll wuaueng1.dll wucltui.dll wups.dll wups2.dll wuweb.dll qmgr.dll
     qmgrprxy.dll wucltux.dll muweb.dll wuwebv.dll
 ) do regsvr32.exe /s %%i
+set temperror=!ERRORLEVEL!
+Call :LOGERRORLEVEL !temperror!
+if !temperror! GEQ 1 ( Call :Retry DLLWindowsUp )
 echo|set /p="✅ Windows Update has been completely reset !"
 echo.
 goto :eof
@@ -2596,6 +3300,8 @@ if /I "%wuauservStart%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "net Start wuauservStart"
 		net start wuauserv 2>&1
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2619,6 +3325,8 @@ if /I "%cryptSvcStart%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "net Start cryptSvc"
 		net Start cryptSvc 2>&1
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2642,6 +3350,8 @@ if /I "%bitsStart%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "net Start bits"
 		net Start bits 2>&1
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -2665,13 +3375,17 @@ if /I "%msiserverStart%"=="1" (
 	if "%Start?%"=="2" (
 		call :separator "net Start msiserver"
 		net Start msiserver >nul 2>&1
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
 :StartScan
+set Temploop=0
 set /a nb+=1
+:Retry_StartScan
 if /I "%valeur%"=="UsoClient StartScan" (
 set choix=C
 if /I "%StartScan%"=="0" (
@@ -2689,6 +3403,9 @@ if /I "%StartScan%"=="1" (
 		call :separator "UsoClient StartScan"
 		Call :Spinner_Start
 		UsoClient StartScan
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry StartScan )
 		Call :Spinner_OFF
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
@@ -2696,7 +3413,9 @@ if /I "%StartScan%"=="1" (
 goto :eof
 
 :StartDownload
+set Temploop=0
 set /a nb+=1
+:Retry_StartDownload
 if /I "%valeur%"=="UsoClient StartDownload" (
 set choix=C
 if /I "%StartDownload%"=="0" (
@@ -2714,6 +3433,9 @@ if /I "%StartDownload%"=="1" (
 		call :separator "UsoClient StartDownload"
 		Call :Spinner_Start
 		UsoClient StartDownload
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry StartDownload )
 		Call :Spinner_OFF
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
@@ -2721,7 +3443,9 @@ if /I "%StartDownload%"=="1" (
 goto :eof
 
 :StartInstall
+set Temploop=0
 set /a nb+=1
+:Retry_StartInstall
 if /I "%valeur%"=="UsoClient StartInstall" (
 set choix=C
 if /I "%StartInstall%"=="0" (
@@ -2739,6 +3463,9 @@ if /I "%StartInstall%"=="1" (
 		Call :Spinner_Start
 		call :separator "UsoClient StartInstall"
 		UsoClient StartInstall
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
+		if !temperror! GEQ 1 ( Call :Retry StartInstall )
 		Call :Spinner_OFF
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
@@ -2764,10 +3491,55 @@ if /I "%RestartDevice%"=="1" (
 		call :separator "UsoClient RestartDevice"
 		Call :Spinner_Start
 		UsoClient RestartDevice
+		set temperror=!ERRORLEVEL!
+        Call :LOGERRORLEVEL !temperror!
 		Call :Spinner_OFF
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
 goto :eof
 
+:Log
+cd /D "%~dp0".
+if /I "%LOG%"=="1" (
+	echo " |----------------| Start :                             | " >> "%CD%\Computer Wash Log.txt"
+	echo " |- %TIME% --| %1" >> "%CD%\Computer Wash Log.txt">> "%CD%\Computer Wash Log.txt"
+	echo " |                |                                     | " >> "%CD%\Computer Wash Log.txt"
+)
+goto :eof
 
+:LOGERRORLEVEL
+if /I "%LOG%"=="1" (
+	echo " |                | Error level output :                | " >> "%CD%\Computer Wash Log.txt"
+	echo " |- %TIME% --| %1" >> "%CD%\Computer Wash Log.txt">> "%CD%\Computer Wash Log.txt"
+	echo " |----------------|-------------------------------------| " >> "%CD%\Computer Wash Log.txt"
+)
+goto :eof
+
+:LOGERRORLEVEL
+if /I "%LOG%"=="1" (
+	echo " |                | Error level output :                | " >> "%CD%\Computer Wash Log.txt"
+	echo " |- %TIME% --| %1" >> "%CD%\Computer Wash Log.txt">> "%CD%\Computer Wash Log.txt"
+	echo " |----------------|-------------------------------------| " >> "%CD%\Computer Wash Log.txt"
+)
+goto :eof
+
+:Retry
+call :separator "Fail_Retry"
+set /a Temploop+=1
+set "Retry=Retry_%~1"
+if !Temploop! LEQ 1 (
+    if !temperror! GEQ 1 (
+        echo [Retry] Relance !Retry! (Temploop=!Temploop!, ErrorLevel=!temperror!)
+        call :!Retry!
+    )
+)
+goto :eof
+
+:exitlog
+if /I "%LOG%"=="1" (
+	echo " |- %TIME% --| Exit                                | " >> "%CD%\Computer Wash Log.txt"
+	echo " \______________________________________________________/ " >> "%CD%\Computer Wash Log.txt"
+)
+call :Spinner_OFF
+exit
