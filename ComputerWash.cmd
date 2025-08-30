@@ -1176,7 +1176,7 @@ goto :eof
 :: Rogue-like CMD adventure
 :: =========================================
 :Lymbiratus
-set MAXROOM=10
+set MAXROOM=20
 call :Spinner_OFF
 cls
 :: --- Player stats ---
@@ -1580,7 +1580,7 @@ if "!chestchoice!"=="3" (
     )
     if !ROLL! EQU 3 (
         set /a MAXHP+=1
-        set /a HP+=1
+		if HP LSS !MAXHP! set /a HP+=1
         echo %SFCGREEN% 💖 Glitch Chest increases MAXHP +1 %SRESET%
 		echo.
 		pause
