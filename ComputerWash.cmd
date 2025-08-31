@@ -36,10 +36,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.08.31.13.20
+set V=V.2025.08.31.13.34
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2025.08.31.13.20          |
+:: | Update  : PastequeOsaure V 2025.08.31.13.34          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -1299,7 +1299,7 @@ echo.
 echo %SFCCYAN% Press any key to begin your adventure...%SRESET%
 pause >nul
 echo.
-call restLymbiratus
+call :restLymbiratus
 goto :CHAR_SELECT
 
 :: --- Character Selection ---
@@ -2328,7 +2328,7 @@ set DEF=0
 set GOLD=0
 set KEYS=0
 set ROOM=0
-set MAXROOM=0
+set MAXROOM=40
 set IDX=0
 set ROOMNAME=0
 set EVENT=0
@@ -2372,14 +2372,14 @@ set trapChoice=0
 set damage=0
 set TRIGGER=0
 set goldfound=0
-set BANKDEPOSIT=0
+set BANKDEPOSIT=
 set REWARD=0
 set PACT_ANGEL=0
 set PACT_DEMON=0
 set PACT_IRON=0
 set pactrand=0
 set RAND=0
-goto eof
+goto :eof
 
 :: ===============================
 :: 🔧 Secret THE_HAUNTED_COMPUTER
