@@ -1,20 +1,25 @@
+📘 Computer Wash - Overview
+
 # 📘 Computer Wash
 
 Computer Wash is a Windows utility that allows you to clean, repair, and optimize your system using automated commands.  
 The program is organized into three levels: Automatic Tasks (A1–A5), Specific Tasks (S1–S16), and Customizable Menu (C1–C55).
 
-## 📘 General Instructions
+<details>
+<summary>📘 General Instructions</summary>
 
 1. Launch the program.  
 2. Select the automatic tasks (A1–A5) and/or specific tasks (S1–S16) according to your needs.  
 3. Configure the main menu (C1–C54) if necessary.  
 4. Follow the on-screen instructions and wait for the operations to complete.  
 
-⚠️ **Important:** Selecting C55 "Start" is mandatory to launch the main program. All other choices are used to configure or prepare tasks before execution.
+⚠️ **Important:** Selecting C55 "Start" is mandatory to launch the main program. All other choices are used to configure or prepare tasks before execution.  
+The script deactivates standby once it is started and reactivates it at the end.
 
----
+</details>
 
-## 📘 Automatic Tasks
+<details>
+<summary>📘 Automatic Tasks (A1–A5)</summary>
 
 | Code | Task | Description |
 |------|------|-------------|
@@ -24,9 +29,10 @@ The program is organized into three levels: Automatic Tasks (A1–A5), Specific 
 | A4   | Last Resort Wash | Ultimate cleaning with all available tools (SFC, DISM, MRT, MpCmdRun, IP reset, firewall, Shutdown /r, etc.) |
 | A5   | Update All Apps | Automatic update of all installed applications via Winget |
 
----
+</details>
 
-## 📘 Specific Tasks
+<details>
+<summary>📘 Specific Tasks (S1–S16)</summary>
 
 | Code | Task | Description |
 |------|------|-------------|
@@ -47,9 +53,10 @@ The program is organized into three levels: Automatic Tasks (A1–A5), Specific 
 | S15  | Update All Apps | Update all applications via Winget |
 | S16  | Computer Wash USB Protection | Enable USB protection (if activated in the script) |
 
----
+</details>
 
-## 📘 Menu Principal (C1–C55)
+<details>
+<summary>📘 Main Menu (C1–C55)</summary>
 
 | Code | Command / Action | Default Status |
 |------|-----------------|----------------|
@@ -109,14 +116,96 @@ The program is organized into three levels: Automatic Tasks (A1–A5), Specific 
 | C54  | Exit | ON |
 | C55  | Start | Mandatory |
 
----
+</details>
 
-## 📘 Notes
+<details>
+<summary>📘 Notes</summary>
 
-- The script automatically displays the order of commands and their execution status (ON/OFF).
-- You have 30 seconds to close Computer Wash after launching.
-- Verify all Shutdown parameters before starting the process.
-- Some commands may take several minutes to execute (Chkdsk, Mrt.exe, DISM, Sfc…).
-- Administrative privileges are required for proper execution.
-- Winget commands will install or update software if enabled.
+- The script automatically displays the order of commands and their execution status (ON/OFF).  
+- You have 30 seconds to close Computer Wash after launching.  
+- Verify all Shutdown parameters before starting the process.  
+- Some commands may take several minutes to execute (Chkdsk, Mrt.exe, DISM, Sfc…).  
+- Administrative privileges are required for proper execution.  
+- Winget commands will install or update software if enabled.  
 - Cleanup and reset commands may modify the system and delete temporary files: back up your important data.
+
+</details>
+
+<details>
+<summary>🏰 Roglike (Batch Edition)</summary>
+
+A tiny roguelike made entirely in Windows Batch, originally designed as a hidden Easter Egg… and then it became a standalone mini-game!  
+Explore the mysterious dungeon rooms, face monsters, manage your gold and keys… and see how far you can get.
+
+<details>
+<summary>🎮 Gameplay</summary>
+
+- Move room by room until you reach the dungeon’s end.  
+- Each room may hide a random event or a monster (monsters appear every 7 rooms).  
+- Your choices shape your survival: careful management of HP, gold, and keys is key.  
+- No two runs are alike: randomness and risk management rule the game.
+
+</details>
+
+<details>
+<summary>⚔️ Player Stats</summary>
+
+- ❤️ **HP** – Health Points.  
+- 🗡 **ATK** – Attack.  
+- 🛡 **DEF** – Defense.  
+- 💰 **Gold** – Currency for buying, healing, or opening doors.  
+- 🔑 **Keys** – Used to open sealed doors.
+
+</details>
+
+<details>
+<summary>🧩 Possible Events</summary>
+
+- 🛏 **Inn**: fully restores HP.  
+- 🛒 **Merchant**: sells useful items… for a price.  
+- 💰 **Trapped Treasure**: big rewards… or big losses.  
+- 🦹 **Thief**: a shady figure who may take your keys or trade them for gains.  
+- 🚪 **Sealed Door**: without a key, you must pay dearly to pass.  
+- 🏦 **Bank**: store your riches… if you dare.  
+- ☠️ **Pact**: dramatically boosts stats… at a mysterious cost.
+
+</details>
+
+<details>
+<summary>🎲 Combat</summary>
+
+- Monsters appear every 7 rooms.  
+- Monsters may drop gold… or sometimes a key.
+
+</details>
+
+<details>
+<summary>🔑 Keys & Doors</summary>
+
+- Keys are rare but valuable:  
+  - Open sealed doors safely.  
+  - Avoid traps or unexpected losses.  
+- Without keys, progress comes at a heavy cost in gold or HP.
+
+</details>
+
+<details>
+<summary>🎲 Game Philosophy</summary>
+
+- This started as a hidden Easter Egg: there’s no grand victory, only challenge and discovery.  
+- The goal is to experiment through multiple runs, learn the mechanics, and optimize choices.  
+- RNG is tricky: mismanagement leads to consequences.
+
+</details>
+
+<details>
+<summary>🔑 How to Access</summary>
+
+The script may give you a **first hint** to reach this hidden dungeon… sometimes.  
+Patience, courage, and curiosity are required to uncover the full path.  
+Once discovered, the game will launch itself as a **Batch roguelike**.
+
+⚠️ This Easter Egg unfolds through an investigation that starts with the first secret command.
+Try multiple times, and stay sharp… hidden secrets may reveal themselves.
+
+</details>

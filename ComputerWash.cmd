@@ -36,10 +36,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.08.29.23.18
+set V=V.2025.08.31.13.09
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2025.08.29.23.18          |
+:: | Update  : PastequeOsaure V 2025.08.31.13.09          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -107,6 +107,7 @@ set nb=0
 :: Code Ctrl + F pour Var C
 :: Code 5Ed5wEu5Q6
 :: ===============================
+call :CFGOFF
 call :Create_Restore_Point
 call :System_info
 call :Chkdsk
@@ -161,6 +162,7 @@ call :Pause
 call :USB
 call :Exit
 call :AutoLigneMenu C Ligne_MenuC
+call :CFGON
 call :Spinner_OFF
 goto :eof
 
@@ -335,7 +337,8 @@ goto :Var
  set D=Colorblind Mode
  set R=Return to the main menu
  set Quiz=Quiz
- set Vipptore=Lymbiratus
+ set Soleil12345=Soleil12345
+ set Vipptore=Vipptore
  set Lymbiratus=Lymbiratus
  set ArispBypass=ArispBypass
  set THE_HAUNTED_COMPUTER=THE_HAUNTED_COMPUTER
@@ -755,9 +758,72 @@ if /I "%valeur%"=="THE_HAUNTED_COMPUTER" (
 	call :THE_HAUNTED_COMPUTER
 	set choix=A999
 	)
+if /I "%valeur%"=="Soleil12345" (
+	call :ADMIN
+	set choix=A999
+	)
 if /I "%valeur%"=="Lymbiratus" (
 	call :Lymbiratus
 	set choix=A999
+	)
+if /I "%valeur%"=="Vipptore" (
+	echo.
+	:: Création ligne par ligne du fichier Easter_egg_select.cmd
+	echo|set /p="@echo off"> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="chcp 65001 ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo. ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo ================================ ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo. ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo       Easter Egg Selector        ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo. ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo ================================ ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo. ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo 1. Launch: Quiz ! ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo. ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo 2. Launch: THE_HAUNTED_COMPUTER ! ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo. ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo 3. Launch: 🏰 Roglike ((Batch Edition) Lymbiratus) ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo. ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo 4. Exit ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo. ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="set /p choice=Choose an option ^(1-4^): ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo. ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="if "%%choice%%"=="1" start "" ComputerWash.cmd payload ArispBypass Quiz ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo. ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="if "%%choice%%"=="2" start "" ComputerWash.cmd ArispBypass THE_HAUNTED_COMPUTER ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo. ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="if "%%choice%%"=="3" start "" ComputerWash.cmd payload ArispBypass Lymbiratus ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="echo. ">> Easter_egg_select.cmd
+	echo.>> Easter_egg_select.cmd
+	echo|set /p="if "%%choice%%"=="4" exit ">> Easter_egg_select.cmd
+	echo %NFCGREEN% File Easter_egg_select.cmd created successfully ! %SRESET% 
+	echo %SRESET% Auto exit 30s
+	timeout /t 30 /nobreak >nul
+	exit
 	)
 if /I "%valeur%"=="Quiz" (
 	call :Quiz
@@ -1176,11 +1242,14 @@ goto :eof
 :: Rogue-like CMD adventure
 :: =========================================
 :Lymbiratus
-set MAXROOM=20
+set MAXROOM=40
 call :Spinner_OFF
 cls
-:: --- Player stats ---
 
+:: --- Pact ---
+set /a PACT_ANGEL=%random% %% 2
+set /a PACT_DEMON=%random% %% 2
+set /a PACT_IRON=%random% %% 2
 
 :: --- Room names ---
 set "ROOMNAME0=The Dark Hall"
@@ -1209,6 +1278,9 @@ set "EVENT3=TRAP_CHEST"
 set "EVENT4=DOOR"
 set "EVENT5=BANK"
 set "EVENT6=PACT"
+set "EVENT7=THIEF"
+set "EVENT8=TRAP"
+set "EVENT9=INN"
 :: --- Intro ---
 :INTRO
 cls
@@ -1227,6 +1299,7 @@ echo.
 echo %SFCCYAN% Press any key to begin your adventure...%SRESET%
 pause >nul
 echo.
+call restLymbiratus
 goto :CHAR_SELECT
 
 :: --- Character Selection ---
@@ -1236,13 +1309,13 @@ echo        🏰 Lymbiratus - Choose Your Hero
 echo %SFCYELLOW%=========================================%SRESET%
 echo.
 echo %NFCYELLOW% 1)%SRESET% Knight    - Balanced fighter
-echo     HP: 15, ATK: 3, DEF: 0, GOLD: 10
+echo     HP: 15, ATK: 3, DEF: 0, GOLD: 10, KEYS: 0
 echo.
 echo %NFCYELLOW% 2)%SRESET% Warrior   - Stronger attack, less defense
-echo     HP: 14, ATK: 4, DEF: 0, GOLD: 10
+echo     HP: 14, ATK: 4, DEF: 0, GOLD: 10, KEYS: 0
 echo.
 echo %NFCYELLOW% 3)%SRESET% Guardian  - Stronger defense, less attack
-echo     HP: 16, ATK: 2, DEF: 1, GOLD: 10
+echo     HP: 15, ATK: 2, DEF: 1, GOLD: 5, KEYS: 1
 echo.
 set /p CHARCHOICE=Choose your hero (1-3): 
 
@@ -1273,8 +1346,8 @@ if "%CHARCHOICE%"=="3" (
     set MAXHP=15
     set ATK=2
     set DEF=1
-    set GOLD=10
-    set KEYS=0
+    set GOLD=5
+    set KEYS=1
     set ROOM=1
     goto START_ADVENTURE
 )
@@ -1307,12 +1380,12 @@ echo %SFCGREEN% HP: !HP!/!MAXHP!%SRESET%   %SFCBLUE%ATK: !ATK!%SRESET%   %SFCMAG
 echo.
 if !HP! LEQ 0 goto GAMEOVERdungeon
 :: Random event
-set /a MODROOM=!ROOM! %% 5
+set /a MODROOM=!ROOM! %% 7
 if !MODROOM! EQU 0 (
     goto ENEMY
 )
 :EVENTrandom
-set /a EVENTIDX=%random% %%7
+set /a EVENTIDX=%random% %%10
 call set EVENT=%%EVENT%EVENTIDX%%%
 if "!EVENT!"=="TREASURE" goto TREASURE
 if "!EVENT!"=="MERCHANT" goto MERCHANT
@@ -1321,6 +1394,9 @@ if "!EVENT!"=="TRAP_CHEST" goto TRAP_CHEST
 if "!EVENT!"=="DOOR" goto DOOR
 if "!EVENT!"=="BANK" goto BANK
 if "!EVENT!"=="PACT" goto PACT
+if "!EVENT!"=="THIEF" goto THIEF
+if "!EVENT!"=="TRAP" goto TRAP
+if "!EVENT!"=="INN" goto INN
 
 goto NEXTROOM
 
@@ -1403,12 +1479,12 @@ if "!choice!"=="1" (
         echo %SFCYELLOW% 🏆 Rewards:%SRESET%
         echo %SFCYELLOW% Gold: +!GOLDGAIN!%SRESET%
         echo %SFCGREEN% HP recovered: +!HPGAIN!%SRESET%
-		set /a KEYS+=1
-		echo %SFCWHITE% 🗝️ Key obtained +1 KEYS ^^!%SRESET%
-		set /a ROOM+=10
-		set /a Tempboostnbderencontre+=!ROOM!/10
-		set /a ROOM-=10
-		set /a boostnbderencontre+=!Tempboostnbderencontre!
+        set /a KEYS+=1
+	echo %SFCWHITE% 🗝️ Key obtained +1 KEYS ^^!%SRESET%
+	set /a ROOM+=10
+	set /a Tempboostnbderencontre+=!ROOM!/10
+	set /a ROOM-=10
+	set /a boostnbderencontre+=!Tempboostnbderencontre!
         goto ARMORYSHOP
     )
 	if !DEF! GEQ 0 (
@@ -1464,12 +1540,12 @@ if "!choice!"=="4" (
         echo %SFCYELLOW% 🏆 Rewards:%SRESET%
         echo %SFCYELLOW% Gold: +!GOLDGAIN!%SRESET%
         echo %SFCGREEN% HP recovered: +!HPGAIN!%SRESET%
-		set /a KEYS+=1
-		echo %SFCWHITE% 🗝️ Key obtained +1 KEYS ^^!%SRESET%
-		set /a ROOM+=10
-		set /a Tempboostnbderencontre+=!ROOM!/10
-		set /a ROOM-=10
-		set /a boostnbderencontre+=!Tempboostnbderencontre!
+        set /a KEYS+=1
+	echo %SFCWHITE% 🗝️ Key obtained +1 KEYS ^^!%SRESET%
+	set /a ROOM+=10
+	set /a Tempboostnbderencontre+=!ROOM!/10
+	set /a ROOM-=10
+	set /a boostnbderencontre+=!Tempboostnbderencontre!
         goto ARMORYSHOP
     )
 	if !DEF! GEQ 0 (
@@ -1627,7 +1703,90 @@ if "!choice!"=="5" (set /a GOLD-=5 & echo %SFCRED% 💸 You left without deposit
 echo %SFCRED% ❌ Not enough gold or invalid choice, try again.%SRESET%
 goto BANK
 
-:: --- Merchant ---
+
+:THIEF
+echo %SFCMAGENTA% 🦹 A sneaky thief approaches you...%SRESET%
+echo %SRESET% He needs your keys for his dark schemes, he offers you dubious exchanges..
+echo.
+
+:: --- 10% chance to steal 1 key automatically ---
+set /a THIEFROLL=%random% %% 100
+if !THIEFROLL! LSS 10 (
+    if !KEYS! GEQ 1 (
+        set /a KEYS-=1
+        echo %SFCRED% ❌ The thief snatches 1 of your keys before you can react!%SRESET%
+    ) else (
+        echo %SFCYELLOW% The thief tries to steal a key, but you have none.%SRESET%
+    )
+    goto NEXTROOM
+)
+
+:: --- Création d'un tableau des offres ---
+set OPTIONS0=Trade 1 key   [ +1 ATK ]
+set OPTIONS1=Trade 2 keys  [ +2 ATK ]
+set OPTIONS2=Trade 2 keys  [ +1 DEF ]
+set OPTIONS3=Trade 4 keys  [ +2 DEF ]
+set OPTIONS4=Trade 1 key   [ +12 GOLD ]
+
+:: --- Tirage aléatoire de 3 indices différents ---
+set /a IDX1=%random% %%5
+:IDX2_LOOP
+set /a IDX2=%random% %%5
+if %IDX2%==%IDX1% goto IDX2_LOOP
+:IDX3_LOOP
+set /a IDX3=%random% %%5
+if %IDX3%==%IDX1% goto IDX3_LOOP
+if %IDX3%==%IDX2% goto IDX3_LOOP
+
+:: --- Assignation des choix ---
+set TMSG1=!OPTIONS%IDX1%!
+set TMSG2=!OPTIONS%IDX2%!
+set TMSG3=!OPTIONS%IDX3%!
+set TMSG4=Leave quietly [ +0 ]
+
+:: --- Affichage des choix ---
+echo %NFCMAGENTA% 1)%SRESET% !TMSG1!
+echo %NFCMAGENTA% 2)%SRESET% !TMSG2!
+echo %NFCMAGENTA% 3)%SRESET% !TMSG3!
+echo %NFCMAGENTA% 4)%SRESET% !TMSG4!
+echo.
+
+set /p choice=Deal : 
+echo.
+
+:: --- Gestion des choix ---
+if "!choice!"=="1" (
+    call :EXECUTE_OPTION !IDX1!
+    goto NEXTROOM
+)
+if "!choice!"=="2" (
+    call :EXECUTE_OPTION !IDX2!
+    goto NEXTROOM
+)
+if "!choice!"=="3" (
+    call :EXECUTE_OPTION !IDX3!
+    goto NEXTROOM
+)
+if "!choice!"=="4" (
+    echo %SFCYELLOW% You refuse the deal and walk away.%SRESET%
+    goto NEXTROOM
+)
+
+echo %SFCRED% ❌ Invalid choice or not enough keys!%SRESET% %SFCMAGENTA%Keys: !KEYS!%SRESET%
+goto THIEF
+
+:: --- Sous-routine pour appliquer l'effet ---
+:EXECUTE_OPTION
+set IDX=%1
+if %IDX%==0 if !KEYS! GEQ 1 set /a KEYS-=1 & set /a ATK+=1 & echo %SFCGREEN% You hand over 1 key... ATK +1%SRESET% & exit /b
+if %IDX%==1 if !KEYS! GEQ 2 set /a KEYS-=2 & set /a ATK+=2 & echo %SFCGREEN% The thief grins... You gain +2 ATK%SRESET% & exit /b
+if %IDX%==2 if !KEYS! GEQ 2 set /a KEYS-=2 & set /a DEF+=1 & echo %SFCGREEN% A shady deal... DEF +1%SRESET% & exit /b
+if %IDX%==3 if !KEYS! GEQ 4 set /a KEYS-=4 & set /a DEF+=2 & echo %SFCGREEN% Costly, but worth it. DEF +2%SRESET% & exit /b
+if %IDX%==4 if !KEYS! GEQ 1 set /a KEYS-=1 & set /a GOLD+=12 & echo %SFCGREEN% You trade 1 key for 12 shiny gold coins!%SRESET% & exit /b
+
+echo %SFCRED% ❌ Not enough keys for this option!%SRESET%
+exit /b
+
 :: --- Merchant ---
 :MERCHANT
 echo %SFCYELLOW% 🛒 You meet a traveling merchant!%SRESET%
@@ -1687,6 +1846,53 @@ if "!choice!"=="4" (
 echo %SFCRED% ❌ Invalid choice, try again.%SRESET% %SFCYELLOW%GOLD: !GOLD!%SRESET%
 goto MERCHANT
 
+:: --- Inn / Auberge ---
+:INN
+echo %SFCYELLOW% 🏨 You arrive at a cozy inn!%SRESET%
+echo.
+echo Your current HP: !HP!/!MAXHP!  Gold: !GOLD!
+echo.
+echo %NFCYELLOW% 1)%SRESET% Rest at the Standard Room [ +Full HP, Cost: 5 Gold ]
+echo %NFCYELLOW% 2)%SRESET% Book the Premium Room     [ +Full HP + Bonus ATK or DEF, Cost: 15 Gold ]
+echo %NFCYELLOW% 3)%SRESET% Leave                     [ +0 HP ]
+echo.
+set /p choice=Choose: 
+echo.
+
+:: Standard Room
+if "!choice!"=="1" if !GOLD! GEQ 5 (
+    set /a GOLD-=5
+    set /a HP=!MAXHP!
+    echo %SFCGREEN% You rest at the Standard Room and recover full HP!%SRESET%
+    goto NEXTROOM
+)
+
+:: Premium Room with random bonus
+if "!choice!"=="2" if !GOLD! GEQ 15 (
+    set /a GOLD-=15
+    set /a HP=!MAXHP!
+    :: Choix aléatoire du bonus
+    set /a FORMULA=%random% %%2
+    if !FORMULA! EQU 0 (
+        set /a ATK+=1
+        echo %SFCGREEN% You book the Premium Room: Full HP + ATK +1!%SRESET%
+    ) else (
+        set /a DEF+=1
+        echo %SFCGREEN% You book the Premium Room: Full HP + DEF +1!%SRESET%
+    )
+    goto NEXTROOM
+)
+
+:: Leave
+if "!choice!"=="3" (
+    echo %SFCYELLOW% You leave the inn and continue your journey.%SRESET%
+    goto NEXTROOM
+)
+
+echo %SFCRED% ❌ Invalid choice or not enough gold, try again.%SRESET%
+goto INN
+
+
 :: --- Key Shop ---
 :KEYSHOP
 echo %SFCYELLOW% 🔑 You meet a locksmith!%SRESET%
@@ -1726,27 +1932,51 @@ goto KEYSHOP
 
 :: --- Trap ---
 :TRAP
-echo %SFCRED% 💀 A trap^^!
 echo.
+echo %SFCRED% 💀 A trap appears!%SRESET%
+echo.
+
 if !KEYS! GEQ 1 (
-    set /a KEYS-=1
-    set /a msg=%random% %%4
-    if !msg! EQU 0 echo %SRESET% 🗝️ You used a key to unlock a hidden passage and avoid the trap.
-    if !msg! EQU 1 echo %SRESET% 🗝️ The key glows... the trap vanishes before your eyes.
-    if !msg! EQU 2 echo %SRESET% 🗝️ You used a key to bypass the cursed trap.
-    if !msg! EQU 3 echo %SRESET% 🗝️ You used a key to unlock a hidden mechanism and avoid the trap.
+    echo %SFCYELLOW% You have a key. Do you want to use it to avoid the trap?%SRESET%
+	echo.
+	echo|set /p="%NFCYELLOW% 1)%SRESET% Use a key to avoid the trap"
+	echo.
+	echo|set /p="%NFCYELLOW% 2)%SRESET% Take the trap and lose HP"
+	echo.
+	echo.
+	set /p trapChoice=Choose 1 or 2 : 
+    echo.
+
+    if "!trapChoice!"=="1" (
+        set /a KEYS-=1
+        set /a msg=%random% %%4
+        if !msg! EQU 0 echo %SRESET% 🗝️ You used a key to unlock a hidden passage and avoid the trap.%SRESET%
+        if !msg! EQU 1 echo %SRESET% 🗝️ The key glows... the trap vanishes before your eyes.%SRESET%
+        if !msg! EQU 2 echo %SRESET% 🗝️ You used a key to bypass the cursed trap.%SRESET%
+        if !msg! EQU 3 echo %SRESET% 🗝️ You used a key to unlock a hidden mechanism and avoid the trap.%SRESET%
+    ) else (
+        set /a damage=%random% %%3 +1
+        set /a HP-=damage
+        echo %SFCRED% 💀 You take !damage! HP damage from the trap!%SRESET%
+        if !HP! LEQ 0 (
+            echo %SFCRED% 💀 You succumbed to the trap...%SRESET%
+            goto GAMEOVERdungeon
+        )
+    )
 ) else (
     set /a damage=%random% %%3 +1
     set /a HP-=damage
-    echo %SFCRED% 💀 A trap^^! You lose !damage! HP!%SRESET%
+    echo %SFCRED% 💀 A trap hits you! You lose !damage! HP!%SRESET%
     if !HP! LEQ 0 (
         echo %SFCRED% 💀 You succumbed to the trap...%SRESET%
         goto GAMEOVERdungeon
     )
 )
+
 echo.
 pause
 goto NEXTROOM
+
 
 :: --- Trap in front of treasure chest ---
 :TRAP_CHEST
@@ -1803,26 +2033,70 @@ goto TRAP_CHEST
 :: 🎭 Pact System
 :: =========================================
 :PACT
-echo %SFCMAGENTA% ☯ You feel a mystical presence...%SRESET%
+echo %SFCMAGENTA% ☯  You feel a mystical presence...%SRESET%
 echo.
+:pact_loop
 set /a pactrand=!random! %%100
-
+if !PACT_IRON! EQU 1 if !PACT_ANGEL! EQU 1 if !PACT_DEMON! EQU 1 goto Miracle
 :: 0-32 = Angelic, 33-65 = Demonic, 66-98 = Iron, 99 = No Pact
 if !pactrand! lss 33 goto PACT_ANGEL
 if !pactrand! lss 66 goto PACT_DEMON
 if !pactrand! lss 99 goto PACT_IRON
+:Miracle
+set PACT_ANGEL=0
+set PACT_DEMON=0
+set PACT_IRON=0
 echo.
-echo %SFCYELLOW% ✨ Miracle! No pact is offered here...%SRESET%
+echo %SFCYELLOW% ✨ Miracle ^! %SRESET%
+echo.
+echo|set /p="%SRESET% ✨ You feel a little... moderately... much stronger ! ✨"
+echo.
+echo.
+:: --- Tirage aléatoire d'une amélioration ---
+:RANDOM_MIRACLE
+set /a RAND=%random% %%3
+
+if %RAND%==0 (
+    set /a MAXHP+=5
+    set /a HP+=5
+    echo %SFCGREEN% Your vitality surges! MAXHP +5, HP +5%SRESET%
+) else if %RAND%==1 (
+    set /a ATK+=1
+    echo %SFCBLUE% Your attack increases! ATK +1%SRESET%
+) else (
+    set /a DEF+=2
+    echo %SFCMAGENTA% Your defenses improve! DEF +2%SRESET%
+)
+echo.
+echo %SFCGREEN% HP: !HP!/!MAXHP!%SRESET%   %SFCBLUE%ATK: !ATK!%SRESET%   %SFCMAGENTA%DEF: !DEF!%SRESET%   %SFCYELLOW%GOLD: !GOLD!%SRESET%   %SFCWHITE%Keys: !KEYS!%SRESET%
 echo.
 pause
 goto NEXTROOM
 
+:: --- Fonction pour miracle aléatoire ---
+:RANDOM_MIRACLE
+set /a RAND=%random% %%3
+
+if %RAND%==0 (
+    set /a MAXHP+=5
+    set /a HP+=5
+    echo %SFCGREEN% Your vitality surges! MAXHP +5, HP +5%SRESET%
+) else if %RAND%==1 (
+    set /a ATK+=1
+    echo %SFCBLUE% Your attack increases! ATK +1%SRESET%
+) else (
+    set /a DEF+=2
+    echo %SFCMAGENTA% Your defenses improve! DEF +2%SRESET%
+)
+goto NEXTROOM
 
 :PACT_ANGEL
+if !PACT_ANGEL! EQU 1 goto :pact_loop
 echo %SFCWHITE% 😇 Angelic Pact%SRESET%
 echo.
 echo Choose your impact :
 echo.
+set PACT_ANGEL=1
 echo %NFCYELLOW% 1)%SRESET% -1 DEF → +10 MAX HP
 echo %NFCYELLOW% 2)%SRESET% -1 DEF → +2 ATK
 echo.
@@ -1830,8 +2104,8 @@ set /p choice=Your choice?
 echo.
 if "!choice!"=="1" (
     set /a DEF-=1
-    set /a MAXHP+=5
-	set /a HP+=5
+    set /a MAXHP+=10
+	set /a HP+=10
 ) else if "!choice!"=="2" (
     set /a DEF-=1
     set /a ATK+=2
@@ -1840,10 +2114,12 @@ goto PACT_CHECK
 
 
 :PACT_DEMON
+if !PACT_DEMON! EQU 1 goto :pact_loop
 echo %SFCRED% 👹 Demonic Pact%SRESET%
 echo.
 echo Choose your impact :
 echo.
+set PACT_DEMON=1
 echo %NFCYELLOW% 1)%SRESET% -5 MAX HP → +1 ATK
 echo %NFCYELLOW% 2)%SRESET% -5 MAX HP → +20 GOLD
 echo.
@@ -1851,19 +2127,23 @@ set /p choice=Your choice?
 echo.
 if "!choice!"=="1" (
     set /a MAXHP-=5
+	set /a HP+=5
     set /a ATK+=1
 ) else if "!choice!"=="2" (
     set /a MAXHP-=5
-    set /a GOLD+=15
+    set /a GOLD+=20
 ) else (goto PACT_DEMON)
+if !HP! GTR !MAXHP! set HP=!MAXHP!
 goto PACT_CHECK
 
 
 :PACT_IRON
+if !PACT_IRON! EQU 1 goto :pact_loop
 echo %SFCBLUE% ⚒ Iron Pact%SRESET%
 echo.
 echo Choose your impact :
 echo.
+set PACT_IRON=1
 echo %NFCYELLOW% 1)%SRESET% -1 ATK → +5 MAX HP
 echo %NFCYELLOW% 2)%SRESET% -2 ATK → +1 DEF
 echo.
@@ -1872,6 +2152,7 @@ echo.
 if "!choice!"=="1" (
     set /a ATK-=1
     set /a MAXHP+=5
+	set /a HP+=5
 ) else if "!choice!"=="2" (
     set /a ATK-=2
     set /a DEF+=1
@@ -1888,7 +2169,7 @@ if !ATK! lss 1 (
 )
 
 if !DEF! lss 0 (
-    echo %SFCRED%🛡 Your armor is shattered! Every hit deals +1 extra damage.%SRESET%
+    echo %SFCRED%🛡  Your armor is shattered ^^! Each hit deals you +1 extra damage.%SRESET%
 )
 
 if !MAXHP! leq 0 (
@@ -1896,7 +2177,6 @@ if !MAXHP! leq 0 (
     pause
     goto GAMEOVER
 )
-
 goto NEXTROOM
 
 :: --- Door / Key check ---
@@ -2037,6 +2317,68 @@ goto :ENDdungeon
 pause
 goto :Lymbiratus
 
+:restLymbiratus
+:: --- Initialize all variables ---
+set HP=0
+set MAXHP=0
+set ATK=0
+set DEF=0
+set GOLD=0
+set KEYS=0
+set ROOM=0
+set MAXROOM=0
+set IDX=0
+set ROOMNAME=0
+set EVENT=0
+set MODROOM=0
+set EVENTIDX=0
+set choice=0
+set nbderencontre=0
+set ENEMYIDX=0
+set ENEMYNAME=0
+set ROOM_SCALE=0
+set BASEHP=0
+set BASEATK=0
+set ENEMYHP=0
+set ENEMYATK=0
+set ENEMYDEF=0
+set nbnbderencontretemp=0
+set STATBOOST=0
+set DAMAGE=0
+set DEFNEGAT=0
+set BRIBE=0
+set GOLDGAIN=0
+set HPGAIN=0
+set Tempboostnbderencontre=0
+set OPTIONS0=0
+set OPTIONS1=0
+set OPTIONS2=0
+set OPTIONS3=0
+set OPTIONS4=0
+set TMSG1=0
+set TMSG2=0
+set TMSG3=0
+set TMSG4=0
+set FORMULA=0
+set PMSG1=0
+set PMSG2=0
+set PMSG3=0
+set PMSG4=0
+set KMSG1=0
+set KMSG2=0
+set trapChoice=0
+set damage=0
+set TRIGGER=0
+set goldfound=0
+set BANKDEPOSIT=0
+set REWARD=0
+set PACT_ANGEL=0
+set PACT_DEMON=0
+set PACT_IRON=0
+set pactrand=0
+set RAND=0
+goto eof
+
 :: ===============================
 :: 🔧 Secret THE_HAUNTED_COMPUTER
 :: ===============================
@@ -2109,7 +2451,7 @@ call :separator " " "only"
 color 0b
 echo The script runs... a message appears:
 echo.
-echo "Admin password: FREEDOM"
+echo "Admin password: Soleil12345"
 echo.
 echo 1^) Return to main menu
 
@@ -2440,6 +2782,7 @@ if !score! EQU 5 (
 	echo.
 	echo|set /p="Will you manage to free the soul of your haunted computer… and unlock the next game ? "
 	echo.
+	echo.
 	set "foot_head8=%%NFCGREEN%%  _____________________________________________________________________"
 	set "foot_head9=%%NFCGREEN%% ^/                                                                     ^\"
 	set "foot_head10=%%NFCGREEN%% ^| %%SRESET%% THE_HAUNTED_COMPUTER ) Will you manage to free the soul of your   %%NFCGREEN%% ^|"
@@ -2528,11 +2871,12 @@ if /i "!ans!"=="D" set idx=3
 
 :: Vérification de la réponse
 call set "selected=%%OptionsArr!idx!%%"
+echo.
 if "!selected!"=="!QuestionCmd!" (
-    echo %SFCGREEN%Correct! ✅%SRESET%
+    echo %SFCGREEN% Correct! ✅%SRESET%
     set /a score+=1
 ) else (
-    echo %NFCRED%Wrong ❌ Correct answer: !QuestionCmd!%SRESET%
+    echo %NFCRED% Wrong ❌ Correct answer: !QuestionCmd!%SRESET%
 )
 
 echo.
