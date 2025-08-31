@@ -1742,7 +1742,7 @@ if %IDX3%==%IDX2% goto IDX3_LOOP
 set TMSG1=!OPTIONS%IDX1%!
 set TMSG2=!OPTIONS%IDX2%!
 set TMSG3=!OPTIONS%IDX3%!
-set TMSG4=Leave quietly [ +0 ]
+set TMSG4=Leave quietly [ +1 GOLD ]
 
 :: --- Affichage des choix ---
 echo %NFCMAGENTA% 1)%SRESET% !TMSG1!
@@ -1768,6 +1768,7 @@ if "!choice!"=="3" (
     goto NEXTROOM
 )
 if "!choice!"=="4" (
+	set /a GOLD+=1
     echo %SFCYELLOW% You refuse the deal and walk away.%SRESET%
     goto NEXTROOM
 )
@@ -1854,7 +1855,7 @@ echo Your current HP: !HP!/!MAXHP!  Gold: !GOLD!
 echo.
 echo %NFCYELLOW% 1)%SRESET% Rest at the Standard Room [ +Full HP, Cost: 5 Gold ]
 echo %NFCYELLOW% 2)%SRESET% Book the Premium Room     [ +Full HP + Bonus ATK or DEF, Cost: 15 Gold ]
-echo %NFCYELLOW% 3)%SRESET% Leave                     [ +0 HP ]
+echo %NFCYELLOW% 3)%SRESET% Leave                     [ +1 GOLD ]
 echo.
 set /p choice=Choose: 
 echo.
@@ -1886,6 +1887,7 @@ if "!choice!"=="2" if !GOLD! GEQ 15 (
 :: Leave
 if "!choice!"=="3" (
     echo %SFCYELLOW% You leave the inn and continue your journey.%SRESET%
+	set /a GOLD+=1
     goto NEXTROOM
 )
 
