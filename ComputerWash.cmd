@@ -36,10 +36,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.08.31.13.09
+set V=V.2025.08.31.13.20
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2025.08.31.13.09          |
+:: | Update  : PastequeOsaure V 2025.08.31.13.20          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |

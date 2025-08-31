@@ -174,8 +174,8 @@ Explore the mysterious dungeon rooms, face monsters, manage your gold and keys�
 <details>
 <summary>🎲 Combat</summary>
 
-- Monsters appear every 7 rooms.  
-- Monsters may drop gold… or sometimes a key.
+- Monsters appear when room is divisible by 7
+- Monsters may drop gold… and one key.
 
 </details>
 
