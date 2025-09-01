@@ -36,10 +36,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.08.31.13.34
+set V=V.2025.09.01.08.01
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2025.08.31.13.34          |
+:: | Update  : PastequeOsaure V 2025.09.01.08.01          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -107,7 +107,9 @@ set nb=0
 :: Code Ctrl + F pour Var C
 :: Code 5Ed5wEu5Q6
 :: ===============================
-call :CFGOFF
+if "%Start?%"=="2" (
+	call :CFGOFF
+)
 call :Create_Restore_Point
 call :System_info
 call :Chkdsk
@@ -156,13 +158,15 @@ call :msiserverStart
 call :StartScan
 call :StartDownload
 call :StartInstall
+if "%Start?%"=="2" (
+	call :CFGON
+)
 call :RestartDevice
 call :shutdown
 call :Pause
 call :USB
 call :Exit
 call :AutoLigneMenu C Ligne_MenuC
-call :CFGON
 call :Spinner_OFF
 goto :eof
 
@@ -2561,7 +2565,12 @@ echo.
 exit /b
 
 :CFGON
+set Temploop=0
+:Retry_CFGON
+timeout /t 10 /nobreak >nul
 powercfg.exe /hibernate on
+set temperror=!ERRORLEVEL!
+if !temperror! GEQ 1 ( Call :Retry CFGON )
 goto :eof
 
 :CFGOFF
