@@ -1410,32 +1410,55 @@ set choice=0
 set /a nbderencontre+=1
 set /a ENEMYIDX=%random% %%5
 call set ENEMYNAME=%%ENEMY%ENEMYIDX%%%
-set /a ROOM_SCALE=ROOM/10
+
+:: Facteur de scaling (augmente tous les 7 étages)
+set /a SCALE=!ROOM! / 7
 
 :: Stats de base selon le type d'ennemi
-:: Stats de base selon le type d'ennemi (nerf pour début de jeu)
-if !ENEMYIDX! == 0 (set /a BASEHP=3 + !ROOM_SCALE! & set /a BASEATK=1 + !ROOM_SCALE!/3)
-if !ENEMYIDX! == 1 (set /a BASEHP=4 + !ROOM_SCALE! & set /a BASEATK=1 + !ROOM_SCALE!/3)
-if !ENEMYIDX! == 2 (set /a BASEHP=5 + !ROOM_SCALE! & set /a BASEATK=1 + !ROOM_SCALE!/4)
-if !ENEMYIDX! == 3 (set /a BASEHP=7 + !ROOM_SCALE! & set /a BASEATK=2 + !ROOM_SCALE!/3)
-if !ENEMYIDX! == 4 (set /a BASEHP=2 + !ROOM_SCALE! & set /a BASEATK=1 + !ROOM_SCALE!/5)
+if !ENEMYIDX! == 0 (
+    rem Goblin → rapide, attaque correcte, peu de défense
+    set /a BASEHP=4 + !ROOM!/12
+    set /a BASEATK=2 + !ROOM!/20
+    set /a BASEDEF=0 + !ROOM!/40
+)
+if !ENEMYIDX! == 1 (
+    rem Skeleton → équilibré
+    set /a BASEHP=5 + !ROOM!/11
+    set /a BASEATK=1 + !ROOM!/22
+    set /a BASEDEF=1 + !ROOM!/35
+)
+if !ENEMYIDX! == 2 (
+    rem Slime → gros sacs de PV, faible attaque
+    set /a BASEHP=7 + !ROOM!/9
+    set /a BASEATK=0 + !ROOM!/30
+    set /a BASEDEF=1 + !ROOM!/30
+)
+if !ENEMYIDX! == 3 (
+    rem Dark Knight → boss-like, gros ATK/DEF mais moins de PV que Slime
+    set /a BASEHP=6 + !ROOM!/10
+    set /a BASEATK=3 + !ROOM!/18
+    set /a BASEDEF=2 + !ROOM!/20
+)
+if !ENEMYIDX! == 4 (
+    rem Bat → fragile mais rapide (ATK monte vite)
+    set /a BASEHP=3 + !ROOM!/15
+    set /a BASEATK=2 + !ROOM!/15
+    set /a BASEDEF=0 + !ROOM!/40
+)
 
-:: HP / ATK avec petite variance
-set /a ENEMYHP=!BASEHP! + %random% %%3
-set /a ENEMYATK=!BASEATK! + %random% %%2
+:: Ajout de variance aléatoire
+set /a ENEMYHP=!BASEHP! + (%random% %% 3) - 1
+set /a ENEMYATK=!BASEATK! + (%random% %% 2)
+set /a ENEMYDEF=!BASEDEF! + (%random% %% 2)
 
-:: Nouvelle stat : DEF de base (toujours 0)
-set /a ENEMYDEF=0
-set nbnbderencontretemp=0
+:: Sécurité (min)
+if !ENEMYHP! LEQ 0 set ENEMYHP=1
+if !ENEMYATK! LEQ 0 set ENEMYATK=1
+if !ENEMYDEF! LSS 0 set ENEMYDEF=0
 
-:STATBOOST
-:: Amélioration dynamique : +1 sur une stat aléatoire
-set /a STATBOOST=%random% %%3
-if !STATBOOST! EQU 0 (set /a ENEMYHP+=1)
-if !STATBOOST! EQU 1 (set /a ENEMYATK+=1)
-if !STATBOOST! EQU 2 (set /a ENEMYDEF+=1)
-set /a nbnbderencontretemp +=1
-if !nbnbderencontretemp! LEQ !boostnbderencontre! goto STATBOOST
+rem -- Calcul des dégâts potentiels de fuite
+set /a FLEEDMG=!ENEMYATK! - !ENEMYDEF!
+if !FLEEDMG! LSS 0 set /a FLEEDMG=!FLEEDMG! * -1
 
 :ENEMY_LOOP
 echo %SFCRED% ⚔️  A wild !ENEMYNAME! appears!%SRESET%
@@ -1445,7 +1468,7 @@ echo %SFCGREEN% HP: !HP!/!MAXHP!%SRESET%   %SFCBLUE%ATK: !ATK!%SRESET%   %SFCMAG
 echo.
 set /a BRIBE=!ENEMYHP! + !ENEMYATK! + !ENEMYDEF!
 echo %NFCYELLOW% 1)%SRESET% Attack
-echo %NFCYELLOW% 2)%SRESET% Flee HP (-!ENEMYDEF! %SFCGREEN%HP%SRESET%)
+echo %NFCYELLOW% 2)%SRESET% Flee HP (-!FLEEDMG! %SFCGREEN%HP%SRESET%)
 echo %NFCYELLOW% 3)%SRESET% Bribe (-!BRIBE! %SFCYELLOW%gold%SRESET%)
 echo %NFCYELLOW% 4)%SRESET% Auto-Battle (attack until the fight ends)
 echo.
@@ -1484,11 +1507,7 @@ if "!choice!"=="1" (
         echo %SFCYELLOW% Gold: +!GOLDGAIN!%SRESET%
         echo %SFCGREEN% HP recovered: +!HPGAIN!%SRESET%
         set /a KEYS+=1
-	echo %SFCWHITE% 🗝️ Key obtained +1 KEYS ^^!%SRESET%
-	set /a ROOM+=10
-	set /a Tempboostnbderencontre+=!ROOM!/10
-	set /a ROOM-=10
-	set /a boostnbderencontre+=!Tempboostnbderencontre!
+		echo %SFCWHITE% 🗝️ Key obtained +1 KEYS ^^!%SRESET%
         goto ARMORYSHOP
     )
 	if !DEF! GEQ 0 (
@@ -1508,9 +1527,14 @@ if "!choice!"=="1" (
 )
 
 if "!choice!"=="2" (
-    set /a HP-=ENEMYDEF
-    echo %SFCCYAN% You fled safely !
-    echo %SFCCYAN% You take !ENEMYDEF! damage while escaping. HP: !HP!%SRESET%
+    rem Calcul des dégâts de fuite
+    set /a DAMAGE=!ENEMYATK! - !DEF!
+    if !DAMAGE! LSS 0 set /a DAMAGE=!DAMAGE! * -1
+
+    set /a HP-=DAMAGE
+    echo %SFCCYAN% 🏃 You fled safely !%SRESET%
+    echo %SFCCYAN% You take !DAMAGE! damage while escaping. HP: !HP!%SRESET%
+
     if !HP! LEQ 0 goto GAMEOVERdungeon
     goto NEXTROOM
 )
@@ -1538,18 +1562,13 @@ if "!choice!"=="4" (
         set /a GOLD+=GOLDGAIN
         set /a HP+=HPGAIN
 		echo.
-		pause
         if !HP! GTR !MAXHP! set HP=!MAXHP!
         echo.
         echo %SFCYELLOW% 🏆 Rewards:%SRESET%
         echo %SFCYELLOW% Gold: +!GOLDGAIN!%SRESET%
         echo %SFCGREEN% HP recovered: +!HPGAIN!%SRESET%
         set /a KEYS+=1
-	echo %SFCWHITE% 🗝️ Key obtained +1 KEYS ^^!%SRESET%
-	set /a ROOM+=10
-	set /a Tempboostnbderencontre+=!ROOM!/10
-	set /a ROOM-=10
-	set /a boostnbderencontre+=!Tempboostnbderencontre!
+		echo %SFCWHITE% 🗝️ Key obtained +1 KEYS ^^!%SRESET%
         goto ARMORYSHOP
     )
 	if !DEF! GEQ 0 (
@@ -1660,6 +1679,7 @@ if "!chestchoice!"=="3" (
     )
     if !ROLL! EQU 3 (
         set /a MAXHP+=1
+		set /a HP+=1
 		if HP LSS !MAXHP! set /a HP+=1
         echo %SFCGREEN% 💖 Glitch Chest increases MAXHP +1 %SRESET%
 		echo.
@@ -1702,7 +1722,7 @@ if "!choice!"=="1" if !GOLD! GEQ 1 (set /a GOLD-=1 & set BANKDEPOSIT=1 & echo %S
 if "!choice!"=="2" if !GOLD! GEQ 2 (set /a GOLD-=2 & set BANKDEPOSIT=2 & echo %SFCGREEN% ✅ You deposited 2 gold!%SRESET% & echo. & pause & goto NEXTROOM)
 if "!choice!"=="3" if !GOLD! GEQ 3 (set /a GOLD-=3 & set BANKDEPOSIT=3 & echo %SFCGREEN% ✅ You deposited 3 gold!%SRESET% & echo. & pause & goto NEXTROOM)
 if "!choice!"=="4" if !GOLD! GEQ 4 (set /a GOLD-=4 & set BANKDEPOSIT=4 & echo %SFCGREEN% ✅ You deposited 4 gold!%SRESET% & echo. & pause & goto NEXTROOM)
-if "!choice!"=="5" (set /a GOLD-=5 & echo %SFCRED% 💸 You left without depositing. You lost 5 gold.%SRESET% & pause & goto NEXTROOM)
+if "!choice!"=="5" (set /a GOLD-=5 & echo. & echo %SFCRED% 💸 You left without depositing. You lost 5 gold.%SRESET% & pause & goto NEXTROOM)
 
 echo %SFCRED% ❌ Not enough gold or invalid choice, try again.%SRESET%
 goto BANK
@@ -1748,6 +1768,7 @@ set TMSG2=!OPTIONS%IDX2%!
 set TMSG3=!OPTIONS%IDX3%!
 set TMSG4=Leave quietly [ +1 GOLD ]
 
+:LOOPTHIEF
 :: --- Affichage des choix ---
 echo %NFCMAGENTA% 1)%SRESET% !TMSG1!
 echo %NFCMAGENTA% 2)%SRESET% !TMSG2!
@@ -1778,7 +1799,7 @@ if "!choice!"=="4" (
 )
 
 echo %SFCRED% ❌ Invalid choice or not enough keys!%SRESET% %SFCMAGENTA%Keys: !KEYS!%SRESET%
-goto THIEF
+goto :LOOPTHIEF
 
 :: --- Sous-routine pour appliquer l'effet ---
 :EXECUTE_OPTION
@@ -1790,7 +1811,7 @@ if %IDX%==3 if !KEYS! GEQ 4 set /a KEYS-=4 & set /a DEF+=2 & echo %SFCGREEN% Cos
 if %IDX%==4 if !KEYS! GEQ 1 set /a KEYS-=1 & set /a GOLD+=12 & echo %SFCGREEN% You trade 1 key for 12 shiny gold coins!%SRESET% & exit /b
 
 echo %SFCRED% ❌ Not enough keys for this option!%SRESET%
-exit /b
+goto :LOOPTHIEF
 
 :: --- Merchant ---
 :MERCHANT
@@ -2079,23 +2100,6 @@ echo.
 pause
 goto NEXTROOM
 
-:: --- Fonction pour miracle aléatoire ---
-:RANDOM_MIRACLE
-set /a RAND=%random% %%3
-
-if %RAND%==0 (
-    set /a MAXHP+=5
-    set /a HP+=5
-    echo %SFCGREEN% Your vitality surges! MAXHP +5, HP +5%SRESET%
-) else if %RAND%==1 (
-    set /a ATK+=1
-    echo %SFCBLUE% Your attack increases! ATK +1%SRESET%
-) else (
-    set /a DEF+=2
-    echo %SFCMAGENTA% Your defenses improve! DEF +2%SRESET%
-)
-goto NEXTROOM
-
 :PACT_ANGEL
 if !PACT_ANGEL! EQU 1 goto :pact_loop
 echo %SFCWHITE% 😇 Angelic Pact%SRESET%
@@ -2116,6 +2120,8 @@ if "!choice!"=="1" (
     set /a DEF-=1
     set /a ATK+=2
 ) else (goto PACT_ANGEL)
+if "!choice!"==" " goto PACT_ANGEL
+if "!choice!"=="" goto PACT_ANGEL
 goto PACT_CHECK
 
 
@@ -2133,13 +2139,14 @@ set /p choice=Your choice?
 echo.
 if "!choice!"=="1" (
     set /a MAXHP-=5
-	set /a HP+=5
     set /a ATK+=1
 ) else if "!choice!"=="2" (
     set /a MAXHP-=5
     set /a GOLD+=20
 ) else (goto PACT_DEMON)
 if !HP! GTR !MAXHP! set HP=!MAXHP!
+if "!choice!"==" " goto PACT_DEMON
+if "!choice!"=="" goto PACT_DEMON
 goto PACT_CHECK
 
 
@@ -2163,6 +2170,8 @@ if "!choice!"=="1" (
     set /a ATK-=2
     set /a DEF+=1
 ) else (goto PACT_IRON)
+if "!choice!"==" " goto PACT_IRON
+if "!choice!"=="" goto PACT_IRON
 goto PACT_CHECK
 
 
@@ -2348,7 +2357,6 @@ set BASEATK=0
 set ENEMYHP=0
 set ENEMYATK=0
 set ENEMYDEF=0
-set nbnbderencontretemp=0
 set STATBOOST=0
 set DAMAGE=0
 set DEFNEGAT=0
@@ -2378,9 +2386,6 @@ set TRIGGER=0
 set goldfound=0
 set BANKDEPOSIT=
 set REWARD=0
-set PACT_ANGEL=0
-set PACT_DEMON=0
-set PACT_IRON=0
 set pactrand=0
 set RAND=0
 goto :eof
