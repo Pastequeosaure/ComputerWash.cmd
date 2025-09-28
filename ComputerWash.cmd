@@ -36,10 +36,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.09.28.23.15
+set V=V.2025.09.28.23.35
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2025.09.28.23.15          |
+:: | Update  : PastequeOsaure V 2025.09.28.23.35          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -543,7 +543,7 @@ set char_sp1=[0m🛠️
 set char_sp2=[0m⚙️
 set char_sp3=[0m🧰
 set char_sp4=[0m🪛
-set char_sp5=[0m​💻
+set char_sp5=[0m🌊
 set char_sp6=[0m💾
 set char_sp7=[0m🖥️
 set char_sp8=[0m🗂️
@@ -1070,6 +1070,7 @@ goto :END_Menu
  echo.
  set print=0
  set Ligne_Menu=%Reset_Ligne_Menu%
+ set "choix="
  set /p choix=%SRESET% Select washing program : %SRESET%
  if "%choix%"=="" ( set choix=A999 )
  if "%choix%"==" " ( set choix=A999 )
