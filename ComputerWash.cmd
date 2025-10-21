@@ -36,10 +36,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.09.28.23.35
+set V=V.2025.10.22.00.30
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2025.09.28.23.35          |
+:: | Update  : PastequeOsaure V 2025.10.22.00.30          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -108,7 +108,9 @@ set nb=0
 :: Code 5Ed5wEu5Q6
 :: ===============================
 if "%Start?%"=="2" (
-	call :CFGOFF
+	if "%NO_ADMIN%"=="0" (
+		call :CFGOFF
+	)
 )
 call :Create_Restore_Point
 call :System_info
@@ -159,7 +161,9 @@ call :StartScan
 call :StartDownload
 call :StartInstall
 if "%Start?%"=="2" (
-	call :CFGON
+	if "%NO_ADMIN%"=="0" (
+		call :CFGON
+	)
 )
 call :RestartDevice
 call :shutdown
@@ -266,7 +270,7 @@ goto :eof
 :: 🔧 Admin ? si oui goto Copy
 :: ===============================
 :full_mode_admin
-If _%1_==_payload_  goto :copy
+If _%1_==_payload_  goto :copyAdmin
 :Admin
  set vbs=%temp%\getadmin.vbs
  echo Set UAC = CreateObject^("Shell.Application"^)>> "%vbs%"
@@ -275,11 +279,29 @@ If _%1_==_payload_  goto :copy
  del "%temp%\getadmin.vbs"
  call :separator "Error admin"
  call :Erreur
- exit
+ call :separator "Mode No admin 30s .... ... .. ."
+ call :separator " " "only"
+ set Temploop=0
+:checkNO_ADMIN
+timeout /t 1 /nobreak >nul
+ if exist Admin.txt (
+	del Admin.txt
+	exit
+ )
+set /a Temploop+=1
+set "Retry=Retry_%~1"
+if !Temploop! LEQ 30 (
+    goto :checkNO_ADMIN
+)
+ set Temploop=0
+ set NO_ADMIN=1
+ goto :copy
  
 :: ===============================
 :: 🔧 Copy puis Initialisation des variables
 :: ===============================
+:copyAdmin
+type nul > Admin.txt
 :copy
 if /I "%LOG%"=="1" (
 	echo . > "%CD%\Computer Wash Log.txt"
@@ -1047,6 +1069,10 @@ goto :ARGC_mode_?
   cls
 :Menu_?
 call :Print Ligne_Menuheader 0
+if /I "%NO_ADMIN%"=="1" (
+ call :separator "Error admin"
+ call :separator " " "only"
+ )
 if /I "%Anyreproductionisstrictlyprohibited%"=="1" (
    set Anyreproductionisstrictlyprohibited=0
    call :Print Ligne_MenuARISP 0
@@ -3187,6 +3213,8 @@ if /I "%wmicsoftwarelicensingservice%"=="1" (
    		systeminfo | find /i "Microsoft windows"
    		echo|set /p="Windows KEY :                               "
    		powershell -Command "(Get-WmiObject -Query 'Select * from SoftwareLicensingService').OA3xOriginalProductKey"
+		start msinfo32
+		timeout 60
 		set temperror=!ERRORLEVEL!
         Call :LOGERRORLEVEL !temperror!
 	)
