@@ -69,9 +69,9 @@ set Log=1
 set copy=0
 :: |______________________________________________________|
 :: |                                                      |
-:: | System info 0 = OFF 1 = ON  ( default )              |
+:: | System info 0 = OFF 1 = ON  ( 0 = OFF = default )              |
 :: |                                                      |
-set wmicsoftwarelicensingservice=1
+set wmicsoftwarelicensingservice=0
 :: |______________________________________________________|
 :: |                                                      |
 :: |    Color ?                                           |
@@ -289,7 +289,6 @@ timeout /t 1 /nobreak >nul
 	exit
  )
 set /a Temploop+=1
-set "Retry=Retry_%~1"
 if !Temploop! LEQ 30 (
     goto :checkNO_ADMIN
 )
@@ -3282,7 +3281,7 @@ if /I "%valeur%"=="System info" (
 		set wmicsoftwarelicensingservice=0
 	)
 )
-set "C%nb%=Windows KEY "
+set "C%nb%=Windows KEY + Info System "
 if /I "%wmicsoftwarelicensingservice%"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
 )
