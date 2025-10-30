@@ -36,10 +36,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.10.25.12.55
+set V=V.2025.10.28.20.36
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2025.10.25.12.55          |
+:: | Update  : PastequeOsaure V 2025.10.28.20.36          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -69,7 +69,7 @@ set Log=1
 set copy=0
 :: |______________________________________________________|
 :: |                                                      |
-:: | System info 0 = OFF 1 = ON  ( 0 = OFF = default )              |
+:: | System info 0 = OFF 1 = ON  ( 0 = OFF = default )    |
 :: |                                                      |
 set wmicsoftwarelicensingservice=0
 :: |______________________________________________________|
@@ -1403,7 +1403,9 @@ goto GAME
 cls
 set /a IDX=%random% %%10
 echo %SFCYELLOW% =========================================%SRESET%
-echo %SFCYELLOW%       🏰 Lymbiratus - Room !ROOM! / !MAXROOM!%SRESET%
+echo      Computer Wash %V%
+echo %SFCYELLOW% =========================================%SRESET%
+echo %SRESET%       🏰 Lymbiratus - %SFCYELLOW%Room %NFCGREEN%!ROOM! %SRESET%/ %NFCRED%!MAXROOM!%SRESET%
 echo %SFCYELLOW% =========================================%SRESET%
 call set ROOMNAME=%%ROOMNAME%IDX%%%
 echo.
@@ -3941,7 +3943,6 @@ goto :eof
 :cryptSvcStop
 set Temploop=0
 set /a nb+=1
-:Retry_cryptSvcStop
 if /I "%valeur%"=="cryptSvcStop" (
 set choix=C
 if /I "%cryptSvcStop%"=="0" (
@@ -3960,7 +3961,6 @@ if /I "%cryptSvcStop%"=="1" (
 		net stop cryptSvc 2>&1
 		set temperror=!ERRORLEVEL!
         Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry cryptSvcStop )
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -4600,7 +4600,7 @@ goto :eof
 call :separator "Fail_Retry"
 set /a Temploop+=1
 set "Retry=Retry_%~1"
-if !Temploop! LEQ 1 (
+if !Temploop! LEQ 5 (
     if !temperror! GEQ 1 (
         echo [Retry] Relance !Retry! (Temploop=!Temploop!, ErrorLevel=!temperror!)
         call :!Retry!
