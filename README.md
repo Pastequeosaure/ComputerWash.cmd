@@ -152,6 +152,7 @@ The order of execution of commands can be found in the Custom menu.
 <details>
 <summary>📌 Notes</summary>
 
+- The script supports arguments (ComputerWash.cmd only)
 - The script automatically displays the order of commands and their execution status (ON/OFF).  
 - You have 30 seconds to close Computer Wash after launching.
 ![Texte alternatif](Screenshot/Safeguard.png)
