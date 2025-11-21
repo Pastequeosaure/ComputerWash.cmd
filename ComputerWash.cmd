@@ -58,10 +58,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.11.21.10.35
+set V=V.2025.11.20.20.40
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2025.11.21.10.35          |
+:: | Update  : PastequeOsaure V 2025.11.20.20.40          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
