@@ -15,4 +15,6 @@ if exist "%temp%\END.TXT" (
         if /I not "%%~nxi"=="*.cmd" del /F /Q "%%i"
     )
 )
+cd /D "%~dp0".
+del END.TXT
 exit

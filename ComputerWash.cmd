@@ -25,8 +25,6 @@ set Anyreproductionisstrictlyprohibited=1
 :ALL
 chcp 65001
 setlocal EnableDelayedExpansion
-:: Any unauthorized modification of this ferra is at your own risk.
-:: You are allowed to modify all the parameters by default in the large frame at the beginning of the file except the version number
 ::  ______________________________________________________ 
 :: /                                                      \
 :: |                Computer Wash Ulitmate                |
@@ -58,10 +56,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.11.20.20.40
+set V=V.2025.11.21.12.40
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2025.11.20.20.40          |
+:: | Update  : PastequeOsaure V 2025.11.21.12.40          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -680,7 +678,7 @@ set "ARISP19=%%SRESET%% ℹ️ Note: Option D (Colorblind Mode) is NOT compatibl
 set "ARISP20=%%SRESET%%   You can enable it by modifying line 62 of the script file (change 1 → 0)."
 set "ARISP21= "
 set "ARISP22=%%SRESET%% ⚙️ To disable the startup warning message:"
-set "ARISP23=%%SRESET%%   Modify line 2 of the script file (change 1 → 0)."
+set "ARISP23=%%SRESET%%   Modify line 24 of the script file (change 1 → 0)."
 set "ARISP24=%%SRESET%% ⚡ By doing this, you acknowledge that you have read the disclaimer above."
 set "ARISP25= "
 set "ARISP26=%%SFCYELLOW%% -----------------------------------------------------------------------%%SRESET%%"
