@@ -56,10 +56,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.11.21.12.40
+set V=V.2025.11.21.18.10
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2025.11.21.12.40          |
+:: | Update  : PastequeOsaure V 2025.11.21.18.10          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -348,10 +348,14 @@ for %%A in (%*) do (
         echo Argument ignoré : %%A
     )
 )
+timeout /t 2 /nobreak >nul
 echo === Arguments filtrés ===
 echo !arglist!
 echo =========================
-
+timeout /t 2 /nobreak >nul
+if exist Admin.txt (
+	del Admin.txt
+)
 call "%windir%\system32\ComputerWash.cmd" !arglist!
 	call :exitlog
     exit /b
@@ -4688,6 +4692,5 @@ if /I "%LOG%"=="1" (
 	echo " |- %TIME% --| Exit                                | " >> "%userProfile%\Desktop\Computer Wash Log.txt"
 	echo " \______________________________________________________/ " >> "%userProfile%\Desktop\Computer Wash Log.txt"
 )
-echo END > END.TXT
 call :Spinner_OFF
 exit
