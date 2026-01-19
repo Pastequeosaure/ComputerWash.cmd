@@ -1,6 +1,8 @@
+set NONCE=1677794
+
 :: MIT License
 
-:: Copyright (c) 2019-2025 PastequeOsaure
+:: Copyright (c) 2019-2026 PastequeOsaure
 
 :: Permission is hereby granted, free of charge, to any person obtaining a copy
 :: of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +26,7 @@
 set Anyreproductionisstrictlyprohibited=1
 :ALL
 chcp 65001
+cls
 setlocal EnableDelayedExpansion
 ::  ______________________________________________________ 
 :: /                                                      \
@@ -56,10 +59,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2025.11.21.18.10
+set V=V.2026.01.18.22.48
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2025.11.21.18.10          |
+:: | Update  : PastequeOsaure V 2026.01.18.22.48          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -83,10 +86,13 @@ set V=V.2025.11.21.18.10
 set Log=1
 :: |______________________________________________________|
 :: |                                                      |
-:: | Copy computerwash to system32 0 = OFF                |
-:: |                               1 = ON  ( default )    |
+:: | Copy computerwash to system32 0 = Off except in      |
+:: |                                 = temporary files    |
+:: |                                 = ( default )        |
 :: |                                                      |
-set copy=1
+:: |                               1 = ON                 |
+:: |                                                      |
+set CopyS32=0
 :: |______________________________________________________|
 :: |                                                      |
 :: | System info 0 = OFF 1 = ON  ( 0 = OFF = default )    |
@@ -113,86 +119,198 @@ set Color=1
 :: ===============================
 title Computer wash ERR ADMIN
 cd /D "%~dp0".
+set Cert=0
+call :VERIFY || set Cert=1
 call :Color
 goto :full_mode_admin
 
+:VERIFY
+call :template
 :: ===============================
-:: 🔧 Algo + menu personnalisé
+:: SHA256
 :: ===============================
-:algo
-set nb=0
-:: ===============================
-:: 🔧 Call à la fin du fichier script
-:: 🔧 Bien mettre à jour les variables dans le même ordre !
-:: Code Ctrl + F pour Var C
-:: Code 5Ed5wEu5Q6
-:: ===============================
-if "%Start?%"=="2" (
-	if "%NO_ADMIN%"=="0" (
-		call :CFGOFF
-	)
+set "HASH="
+for /f "tokens=1" %%H in (
+  'certutil -hashfile "%~f0" SHA256 ^| findstr /R "^[0-9A-Fa-f]"'
+) do (
+  set "HASH=%%H"
+  goto HASH_OK
 )
-call :Create_Restore_Point
-call :System_info
-call :Chkdsk
-call :Defragmentation
-call :cleanmgr
-call :DISM
-call :Sfcscannow
-call :findstr
-call :Mrt
-call :SignatureUpdate
-call :MpCmdRunBootSectorScan
-call :MpCmdRunScanType
-call :pnpunattendauditsystem
-call :mode
-call :mdsched
-call :bcdbootsfall
-call :wsreset
-call :rstrui
-call :AllUpdateAPP
-call :wingetgooglechrome
-call :wingetMozillaFirefox
-call :wingetVideoLANVLC
-call :wingetAcrobat
-call :winget7zip
-call :KeePass
-call :wuauservStop
-call :cryptSvcStop
-call :bitsStop
-call :msiserverStop
-call :del
-call :del2
-call :SoftwareDistribution
-call :catroot2
-call :winsockreset
-call :interfaceipreset
-call :advfirewallreset
-call :ipconfigrelease
-call :ipconfigflushdns
-call :iwinhttp
-call :bitsadminresetallusers
-call :DLLWindowsUp
-call :wuauservStart
-call :cryptSvcStart
-call :bitsStart
-call :msiserverStart
-call :StartScan
-call :StartDownload
-call :StartInstall
-if "%Start?%"=="2" (
-	if "%NO_ADMIN%"=="0" (
-		call :CFGON
-	)
+:HASH_OK
+if not defined HASH exit /b 1
+
+set "TEMPLATE=!TEMPLATE:~0,64!"
+
+:: ===============================
+:: VERIFY SHA256 via TEMPLATE
+:: ===============================
+set VERIFY_OK=1
+
+<nul set /p "= "
+
+for /L %%I in (0,1,63) do (
+    set "H=!HASH:~%%I,1!"
+    set "T=!TEMPLATE:~%%I,1!"
+
+    if "!T!"=="." (
+        rem Pass
+    ) else if /I "!H!"=="!T!" (
+        rem OK
+    ) else (
+        set VERIFY_OK=0
+    )
 )
-call :RestartDevice
-call :shutdown
-call :Pause
-call :USB
-call :Exit
-call :AutoLigneMenu C Ligne_MenuC
-call :Spinner_OFF
-goto :eof
+
+if !VERIFY_OK!==1 (
+    exit /b 0
+) else (
+    exit /b 1
+)
+exit /b 1
+
+:template
+:: ======================================
+:: Chemins
+:: ======================================
+set "SOURCE=%~f0"
+
+if not exist "%SOURCE%" (
+    echo ERREUR : "%SOURCE%" introuvable
+    pause
+    exit /b 1
+)
+
+:: ======================================
+:: Comptage des lignes
+:: ======================================
+set LINECOUNT=0
+set OFFSET=1
+for /f "usebackq delims=" %%L in ("%SOURCE%") do (
+    set /a LINECOUNT+=1
+)
+set /a LINECOUNT-=OFFSET
+if %LINECOUNT% LSS 6 (
+    echo ERREUR : pas assez de lignes
+    pause
+    exit /b 1
+)
+
+set /a STEP=LINECOUNT/6
+if %STEP% LSS 1 set STEP=1
+
+:: ======================================
+:: Extraction de 6 caracteres HEX (zones)
+:: ======================================
+set HEXLIST=
+set HEXCOUNT=0
+set INDEX=0
+
+:: offset unique pour ignorer les 2 lignes ajoutées
+set /a ZONE_START=STEP+OFFSET
+
+for /f "usebackq delims=" %%L in ("%SOURCE%") do (
+    set /a INDEX+=1
+
+    if !HEXCOUNT! GEQ 6 goto EXTRACT_DONE
+
+    if !INDEX! GEQ !ZONE_START! (
+        call :SAFECHAR "%%L"
+        if "!FOUND!"=="1" (
+            set FOUND=0
+            set /a ZONE_START+=STEP
+        )
+    )
+)
+
+:EXTRACT_DONE
+if %HEXCOUNT% LSS 6 (
+    exit /b 1
+)
+
+:: ======================================
+:: Generation du template (64 caracteres)
+:: Positions : 1,12,23,34,45,56
+:: ======================================
+set "TPL="
+set POS=0
+set HEXPOS=0
+
+:BUILD
+if %POS% GEQ 64 goto DONE
+
+set /a POS+=1
+
+if %POS%==1  goto PUT
+if %POS%==12 goto PUT
+if %POS%==23 goto PUT
+if %POS%==34 goto PUT
+if %POS%==45 goto PUT
+if %POS%==56 goto PUT
+
+set "TPL=!TPL!."
+goto BUILD
+
+:PUT
+call set "CHAR=%%HEXLIST:~%HEXPOS%,1%%"
+set "TPL=!TPL!!CHAR!"
+set /a HEXPOS+=1
+goto BUILD
+
+:DONE
+:: ======================================
+:: Écrire sans retour à la ligne
+:: ======================================
+set "TEMPLATE=!TPL!"
+exit /b
+
+:: ======================================
+:: Sous-fonction : SAFECHAR
+:: ======================================
+:SAFECHAR
+set "STR=%~1"
+set I=0
+set FOUND=0
+
+:SCAN
+set "C=!STR:~%I%,1!"
+if "!C!"=="" goto :EOF
+
+:: chiffres
+if "!C!"=="0" goto OK
+if "!C!"=="1" goto OK
+if "!C!"=="2" goto OK
+if "!C!"=="3" goto OK
+if "!C!"=="4" goto OK
+if "!C!"=="5" goto OK
+if "!C!"=="6" goto OK
+if "!C!"=="7" goto OK
+if "!C!"=="8" goto OK
+if "!C!"=="9" goto OK
+
+:: lettres hex (conversion majuscule)
+if "!C!"=="a" goto iplpl
+if "!C!"=="b" goto iplpl
+if "!C!"=="c" goto iplpl
+if "!C!"=="d" goto iplpl
+if "!C!"=="e" goto iplpl
+if "!C!"=="f" goto iplpl
+
+if "!C!"=="A" goto OK
+if "!C!"=="B" goto OK
+if "!C!"=="C" goto OK
+if "!C!"=="D" goto OK
+if "!C!"=="E" goto OK
+if "!C!"=="F" goto OK
+
+:iplpl
+set /a I+=1
+goto SCAN
+
+:OK
+set "HEXLIST=!HEXLIST!!C!"
+set /a HEXCOUNT+=1
+set FOUND=1
+goto :EOF
 
 :: ===============================
 :: 🔧 Color
@@ -290,100 +408,112 @@ goto :eof
 :: 🔧 Admin ? si oui goto Copy
 :: ===============================
 :full_mode_admin
+
+:: Temp = copy
+set "ME=%~f0"
+if /I "!ME!"=="!ME:%TEMP%=!" (
+    set copy=%CopyS32%
+) else (
+    set copy=1
+)
+call :del_admin
+
 If _%1_==_payload_  goto :copyAdmin
 net session >nul 2>&1
 if %errorlevel% neq 0 ( goto :Admin ) else ( goto :copyAdmin )
 :Admin
- set vbs=%temp%\getadmin.vbs
- echo Set UAC = CreateObject^("Shell.Application"^)>> "%vbs%"
- echo UAC.ShellExecute "%~s0", "payload %~sdp0 %*", "", "runas", 1 >> "%vbs%"
- "%temp%\getadmin.vbs"
- del "%temp%\getadmin.vbs"
- call :separator "Error admin"
- call :Erreur
- call :separator "Mode No admin 30s .... ... .. ."
- call :separator " " "only"
- set Temploop=0
+set vbs=%temp%\getadmin.vbs
+echo Set UAC = CreateObject^("Shell.Application"^)>> "%vbs%"
+echo UAC.ShellExecute "%~s0", "payload %~sdp0 %*", "", "runas", 1 >> "%vbs%"
+"%temp%\getadmin.vbs"
+del "%temp%\getadmin.vbs"
+call :separator "Error admin"
+call :Erreur
+call :separator "Mode No admin 30s .... ... .. ."
+call :separator " " "only"
+set Temploop=0
+set NO_ADMIN=1
+type nul > NO_Admin.txt
 :checkNO_ADMIN
 timeout /t 1 /nobreak >nul
- if exist Admin.txt (
-	del Admin.txt
-	call :exitlog
-	exit
- )
+call :Exit_del_admin
 set /a Temploop+=1
 if !Temploop! LEQ 30 (
     goto :checkNO_ADMIN
 )
- set Temploop=0
- set NO_ADMIN=1
- goto :afterCopy
- 
+
+set Temploop=0
+goto :afterCopy
+
 :: ===============================
 :: 🔧 Copy puis Initialisation des variables
 :: ===============================
 :copyAdmin
+if exist stop.txt (
+	del stop.txt
+)
 set NO_ADMIN=0
-type nul > Admin.txt
+if exist NO_Admin.txt (
+    del NO_Admin.txt
+    type nul > Admin.txt
+)
+set "logdest=%~dp0\Computer Wash Log.txt"
  if /I "%~dp0"=="%windir%\system32\" (
+    set "logdest=%userProfile%\Desktop\Computer Wash Log.txt"
     goto afterCopy
 )
+
 if /I "%copy%"=="1" (
-    echo Copie en cours...
+    echo.
+    echo Copie in progress...
 	cd /D "%~dp0".
-	if exist Spinner.cmd (
-		xcopy "Spinner.cmd" "%windir%\system32\" /s /h /y >nul
-	)
+    if %Cert% EQU 1 (
+        echo.
+        echo %SUNDERLINE%%NFCRED% ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ Unofficial version, it has undergone changes. ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ %SRESET%
+        echo.
+        echo Timeout 15s SECURITY, Then copy to system32.
+	    timeout 15
+    )
 	xcopy "%~f0" "%windir%\system32\" /s /h /y >nul
-    echo Lance ComputerWash.cmd depuis System32...
+    echo Start ComputerWash.cmd to System32...
+    echo.
 
 set "arglist="
 for %%A in (%*) do (
     echo %%A | find "\" >nul
     if errorlevel 1 (
-        rem Si pas de "\", on ajoute tel quel
+        :: Si pas de "\", on ajoute tel quel
         set "arglist=!arglist! %%A"
-    ) else (
-		echo =========================
-        echo Argument ignoré : %%A
     )
 )
-timeout /t 2 /nobreak >nul
-echo === Arguments filtrés ===
-echo !arglist!
-echo =========================
-timeout /t 2 /nobreak >nul
-if exist Admin.txt (
-	del Admin.txt
-)
-call "%windir%\system32\ComputerWash.cmd" !arglist!
+
+    start %windir%\system32\ComputerWash.cmd !arglist!
+    type nul > copy.txt
 	call :exitlog
     exit /b
 )
+
 :afterCopy
 if /I "%LOG%"=="1" (
 	echo . > "%CD%\Computer Wash Log.txt"
-	echo "  ______________________________________________________  " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " /                                                      \ " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " | Computer Wash LOG EDITION V 0.5 - %DATE%         | " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |______________________________________________________| " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |----------------|                                     | " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |   %date%   | Computer                            | " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |  %TIME%   |           Wash                      | " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |----------------|_____________________________________| " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |                                                      | " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " | Created : Computer Wash - - - - - - - - - - - - - - -| " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |______________________________________________________| " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |----------------|                                     | " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |----------------| Nom du PC : %COMPUTERNAME% " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |----------------|                                     | " >> "%userProfile%\Desktop\Computer Wash Log.txt"
+	echo "  ______________________________________________________  " >> "%logdest%"
+	echo " /                                                      \ " >> "%logdest%"
+	echo " | Computer Wash LOG EDITION V 0.5 - %DATE%         | " >> "%logdest%"
+	echo " |______________________________________________________| " >> "%logdest%"
+	echo " |----------------|                                     | " >> "%logdest%"
+	echo " |   %date%   | Computer                            | " >> "%logdest%"
+	echo " |  %TIME%   |           Wash                      | " >> "%logdest%"
+	echo " |----------------|_____________________________________| " >> "%logdest%"
+	echo " |                                                      | " >> "%logdest%"
+	echo " | Created : Computer Wash - - - - - - - - - - - - - - -| " >> "%logdest%"
+	echo " |______________________________________________________| " >> "%logdest%"
+	echo " |----------------|                                     | " >> "%logdest%"
+	echo " |----------------| Nom du PC : %COMPUTERNAME% " >> "%logdest%"
+	echo " |----------------|                                     | " >> "%logdest%"
 )
 
  title Computer Wash %V%
  verify on
-if exist stop.txt (
-	del stop.txt
-)
 goto :Var
 
 :: ===============================
@@ -413,7 +543,9 @@ goto :Var
  set S13=Reset WS cache
  set S14=Setup Chrome Firefox VLC Acrobat 7zip KeePASS
  set S15=Update All App
- set S16=Computer Wash USB Protection
+
+ set O=O
+ set O1=Computer Wash USB Protection
 
  set D=Colorblind Mode
  set R=Return to the main menu
@@ -424,7 +556,10 @@ goto :Var
  set ArispBypass=ArispBypass
  set THE_HAUNTED_COMPUTER=THE_HAUNTED_COMPUTER
  set payload=payload
- 
+ set OLD=OldStory
+ set GIT=GIT
+ set SpinnerRUN=SpinnerRUN
+
 :: 5Ed5wEu5Q6
  set C=C
  set nb=0
@@ -549,7 +684,6 @@ set C%nb%=%SFCGREEN%Start%SRESET%
  )
 
  set choix=0
- set Spinner=0
  set Start?=0
  set verify=1
  set Security=1
@@ -679,22 +813,18 @@ set "ARISP16=%%SRESET%% - Example.cmd A1 S1 C55   → Pre-select options and STA
 set "ARISP17=%%SRESET%% ⚠️ Warning: C55 will execute the selected actions. Make sure you reviewed them first!"
 set "ARISP18= "
 set "ARISP19=%%SRESET%% ℹ️ Note: Option D (Colorblind Mode) is NOT compatible in argument mode."
-set "ARISP20=%%SRESET%%   You can enable it by modifying line 62 of the script file (change 1 → 0)."
+set "ARISP20=%%SRESET%%   You can enable it by modifying line 105 of the script file (change 1 → 0)."
 set "ARISP21= "
-set "ARISP22=%%SRESET%% ⚙️ To disable the startup warning message:"
-set "ARISP23=%%SRESET%%   Modify line 24 of the script file (change 1 → 0)."
-set "ARISP24=%%SRESET%% ⚡ By doing this, you acknowledge that you have read the disclaimer above."
-set "ARISP25= "
-set "ARISP26=%%SFCYELLOW%% -----------------------------------------------------------------------%%SRESET%%"
-set "ARISP27= "
-set "ARISP28=%%SRESET%%%%SFCBLUE%% https:^/^/github.com^/Pastequeosaure^/ComputerWash.cmd^/blob^/main^/ComputerWash.cmd"
-set "ARISP29=%%SRESET%%%%SFCBLUE%% https:^/^/computerwash.wixsite.com^/computer-wash%%SRESET%%"
-set "ARISP30= "
-set "ARISP31=%%SFCRED%%   - %%SRESET%%%%SUNDERLINE%%Press CTRL+C to EXIT%%SRESET%%"
-set "ARISP32=%%SFCGREEN%%   - %%SRESET%%%%SUNDERLINE%%Press ENTER to continue%%SRESET%%"
-set "ARISP33= "
-set "ARISP34=%%SFCYELLOW%% -----------------------------------------------------------------------%%SRESET%%"
-set "ARISP35= "
+set "ARISP22=%%SFCYELLOW%% -----------------------------------------------------------------------%%SRESET%%"
+set "ARISP23= "
+set "ARISP24=%%SRESET%%%%SFCBLUE%% https:^/^/github.com^/Pastequeosaure^/ComputerWash.cmd^/blob^/main^/ComputerWash.cmd"
+set "ARISP25=%%SRESET%%%%SFCBLUE%% https:^/^/computerwash.wixsite.com^/computer-wash%%SRESET%%"
+set "ARISP26= "
+set "ARISP27=%%SFCRED%%   - %%SRESET%%%%SUNDERLINE%%Press CTRL+C to EXIT%%SRESET%%"
+set "ARISP28=%%SFCGREEN%%   - %%SRESET%%%%SUNDERLINE%%Press ENTER to continue%%SRESET%%"
+set "ARISP29= "
+set "ARISP30=%%SFCYELLOW%% -----------------------------------------------------------------------%%SRESET%%"
+set "ARISP31= "
 :: Auto Ligne ARISP
 set /a count=0
 set /a line=0
@@ -723,6 +853,14 @@ SET "header9=%NFCMAGENTA% ^|   %%SRESET%%[O.o]    %%NFCMAGENTA%%^|         %%cha
 SET "header10=%%NFCMAGENTA%% ^|   %%SRESET%%/)__)    %%NFCMAGENTA%%^|                                                        %%NFCMAGENTA%%^|"
 SET "header11=%%NFCMAGENTA%% ^| %%SRESET%% --"--"--  %%NFCMAGENTA%%^|               %%SRESET%%Created by PastequeOsaure                %%NFCMAGENTA%%^|"
 SET "header12=%%NFCMAGENTA%% ^\____________^|________________________________________________________^/%SRESET%"
+SET "header13= "
+if %Cert% EQU 1 (
+    SET "header14= %SRESET%            %SUNDERLINE%%NFCRED%⚠️ unofficial version, it has undergone changes ! ⚠️%SRESET%"
+)
+if %Cert% EQU 0 (
+    SET "header14= %SRESET%                   %SUNDERLINE%%NFCGREEN%✅ you are on an official version ✅%SRESET%"
+)
+
 call :AutoLigneMenu header Ligne_Menuheader noPrefix
 
 if /I "%Color%"=="0" (
@@ -733,8 +871,12 @@ if /I "%Color%"=="1" (
 )
 set Other=Other
 set "Other0= "
-set "Other1=%%SRESET%%   D ) Colorblind Mode %%D?%%"
-set "Other2=%%SRESET%%   R ) Return to the main menu"
+set "Other1=%%SRESET%%   %%SUNDERLINE%%Other :%%SRESET%%"
+set "Other2= "
+set "Other3=%%SRESET%%   D ) Colorblind Mode %%D?%%"
+set "Other4=%%SRESET%%   R ) Return to the main menu"
+set "Other5=%%SRESET%%   %%NFCGREEN%%GIT ) Current  ^| ( = or + 2023-03-18 )"
+set "Other6=%%SRESET%%   %%NFCMAGENTA%%OLD ) OldStory ^| ( - 2023-03-18 )"
 call :AutoLigneMenu Other Ligne_MenuOther noPrefix
 
 set foot_head=foot_head
@@ -784,10 +926,13 @@ call :AutoLigneMenu USBB Ligne_MenuUSBB noPrefix
 :Varable_DEV
 set Reset_Ligne_Menu=Ligne_Menu
 set Ligne_Menu=Ligne_Menu
-set Menu0=%SRESET% 
-set Menu1= %SRESET%   A ) Automatic
-set Menu2= %SRESET%   S ) Specific
-set Menu3= %SRESET%   C ) Custom
+set Menu0=%SRESET%  
+set Menu1= %SRESET%   %SUNDERLINE%Ligne_Menu :%SRESET% 
+set Menu2=%SRESET% 
+set Menu3= %SRESET%   A ) Automatic
+set Menu4= %SRESET%   S ) Specific
+set Menu5= %SRESET%   T ) Tool
+set Menu6= %SRESET%   C ) Custom
 call :AutoLigneMenu Menu Ligne_Menu noPrefix
 
 set Ligne_MenuA=Ligne_MenuA
@@ -797,6 +942,12 @@ set Ligne_MenuA2=.
 set Ligne_MenuA3=.
 call :AutoLigneMenu A Ligne_MenuA
 
+set Ligne_MenuO=Ligne_MenuO
+set Ligne_MenuO0=.
+set Ligne_MenuO1=%SRESET%  %SUNDERLINE%%NFCYELLOW%T%SRESET%%SUNDERLINE%ool%SRESET% TOOL ONLY
+set Ligne_MenuO2=.
+set Ligne_MenuO3=.
+call :AutoLigneMenu O Ligne_MenuT
 
 set Ligne_MenuS=Ligne_MenuS
 set Ligne_MenuS0=.
@@ -816,6 +967,56 @@ call :AutoLigneMenu C Ligne_MenuC
 goto :ARGC_mode_?
 
 :: ===============================
+:: 🔧 Générateur des lignes printables de menus
+::     (header principal, secondaire, etc.)
+:: ===============================
+:AutoLigneMenu
+:: %1 = préfixe source (A, S, C, header)
+:: %2 = tableau cible (Ligne_MenuA, Ligne_MenuS, Ligne_Menuheader…)
+:: %3 = "noPrefix" optionnel
+if /i "%~3"=="noPrefix" (
+    set /a count=0
+    set /a line=0
+) else (
+    set /a count=1
+    set /a line=4
+)
+:loopGeneric
+set "value=!%~1%count%!"
+if defined value (
+    if /i "%~3"=="noPrefix" (
+        set "%~2!line!=!value!"
+    ) else (
+        set "%~2!line!=%NFCYELLOW% %~1%SRESET%%count%) !value!"
+    )
+    set /a line+=1
+    set "%~2!line!=."
+    set /a line+=1
+    set /a count+=1
+    goto :loopGeneric
+)
+goto :eof
+
+:: ===============================
+:: 🔧 ARGC_mode_? Puis ?
+:: ===============================
+:ARGC_mode_?
+set "Choix="
+
+rem Si aucun argument, aller à Interface
+if "%1"=="" goto :Interface
+
+rem Vérifie si le premier argument contient "\"
+echo %1 | find "\" >nul
+if errorlevel 1 (
+    rem Si pas de "\", on l'ajoute à Choix
+    set "Choix=%~1"
+    echo %SRESET%%NFCMAGENTA%Choix défini : %NFCCYAN%!Choix!%SRESET%
+)
+shift
+goto :Preparateur_de_variable
+
+:: ===============================
 :: 🔧 Preparateur de variable puis ARGC_mode_?
 :: ===============================
 :Preparateur_de_variable
@@ -831,6 +1032,9 @@ call set "valeur=%%%choix%%%"
 if "%valeur%"=="" (
 	set "choix= "
     goto :mode_console
+)
+if /I "%valeur%"=="SpinnerRUN" (
+	goto :SpinnerRUN
 )
 if /I "%valeur%"=="ArispBypass" ( 
 	set Anyreproductionisstrictlyprohibited=0
@@ -849,64 +1053,17 @@ if /I "%valeur%"=="Lymbiratus" (
 	set choix=Ligne_Menu
 	)
 if /I "%valeur%"=="Vipptore" (
-	echo.
-	:: Création ligne par ligne du fichier Easter_egg_select.cmd
-	echo|set /p="@echo off"> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="chcp 65001 ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo. ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo ================================ ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo. ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo       Easter Egg Selector        ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo. ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo ================================ ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo. ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo 1. Launch: Quiz ! ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo. ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo 2. Launch: THE_HAUNTED_COMPUTER ! ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo. ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo 3. Launch: 🏰 Roglike ((Batch Edition) Lymbiratus) ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo. ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo 4. Exit ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo. ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="set /p choice=Choose an option ^(1-4^): ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo. ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="if "%%choice%%"=="1" start "" ComputerWash.cmd payload ArispBypass Quiz ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo. ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="if "%%choice%%"=="2" start "" ComputerWash.cmd ArispBypass THE_HAUNTED_COMPUTER ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo. ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="if "%%choice%%"=="3" start "" ComputerWash.cmd payload ArispBypass Lymbiratus ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="echo. ">> Easter_egg_select.cmd
-	echo.>> Easter_egg_select.cmd
-	echo|set /p="if "%%choice%%"=="4" exit ">> Easter_egg_select.cmd
-	echo %NFCGREEN% File Easter_egg_select.cmd created successfully ! %SRESET% 
-	echo %SRESET% Auto exit 30s
-	timeout /t 30 /nobreak >nul
-	exit
+	call :Lymbiratus
+	set choix=Ligne_Menu
 	)
+if /I "%valeur%"=="GIT" (
+	start https://github.com/Pastequeosaure/ComputerWash.cmd/blob/main/ComputerWash.cmd
+	set choix=Ligne_Menu
+)
+if /I "%valeur%"=="OldStory" (
+	start https://computerwash.wixsite.com/computer-wash/archives
+	set choix=Ligne_Menu
+)
 if /I "%valeur%"=="Quiz" (
 	call :Quiz
 	set choix=Ligne_Menu
@@ -1105,32 +1262,79 @@ if /I "%valeur%"=="%SFCGREEN%Start%SRESET%" (
 goto :ARGC_mode_?
 
 :: ===============================
-:: 🔧 ARGC_mode_? Puis ?
+:: 🔧 Algo + menu personnalisé
 :: ===============================
-@echo off
-setlocal enabledelayedexpansion
-
-:ARGC_mode_?
-set "Choix="
-
-rem Si aucun argument, aller à Interface
-if "%1"=="" goto :Interface
-
-call :Spinner_Start
-
-rem Vérifie si le premier argument contient "\"
-echo %1 | find "\" >nul
-if errorlevel 1 (
-    rem Si pas de "\", on l'ajoute à Choix
-    set "Choix=%~1"
-    echo Choix défini : !Choix!
-) else (
-    echo Argument ignoré : %1
+:algo
+set nb=0
+:: ===============================
+:: 🔧 Bien mettre à jour les variables dans le même ordre ! ( pour Var C )
+:: Code 5Ed5wEu5Q6
+:: ===============================
+if "%Start?%"=="2" (
+	if "%NO_ADMIN%"=="0" (
+		call :CFGOFF
+	)
 )
-
-shift
-goto :Preparateur_de_variable
-
+call :Create_Restore_Point
+call :System_info
+call :Chkdsk
+call :Defragmentation
+call :cleanmgr
+call :DISM
+call :Sfcscannow
+call :findstr
+call :Mrt
+call :SignatureUpdate
+call :MpCmdRunBootSectorScan
+call :MpCmdRunScanType
+call :pnpunattendauditsystem
+call :mode
+call :mdsched
+call :bcdbootsfall
+call :wsreset
+call :rstrui
+call :AllUpdateAPP
+call :wingetgooglechrome
+call :wingetMozillaFirefox
+call :wingetVideoLANVLC
+call :wingetAcrobat
+call :winget7zip
+call :KeePass
+call :wuauservStop
+call :cryptSvcStop
+call :bitsStop
+call :msiserverStop
+call :del
+call :del2
+call :SoftwareDistribution
+call :catroot2
+call :winsockreset
+call :interfaceipreset
+call :advfirewallreset
+call :ipconfigrelease
+call :ipconfigflushdns
+call :iwinhttp
+call :bitsadminresetallusers
+call :DLLWindowsUp
+call :wuauservStart
+call :cryptSvcStart
+call :bitsStart
+call :msiserverStart
+call :StartScan
+call :StartDownload
+call :StartInstall
+if "%Start?%"=="2" (
+	if "%NO_ADMIN%"=="0" (
+		call :CFGON
+	)
+)
+call :RestartDevice
+call :shutdown
+call :Pause
+call :USB
+call :Exit
+call :AutoLigneMenu C Ligne_MenuC
+exit /b
 
 :: ===============================
 :: 🔧 Interface Pilote
@@ -1158,44 +1362,36 @@ if "%Start?%"=="1" (
 call :Print %Ligne_Menu% 0
 call :Print Ligne_MenuOther 0
 call :Print Ligne_Menufoot_head 0
-goto :END_Menu
 
-:: ===============================
-:: 🔧 Question Pilote
-:: ===============================
- :END_Menu
- echo.
- set print=0
- set Ligne_Menu=%Reset_Ligne_Menu%
- set "choix="
- set /p choix=%SRESET% Select washing program : %SRESET%
- if "%choix%"=="" ( set choix=Ligne_Menu )
- if "%choix%"==" " ( set choix=Ligne_Menu )
- :: Enlever les espaces
- set "choix=%choix: =%"
- ::preparateur de variable
- goto :Preparateur_de_variable
+IF NOT DEFINED FAST_Menu (
+    if not exist FAST_Menu.ps1 (
+        set FAST_Menu=0
+    ) else (
+        set FAST_Menu=1
+    )
+)
 
-:: ===============================
-:: 🔧 Fonction Affichage
-:: ===============================
-:Print
-SET "print=%~1"
-SET /A "ligne=%~2"
-:Menu
-:: Accès dynamique à la variable "header%ligne%"
-CALL SET var=%%%print%%ligne%%%
-if "%var%"=="." ( echo. ) else ( CALL echo|set /p="%var%" )
-SET /A ligne+=1
-IF NOT "%var%"=="" (
-    goto :Menu
+if /I "%FAST_Menu%"=="1" (
+    if /I "%~dp0"=="%windir%\system32\" (
+        call :END_Menu
+    ) else (
+        if exist FAST_Menu.ps1 (
+            for /f "delims=" %%A in ('powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0FAST_Menu.ps1"') do (
+                set "ARGS=%%A"
+            )
+       call :ARGC_mode_? !ARGS!
+       goto :exitlog
+       ) else ( 
+        set FAST_Menu=0
+        call :END_Menu
+        )
+    )
 ) else (
-	set choix=0
-	exit /b
+    call :END_Menu
 )
 
 :: ===============================
-:: 🔧 Fonction Affichage du pilote
+:: 🔧 Fonction separator
 :: ===============================
 :separator
 echo.
@@ -1231,74 +1427,40 @@ echo.
 exit /b
 
 :: ===============================
-:: 🔧 Générateur des lignes printables de menus
-::     (header principal, secondaire, etc.)
+:: 🔧 Fonction Affichage
 :: ===============================
-:AutoLigneMenu
-:: %1 = préfixe source (A, S, C, header)
-:: %2 = tableau cible (Ligne_MenuA, Ligne_MenuS, Ligne_Menuheader…)
-:: %3 = "noPrefix" optionnel
-if /i "%~3"=="noPrefix" (
-    set /a count=0
-    set /a line=0
+:Print
+SET "print=%~1"
+SET /A "ligne=%~2"
+:Menu
+:: Accès dynamique à la variable "header%ligne%"
+CALL SET var=%%%print%%ligne%%%
+if "%var%"=="." ( echo. ) else ( CALL echo|set /p="%var%" )
+SET /A ligne+=1
+IF NOT "%var%"=="" (
+    goto :Menu
 ) else (
-    set /a count=1
-    set /a line=4
+	set choix=0
+	exit /b
 )
-:loopGeneric
-set "value=!%~1%count%!"
-if defined value (
-    if /i "%~3"=="noPrefix" (
-        set "%~2!line!=!value!"
-    ) else (
-        set "%~2!line!=%NFCYELLOW% %~1%SRESET%%count%) !value!"
-    )
-    set /a line+=1
-    set "%~2!line!=."
-    set /a line+=1
-    set /a count+=1
-    goto :loopGeneric
-)
-goto :eof
 
 :: ===============================
-:: 🔧 Fonction : Spinner Start
+:: 🔧 Question Pilote
 :: ===============================
-:Spinner_Start
-cd /D "%~dp0".
-if /i "%Spinner%"=="1" (
-	goto :eof
-)
-if exist stop.txt (
-	del stop.txt
-	goto :eof
-)
-if exist Spinner.cmd (
-	set Spinner=1
-	start Spinner.cmd
-) else (
-	echo|set /p="%SRESET% %NFCRED%Spinner.cmd Disabled %SRESET% !"
-	echo.
-	echo.
-)
-goto :eof
+ :END_Menu
+ echo.
+ set print=0
+ set Ligne_Menu=%Reset_Ligne_Menu%
+ set "choix="
+ set /p choix=%SRESET% Select washing program : %SRESET%
+ if "%choix%"=="" ( set choix=Ligne_Menu )
+ if "%choix%"==" " ( set choix=Ligne_Menu )
+ :: Enlever les espaces
+ set "choix=%choix: =%"
+ ::preparateur de variable
+ goto :Preparateur_de_variable
 
-:: ===============================
-:: 🔧 Fonction : Spinner Stop
-:: ===============================
-:Spinner_OFF
-cd /D "%~dp0"
-if exist Spinner.cmd (
-    type nul > stop.txt
-) else (
-    echo|set /p="%SRESET% %NFCRED%Spinner.cmd Disabled %SRESET% ! "
-	echo.
-	echo.
-)
-set Spinner=0
-goto :eof
-
-:: ===============================
+ :: ===============================
 :: 🔧 Erreur Exit
 :: ===============================
 :Erreur
@@ -1476,8 +1638,8 @@ goto GAME
 :GAME
 cls
 set /a IDX=%random% %%10
-echo %SFCYELLOW% =========================================%SRESET%
-echo      Computer Wash %V%
+call :Print Ligne_Menuheader 0
+echo.
 echo %SFCYELLOW% =========================================%SRESET%
 echo %SRESET%       🏰 Lymbiratus - %SFCYELLOW%Room %NFCGREEN%!ROOM! %SRESET%/ %NFCRED%!MAXROOM!%SRESET%
 echo %SFCYELLOW% =========================================%SRESET%
@@ -2795,7 +2957,6 @@ goto :eof
 
 :END
 exit /b
-
 :: ===============================
 :: 🔧 Secret Quiz
 :: ===============================
@@ -3112,10 +3273,66 @@ timeout /t 1 >nul
 exit /b
 
 :: ===============================
+:: 🔧 Fonction : Spinner Start
+:: ===============================
+:Spinner_Start
+cd /D "%~dp0".
+if not exist SpinnerRun.txt (
+    type nul > SpinnerRun.txt
+    start computerwash.cmd SpinnerRUN
+)
+goto :eof
+
+:: ===============================
+:: 🔧 Fonction : Spinner Stop
+:: ===============================
+:Spinner_OFF
+cd /D "%~dp0"
+type nul > stop.txt
+call :Safe_Stop_txt
+goto :eof
+
+:SpinnerRUN
+cd /D "%~dp0".
+SET "header14="
+call :AutoLigneMenu header Ligne_Menuheader noPrefix
+
+:: === SPINNER AUTONOME ===
+cls
+call :Print Ligne_Menuheader 0
+echo.
+echo|set /p="[0m [34mWelcome to the Computer Wash spinner."
+echo.
+echo.
+echo|set /p="[0m [32mYou can close it or leave it open, but don't touch the Computerwash script."
+echo.
+echo|set /p="[0m [32mThis script closes automatically when it finishes running.[0m "
+echo.
+echo.
+:: Choisir un style de spinner
+set "spinner=^| ^/ ^- ^\"
+
+:loopSpinnerRUN
+:: Vérifier si stop.txt existe
+if exist stop.txt goto :endloopSpinnerRUN
+:: Boucle sur les symboles
+for %%s in (%spinner%) do (
+    <nul set /p="[0m Work in progress... %%s"
+    powershell -command "Start-Sleep -Milliseconds 100" >nul
+    <nul set /p=[1G
+)
+powershell -command "Start-Sleep -Milliseconds 100" >nul
+goto :loopSpinnerRUN
+
+:endloopSpinnerRUN
+del stop.txt
+del SpinnerRun.txt
+exit
+
+:: ===============================
 :: 🔧 Algo + menu personnalisé
 :: ===============================
 :USB
-call :Spinner_OFF
 if /I "%valeur%"=="Computer Wash USB Protection" (
 	cd /D "%~dp0".
 	cls
@@ -3527,13 +3744,10 @@ if /I "%findstr%"=="0" (
 )
 if /I "%findstr%"=="1" (
 	if "%Start?%"=="2" (
-		Call :Spinner_Start
 		call :separator "Findstr /c:""[SR]"" %windir%\Logs\CBS\CBS.log In Progress..."
-		findstr /c:"[SR]" %windir%\Logs\CBS\CBS.log >"%userProfile%\Desktop\Compuer Wash Log sfc.txt"
+		findstr /c:"[SR]" %windir%\Logs\CBS\CBS.log >>"%logdest%"
 		set temperror=!ERRORLEVEL!
         Call :LOGERRORLEVEL !temperror!
-		call :Spinner_OFF
-		
 	)
 	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
 )
@@ -4661,17 +4875,17 @@ goto :eof
 :Log
 cd /D "%~dp0".
 if /I "%LOG%"=="1" (
-	echo " |----------------| Start :                             | " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |- %TIME% --| %1" >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |                |                                     | " >> "%userProfile%\Desktop\Computer Wash Log.txt"
+	echo " |----------------| Start :                             | " >> "%logdest%"
+	echo " |- %TIME% --| %1" >> "%logdest%"
+	echo " |                |                                     | " >> "%logdest%"
 )
 goto :eof
 
 :LOGERRORLEVEL
 if /I "%LOG%"=="1" (
-	echo " |                | Error level output :                | " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |- %TIME% --| %1" >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " |----------------|-------------------------------------| " >> "%userProfile%\Desktop\Computer Wash Log.txt"
+	echo " |                | Error level output :                | " >> "%logdest%"
+	echo " |- %TIME% --| %1" >> "%logdest%"
+	echo " |----------------|-------------------------------------| " >> "%logdest%"
 )
 goto :eof
 
@@ -4687,10 +4901,53 @@ if !Temploop! LEQ 5 (
 )
 goto :eof
 
+:Safe_Stop_txt
+timeout 3 /nobreak >nul
+if exist stop.txt (
+    del stop.txt
+)
+goto :eof
+
+:del_admin
+if exist Admin.txt (
+	del Admin.txt
+)
+goto :eof
+
+:Exit_del_admin
+timeout 1 /nobreak >nul
+if exist Admin.txt (
+	del Admin.txt
+	if /I "!copy!"=="1" (
+		if not exist copy.txt (
+			goto :eof
+		)
+	)
+	goto :exitlog
+)
+goto :eof
+
+:CFGON
+set Temploop=0
+:Retry_CFGON
+timeout /t 10 /nobreak >nul
+powercfg.exe /hibernate on
+set temperror=!ERRORLEVEL!
+if !temperror! GEQ 1 ( Call :Retry CFGON )
+goto :eof
+
+:CFGOFF
+powercfg.exe /hibernate off
+goto :eof
+
+:END
+exit /b
+
 :exitlog
 if /I "%LOG%"=="1" (
-	echo " |- %TIME% --| Exit                                | " >> "%userProfile%\Desktop\Computer Wash Log.txt"
-	echo " \______________________________________________________/ " >> "%userProfile%\Desktop\Computer Wash Log.txt"
+	echo " |- %TIME% --| Exit                                | " >> "%logdest%"
+	echo " \______________________________________________________/ " >> "%logdest%"
 )
 call :Spinner_OFF
-exit
+Exit
+

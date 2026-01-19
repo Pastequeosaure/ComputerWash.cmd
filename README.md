@@ -12,21 +12,48 @@ Computer Wash is a Windows utility that allows you to clean, repair, and optimiz
 4. 👀 Follow the on-screen instructions and wait for the operations to complete.  
 5. 🔄 Certain functions have an auto-retry option; they restart automatically in case of failure.
 
-⚠️ **Important:** Selecting C55 "Start" is mandatory to launch the main program. All other choices are used to configure or prepare tasks before execution.  
-The script deactivates standby once it is started and reactivates it at the end.
+⚠️ **Important:** Selecting C55 "Start" is mandatory to launch the main program. All other choices are used to configure or prepare tasks before execution.  OX Only Exclude
+The script deactivates standby once it is started and reactivates it at the end   OX Only Exclude
+
+⚠️ **Important:** The screenshots are provided for illustrative purposes only; they are not continuously updated. They will be updated in the event of significant changes.
+Please refer to the text.
 
 <details>
 <summary>🛗 The program is organized into three levels: Automatic Tasks</summary>
 
+## 🛗 The program is organized into three levels: Automatic Tasks
+
 <details>
-<summary>🐳 Main Menu </summary>
+<summary>🐳 Main Menu ALL</summary>
+
+## 🐳 Main Menu ALL
+
+<details>
+<summary>🐳📷 Main Menu </summary>
+
+## 🐳📷 Main Menu
+
+Basic command prompt menu
 
 ![Texte alternatif](Screenshot/Main_menu.png)
 
 </details>
+<details>
+<summary>🐳📷 Main Menu FAST</summary>
 
+## 🐳📷 Main Menu FAST
+
+The PowerShell prompt menu:
+Starts automatically via computerwash.cmd if it is present in the same directory (excluding system32).
+
+![Texte alternatif](Screenshot/Main_menu_FAST.png)
+
+</details>
+</details>
 <details>
 <summary>🐛 Automatic Tasks (A1–A5)</summary>
+
+## 🐛 Automatic Tasks (A1–A5)
 
 | Code | Task | Description |
 |------|------|-------------|
@@ -39,7 +66,9 @@ The script deactivates standby once it is started and reactivates it at the end.
 The order of execution of commands can be found in the Custom menu.
 
 <details>
-<summary>📷 Screenshot Automatic Tasks (A1–A5)</summary>
+<summary>🐛📷 Screenshot Automatic Tasks (A1–A5)</summary>
+
+## 🐛📷 Screenshot Automatic Tasks (A1–A5)
 
 ![Texte alternatif](Screenshot/Main_menu_A.png)
 
@@ -48,7 +77,9 @@ The order of execution of commands can be found in the Custom menu.
 </details>
 
 <details>
-<summary>🐦‍⬛ Specific Tasks (S1–S16)</summary>
+<summary>🐦‍⬛ Specific Tasks (S1–S15)</summary>
+
+## 🐦‍⬛ Specific Tasks (S1–S15)
 
 | Code | Task | Description |
 |------|------|-------------|
@@ -67,19 +98,23 @@ The order of execution of commands can be found in the Custom menu.
 | 🏪 S13  | Reset WS Cache | Reset Windows Store cache |
 | ✨ S14  | Setup Chrome, Firefox, VLC, Acrobat, 7zip, KeePass | Install/update main software |
 | 🎈 S15  | Update All Apps | Update all applications via Winget |
-| 🔏 S16  | Computer Wash USB Protection | Enable USB protection (if activated in the script) |
 
 The order of execution of commands can be found in the Custom menu.
 
 <details>
-<summary>📷 Screenshot Specific Tasks (S1–S16)</summary>
+<summary>🐦‍⬛📷 Screenshot Specific Tasks (S1–S15)</summary>
+
+## 🐦‍⬛📷 Screenshot Specific Tasks (S1–S15)
 
 ![Texte alternatif](Screenshot/Main_menu_S.png)
 
 </details>
 </details>
 <details>
+
 <summary>🦚 Customizable Menu (C1–C55)</summary>
+
+## 🦚 Customizable Menu (C1–C55)
 
 | Code | Command / Action | Default Status |
 |------|-----------------|----------------|
@@ -142,30 +177,66 @@ The order of execution of commands can be found in the Custom menu.
 The order of execution of commands can be found in the Custom menu.
 
 <details>
-<summary>📷 Screenshot Customizable Menu (C1–C55)</summary>
+<summary>🦚📷 Screenshot Customizable Menu (C1–C55)</summary>
+
+## 🦚📷 Screenshot Customizable Menu (C1–C55)
 
 ![Texte alternatif](Screenshot/Main_menu_C.png)
 
 </details>
 </details>
+<details>
+
+<summary>1️⃣ Only Tasks (O1)</summary>
+
+## 1️⃣ Only Tasks (O1)
+
+Does not work in conjunction with A S C but only with O
+
+| Code | Task | Description |
+|------|------|-------------|
+| 🔏 O1  | Computer Wash USB Protection | Enable USB protection (if activated in the script) |
+
+</details>
+</details>
 </details>
 <details>
+
 <summary>📌 Notes</summary>
 
-- The script supports arguments (ComputerWash.cmd only)
+## 📌 Notes
+
+- The script supports arguments ( Example : ComputerWash.cmd A1 C55)
 - The script automatically displays the order of commands and their execution status (ON/OFF).  
 - You have 30 seconds to close Computer Wash after launching.
 ![Texte alternatif](Screenshot/Safeguard.png)
 - Verify all Shutdown parameters before starting the process.  
 - Some commands may take several minutes to execute (Chkdsk, Mrt.exe, DISM, Sfc…).  
-- Administrative privileges are required for proper execution.  
-- Winget commands will install or update software if enabled.  
 - Cleanup and reset commands may modify the system and delete temporary files: back up your important data.
+- Administrative privileges are required for proper execution.
+- There is a non-admin mode.
+If necessary: ​​wait and say no to the pop-up.
+![Texte alternatif](Screenshot/Na_Admin.png)  
+- Were you using a modified version or not ?
+Don't panic !
+![Texte alternatif](Screenshot/modified_no.png)
+or
+![Texte alternatif](Screenshot/modified_yes.png)  
+
+## Important
+
+### ⚙️ System Integration (Administrator mode)
+When run as administrator, **ComputerWash.EXE** installs itself as a **system command**:
+
+- Automatically copies `ComputerWash.cmd` to `C:\Windows\System32`  
+- Allows launching from any folder with:
 
 </details>
 
 <details>
 <summary>🏰 Roglike (Batch Edition)</summary>
+
+## 🏰 Roglike (Batch Edition)
 
 A tiny roguelike made entirely in Windows Batch, originally designed as a hidden Easter Egg… and then it became a standalone mini-game!  
 Explore the mysterious dungeon rooms, face monsters, manage your gold and keys… and see how far you can get.
