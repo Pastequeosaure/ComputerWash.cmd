@@ -187,15 +187,16 @@ The order of execution of commands can be found in the Custom menu.
 </details>
 <details>
 
-<summary>1️⃣ Only Tasks (O1)</summary>
+<summary>1️⃣ Tool (T1)</summary>
 
-## 1️⃣ Only Tasks (O1)
+## 1️⃣ Tool (T1)
 
-Does not work in conjunction with A S C but only with O
+Does not work in conjunction with A S C but only with T
 
 | Code | Task | Description |
 |------|------|-------------|
-| 🔏 O1  | Computer Wash USB Protection | Enable USB protection (if activated in the script) |
+| 🔏 T1  | USB Protection | Enable USB protection (if activated in the script) |
+| 🔏 T2  | Auto Ping | Ping the Gateway automatically the desired number of times |
 
 </details>
 </details>

@@ -1,4 +1,6 @@
-set NONCE=1677794
+set NONCE=16548322
+
+:: ============================================================================================================================
 
 :: MIT License
 
@@ -21,6 +23,8 @@ set NONCE=1677794
 :: LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 :: OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 :: SOFTWARE.
+
+:: ============================================================================================================================
 
 @echo off
 set Anyreproductionisstrictlyprohibited=1
@@ -59,10 +63,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2026.01.18.22.48
+set V=V.2026.03.05.22.00
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2026.01.18.22.48          |
+:: | Update  : PastequeOsaure V 2026.03.05.22.00          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -114,320 +118,137 @@ set Color=1
 :: |    ( At your own risk ! ! ! ! )                      |
 :: \______________________________________________________/
 
-:: ===============================
-:: 🔧 Computer Wash Color puis Admin ?
-:: ===============================
+:: ============================================================================================================================
+:: 🔧 Computer Wash Start !
+:: ============================================================================================================================
 title Computer wash ERR ADMIN
 cd /D "%~dp0".
-set Cert=0
-call :VERIFY || set Cert=1
+call :VERIFY
 call :Color
 goto :full_mode_admin
+:: ============================================================================================================================
 
-:VERIFY
-call :template
-:: ===============================
-:: SHA256
-:: ===============================
-set "HASH="
-for /f "tokens=1" %%H in (
-  'certutil -hashfile "%~f0" SHA256 ^| findstr /R "^[0-9A-Fa-f]"'
-) do (
-  set "HASH=%%H"
-  goto HASH_OK
-)
-:HASH_OK
-if not defined HASH exit /b 1
-
-set "TEMPLATE=!TEMPLATE:~0,64!"
-
-:: ===============================
-:: VERIFY SHA256 via TEMPLATE
-:: ===============================
-set VERIFY_OK=1
-
-<nul set /p "= "
-
-for /L %%I in (0,1,63) do (
-    set "H=!HASH:~%%I,1!"
-    set "T=!TEMPLATE:~%%I,1!"
-
-    if "!T!"=="." (
-        rem Pass
-    ) else if /I "!H!"=="!T!" (
-        rem OK
-    ) else (
-        set VERIFY_OK=0
-    )
-)
-
-if !VERIFY_OK!==1 (
-    exit /b 0
-) else (
-    exit /b 1
-)
-exit /b 1
-
-:template
-:: ======================================
-:: Chemins
-:: ======================================
-set "SOURCE=%~f0"
-
-if not exist "%SOURCE%" (
-    echo ERREUR : "%SOURCE%" introuvable
-    pause
-    exit /b 1
-)
-
-:: ======================================
-:: Comptage des lignes
-:: ======================================
-set LINECOUNT=0
-set OFFSET=1
-for /f "usebackq delims=" %%L in ("%SOURCE%") do (
-    set /a LINECOUNT+=1
-)
-set /a LINECOUNT-=OFFSET
-if %LINECOUNT% LSS 6 (
-    echo ERREUR : pas assez de lignes
-    pause
-    exit /b 1
-)
-
-set /a STEP=LINECOUNT/6
-if %STEP% LSS 1 set STEP=1
-
-:: ======================================
-:: Extraction de 6 caracteres HEX (zones)
-:: ======================================
-set HEXLIST=
-set HEXCOUNT=0
-set INDEX=0
-
-:: offset unique pour ignorer les 2 lignes ajoutées
-set /a ZONE_START=STEP+OFFSET
-
-for /f "usebackq delims=" %%L in ("%SOURCE%") do (
-    set /a INDEX+=1
-
-    if !HEXCOUNT! GEQ 6 goto EXTRACT_DONE
-
-    if !INDEX! GEQ !ZONE_START! (
-        call :SAFECHAR "%%L"
-        if "!FOUND!"=="1" (
-            set FOUND=0
-            set /a ZONE_START+=STEP
-        )
-    )
-)
-
-:EXTRACT_DONE
-if %HEXCOUNT% LSS 6 (
-    exit /b 1
-)
-
-:: ======================================
-:: Generation du template (64 caracteres)
-:: Positions : 1,12,23,34,45,56
-:: ======================================
-set "TPL="
-set POS=0
-set HEXPOS=0
-
-:BUILD
-if %POS% GEQ 64 goto DONE
-
-set /a POS+=1
-
-if %POS%==1  goto PUT
-if %POS%==12 goto PUT
-if %POS%==23 goto PUT
-if %POS%==34 goto PUT
-if %POS%==45 goto PUT
-if %POS%==56 goto PUT
-
-set "TPL=!TPL!."
-goto BUILD
-
-:PUT
-call set "CHAR=%%HEXLIST:~%HEXPOS%,1%%"
-set "TPL=!TPL!!CHAR!"
-set /a HEXPOS+=1
-goto BUILD
-
-:DONE
-:: ======================================
-:: Écrire sans retour à la ligne
-:: ======================================
-set "TEMPLATE=!TPL!"
-exit /b
-
-:: ======================================
-:: Sous-fonction : SAFECHAR
-:: ======================================
-:SAFECHAR
-set "STR=%~1"
-set I=0
-set FOUND=0
-
-:SCAN
-set "C=!STR:~%I%,1!"
-if "!C!"=="" goto :EOF
-
-:: chiffres
-if "!C!"=="0" goto OK
-if "!C!"=="1" goto OK
-if "!C!"=="2" goto OK
-if "!C!"=="3" goto OK
-if "!C!"=="4" goto OK
-if "!C!"=="5" goto OK
-if "!C!"=="6" goto OK
-if "!C!"=="7" goto OK
-if "!C!"=="8" goto OK
-if "!C!"=="9" goto OK
-
-:: lettres hex (conversion majuscule)
-if "!C!"=="a" goto iplpl
-if "!C!"=="b" goto iplpl
-if "!C!"=="c" goto iplpl
-if "!C!"=="d" goto iplpl
-if "!C!"=="e" goto iplpl
-if "!C!"=="f" goto iplpl
-
-if "!C!"=="A" goto OK
-if "!C!"=="B" goto OK
-if "!C!"=="C" goto OK
-if "!C!"=="D" goto OK
-if "!C!"=="E" goto OK
-if "!C!"=="F" goto OK
-
-:iplpl
-set /a I+=1
-goto SCAN
-
-:OK
-set "HEXLIST=!HEXLIST!!C!"
-set /a HEXCOUNT+=1
-set FOUND=1
-goto :EOF
-
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 Color
-:: ===============================
+:: ============================================================================================================================
 :Color
 :: - Color Mode -
- if /I "%Color%"=="1" (
- :: - STYLES
- set SRESET=[0m
- set SBOLD=[1m
- set SUNDERLINE=[4m
- set SINVERSE=[7m
- :: - NORMAL FOREGROUND COLORS
- set NFCBLACK=[30m
- set NFCRED=[31m
- set NFCGREEN=[32m
- set NFCYELLOW=[33m
- set NFCBLUE=[34m
- set NFCMAGENTA=[35m
- set NFCCYAN=[36m
- set NFCWHITE=[37m
- :: - NORMAL BACKGROUND COLORS
- set NBCBLACK=[40m
- set NBCRED=[41m
- set NBCGREEN=[42m
- set NBCYELLOW=[43m
- set NBCBLUE=[44m
- set NBCMAGENTA=[45m
- set NBCCYAN=[46m
- set NBCWHITE=[47m
- :: - STRONG FOREGROUND COLORS
- set SFCBLACK=[90m
- set SFCRED=[91m
- set SFCGREEN=[92m
- set SFCYELLOW=[93m
- set SFCBLUE=[94m
- set SFCMAGENTA=[95m
- set SFCCYAN=[96m
- set SFCWHITE=[97m
- :: - STRONG BACKGROUND COLORS
- set SBCBLACK=[100m
- set SBCRED=[101m
- set SBCGREEN=[102m
- set SBCYELLOW=[103m
- set SBCBLUE=[104m
- set SBCMAGENTA=[105m
- set SBCCYAN=[106m
- set SBCWHITE=[107m
- ) else (
- :: - STYLES
- set SRESET=[0m
- set SBOLD=[1m
- set SUNDERLINE=[4m
- set SINVERSE=[7m
- :: - NORMAL FOREGROUND COLORS
- set NFCBLACK=[0m
- set NFCRED=[0m
- set NFCGREEN=[0m
- set NFCYELLOW=[0m
- set NFCBLUE=[0m
- set NFCMAGENTA=[0m
- set NFCCYAN=[0m
- set NFCWHITE=[0m
- :: - NORMAL BACKGROUND COLORS
- set NBCBLACK=[0m
- set NBCRED=[0m
- set NBCGREEN=[0m
- set NBCYELLOW=[0m
- set NBCBLUE=[0m
- set NBCMAGENTA=[0m
- set NBCCYAN=[0m
- set NBCWHITE=[0m
- :: - STRONG FOREGROUND COLORS
- set SFCBLACK=[0m
- set SFCRED=[0m
- set SFCGREEN=[0m
- set SFCYELLOW=[0m
- set SFCBLUE=[0m
- set SFCMAGENTA=[0m
- set SFCCYAN=[0m
- set SFCWHITE=[0m
- :: - STRONG BACKGROUND COLORS
- set SBCBLACK=[0m
- set SBCRED=[0m
- set SBCGREEN=[0m
- set SBCYELLOW=[0m
- set SBCBLUE=[0m
- set SBCMAGENTA=[0m
- set SBCCYAN=[0m
- set SBCWHITE=[0m
- )
+if /I "%Color%"=="1" (
+  :: - STYLES
+  set SRESET=[0m
+  set SBOLD=[1m
+  set SUNDERLINE=[4m
+  set SINVERSE=[7m
+  :: - NORMAL FOREGROUND COLORS
+  set NFCBLACK=[30m
+  set NFCRED=[31m
+  set NFCGREEN=[32m
+  set NFCYELLOW=[33m
+  set NFCBLUE=[34m
+  set NFCMAGENTA=[35m
+  set NFCCYAN=[36m
+  set NFCWHITE=[37m
+  :: - NORMAL BACKGROUND COLORS
+  set NBCBLACK=[40m
+  set NBCRED=[41m
+  set NBCGREEN=[42m
+  set NBCYELLOW=[43m
+  set NBCBLUE=[44m
+  set NBCMAGENTA=[45m
+  set NBCCYAN=[46m
+  set NBCWHITE=[47m
+  :: - STRONG FOREGROUND COLORS
+  set SFCBLACK=[90m
+  set SFCRED=[91m
+  set SFCGREEN=[92m
+  set SFCYELLOW=[93m
+  set SFCBLUE=[94m
+  set SFCMAGENTA=[95m
+  set SFCCYAN=[96m
+  set SFCWHITE=[97m
+  :: - STRONG BACKGROUND COLORS
+  set SBCBLACK=[100m
+  set SBCRED=[101m
+  set SBCGREEN=[102m
+  set SBCYELLOW=[103m
+  set SBCBLUE=[104m
+  set SBCMAGENTA=[105m
+  set SBCCYAN=[106m
+  set SBCWHITE=[107m
+  ) else (
+  :: - STYLES
+  set SRESET=[0m
+  set SBOLD=[1m
+  set SUNDERLINE=[4m
+  set SINVERSE=[7m
+  :: - NORMAL FOREGROUND COLORS
+  set NFCBLACK=[0m
+  set NFCRED=[0m
+  set NFCGREEN=[0m
+  set NFCYELLOW=[0m
+  set NFCBLUE=[0m
+  set NFCMAGENTA=[0m
+  set NFCCYAN=[0m
+  set NFCWHITE=[0m
+  :: - NORMAL BACKGROUND COLORS
+  set NBCBLACK=[0m
+  set NBCRED=[0m
+  set NBCGREEN=[0m
+  set NBCYELLOW=[0m
+  set NBCBLUE=[0m
+  set NBCMAGENTA=[0m
+  set NBCCYAN=[0m
+  set NBCWHITE=[0m
+  :: - STRONG FOREGROUND COLORS
+  set SFCBLACK=[0m
+  set SFCRED=[0m
+  set SFCGREEN=[0m
+  set SFCYELLOW=[0m
+  set SFCBLUE=[0m
+  set SFCMAGENTA=[0m
+  set SFCCYAN=[0m
+  set SFCWHITE=[0m
+  :: - STRONG BACKGROUND COLORS
+  set SBCBLACK=[0m
+  set SBCRED=[0m
+  set SBCGREEN=[0m
+  set SBCYELLOW=[0m
+  set SBCBLUE=[0m
+  set SBCMAGENTA=[0m
+  set SBCCYAN=[0m
+  set SBCWHITE=[0m
+)
 goto :eof
+:: ============================================================================================================================
 
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 Admin ? si oui goto Copy
-:: ===============================
+:: ============================================================================================================================
 :full_mode_admin
-
-:: Temp = copy
+:: ============================================================================================================================
+:: 🔧 Temp = copy
+:: ============================================================================================================================
 set "ME=%~f0"
 if /I "!ME!"=="!ME:%TEMP%=!" (
-    set copy=%CopyS32%
-) else (
-    set copy=1
+  set copy=%CopyS32%
+  ) else (
+  set copy=1
 )
 call :del_admin
-
+:: ============================================================================================================================
+:: 🔧 Admin ?
+:: ============================================================================================================================
 If _%1_==_payload_  goto :copyAdmin
 net session >nul 2>&1
 if %errorlevel% neq 0 ( goto :Admin ) else ( goto :copyAdmin )
+:: ============================================================================================================================
 :Admin
 set vbs=%temp%\getadmin.vbs
 echo Set UAC = CreateObject^("Shell.Application"^)>> "%vbs%"
 echo UAC.ShellExecute "%~s0", "payload %~sdp0 %*", "", "runas", 1 >> "%vbs%"
 "%temp%\getadmin.vbs"
 del "%temp%\getadmin.vbs"
-call :separator "Error admin"
+call :separator "Error admin" " "
 call :Erreur
 call :separator "Mode No admin 30s .... ... .. ."
 call :separator " " "only"
@@ -439,317 +260,188 @@ timeout /t 1 /nobreak >nul
 call :Exit_del_admin
 set /a Temploop+=1
 if !Temploop! LEQ 30 (
-    goto :checkNO_ADMIN
+  goto :checkNO_ADMIN
 )
-
 set Temploop=0
 goto :afterCopy
+:: ============================================================================================================================
 
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 Copy puis Initialisation des variables
-:: ===============================
+:: ============================================================================================================================
 :copyAdmin
 if exist stop.txt (
-	del stop.txt
+  del stop.txt
 )
+:: ============================================================================================================================
 set NO_ADMIN=0
 if exist NO_Admin.txt (
-    del NO_Admin.txt
-    type nul > Admin.txt
+  del NO_Admin.txt
+  type nul > Admin.txt
 )
+:: ============================================================================================================================
 set "logdest=%~dp0\Computer Wash Log.txt"
- if /I "%~dp0"=="%windir%\system32\" (
-    set "logdest=%userProfile%\Desktop\Computer Wash Log.txt"
-    goto afterCopy
+if /I "%~dp0"=="%windir%\system32\" (
+  set "logdest=%userProfile%\Desktop\Computer Wash Log.txt"
+  goto afterCopy
 )
-
+:: ============================================================================================================================
 if /I "%copy%"=="1" (
+  echo.
+  echo Copie in progress...
+  cd /D "%~dp0".
+  if %Cert% EQU 1 (
     echo.
-    echo Copie in progress...
-	cd /D "%~dp0".
-    if %Cert% EQU 1 (
-        echo.
-        echo %SUNDERLINE%%NFCRED% ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ Unofficial version, it has undergone changes. ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ %SRESET%
-        echo.
-        echo Timeout 15s SECURITY, Then copy to system32.
-	    timeout 15
-    )
-	xcopy "%~f0" "%windir%\system32\" /s /h /y >nul
-    echo Start ComputerWash.cmd to System32...
+    echo %SUNDERLINE%%NFCRED% ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ Unofficial version, it has undergone changes. ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ %SRESET%
     echo.
-
-set "arglist="
-for %%A in (%*) do (
+    echo Timeout 15s SECURITY, Then copy to system32.
+    timeout 15
+  )
+  xcopy "%~f0" "%windir%\system32\" /s /h /y >nul
+  echo Start ComputerWash.cmd to System32...
+  echo.
+:: ============================================================================================================================
+  set "arglist="
+  for %%A in (%*) do (
     echo %%A | find "\" >nul
     if errorlevel 1 (
-        :: Si pas de "\", on ajoute tel quel
-        set "arglist=!arglist! %%A"
+      :: Si pas de "\", on ajoute tel quel
+      set "arglist=!arglist! %%A"
     )
+  )
+:: ============================================================================================================================
+  start %windir%\system32\ComputerWash.cmd !arglist!
+  type nul > copy.txt
+  call :exitlog
+  exit /b
 )
+:: ============================================================================================================================
 
-    start %windir%\system32\ComputerWash.cmd !arglist!
-    type nul > copy.txt
-	call :exitlog
-    exit /b
-)
-
+:: ============================================================================================================================
+:: Log Strat
+:: ============================================================================================================================
 :afterCopy
 if /I "%LOG%"=="1" (
-	echo . > "%CD%\Computer Wash Log.txt"
-	echo "  ______________________________________________________  " >> "%logdest%"
-	echo " /                                                      \ " >> "%logdest%"
-	echo " | Computer Wash LOG EDITION V 0.5 - %DATE%         | " >> "%logdest%"
-	echo " |______________________________________________________| " >> "%logdest%"
-	echo " |----------------|                                     | " >> "%logdest%"
-	echo " |   %date%   | Computer                            | " >> "%logdest%"
-	echo " |  %TIME%   |           Wash                      | " >> "%logdest%"
-	echo " |----------------|_____________________________________| " >> "%logdest%"
-	echo " |                                                      | " >> "%logdest%"
-	echo " | Created : Computer Wash - - - - - - - - - - - - - - -| " >> "%logdest%"
-	echo " |______________________________________________________| " >> "%logdest%"
-	echo " |----------------|                                     | " >> "%logdest%"
-	echo " |----------------| Nom du PC : %COMPUTERNAME% " >> "%logdest%"
-	echo " |----------------|                                     | " >> "%logdest%"
+  echo . > "%CD%\Computer Wash Log.txt"
+  echo "  ______________________________________________________  " >> "%logdest%"
+  echo " /                                                      \ " >> "%logdest%"
+  echo " | Computer Wash LOG EDITION V 0.5 - %DATE%         | " >> "%logdest%"
+  echo " |______________________________________________________| " >> "%logdest%"
+  echo " |----------------|                                     | " >> "%logdest%"
+  echo " |   %date%   | Computer                            | " >> "%logdest%"
+  echo " |  %TIME%   |           Wash                      | " >> "%logdest%"
+  echo " |----------------|_____________________________________| " >> "%logdest%"
+  echo " |                                                      | " >> "%logdest%"
+  echo " | Created : Computer Wash - - - - - - - - - - - - - - -| " >> "%logdest%"
+  echo " |______________________________________________________| " >> "%logdest%"
+  echo " |----------------|                                     | " >> "%logdest%"
+  echo " |----------------| Nom du PC : %COMPUTERNAME% " >> "%logdest%"
+  echo " |----------------|                                     | " >> "%logdest%"
 )
-
- title Computer Wash %V%
- verify on
+title Computer Wash %V%
+verify on
 goto :Var
+:: ============================================================================================================================
 
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 Initialisation des variables puis ARGC_mode_?
-:: ===============================
+:: ============================================================================================================================
+:: 🔧 Liste des programmes A S T
+:: Code 5Ed5wEu5Q6
+:: ============================================================================================================================
 :Var
- set A=A
- set A1=Daily Wash
- set A2=Maintenance Wash
- set A3=Washing Repair
- set A4=Last Resort Wash
- set A5=Update All App
-
- set S=S
- set S1=Antivirus Malware Scan
- set S2=Force Windows Update
- set S3=Full Windows Update Reset
- set S4=Verificaton system + log
- set S5=Restore system
- set S6=Restart Windows in Recovery Mode
- set S7=Start repair Boot ^/ Startup Windows
- set S8=Dignostic RAM
- set S9=Maintenance disk c
- set S10=Disk Cleanup
- set S11=Delete temporary files
- set S12=Reset the ip interface
- set S13=Reset WS cache
- set S14=Setup Chrome Firefox VLC Acrobat 7zip KeePASS
- set S15=Update All App
-
- set O=O
- set O1=Computer Wash USB Protection
-
- set D=Colorblind Mode
- set R=Return to the main menu
- set Quiz=Quiz
- set Soleil12345=Soleil12345
- set Vipptore=Vipptore
- set Lymbiratus=Lymbiratus
- set ArispBypass=ArispBypass
- set THE_HAUNTED_COMPUTER=THE_HAUNTED_COMPUTER
- set payload=payload
- set OLD=OldStory
- set GIT=GIT
- set SpinnerRUN=SpinnerRUN
-
-:: 5Ed5wEu5Q6
- set C=C
- set nb=0
- set /a nb+=1
-set C%nb%=Wmic.exe
- set /a nb+=1
-set C%nb%=System info
- set /a nb+=1
-set C%nb%=Chkdsk
- set /a nb+=1
-set C%nb%=Defragmentation
- set /a nb+=1
-set C%nb%=cleanmgr
- set /a nb+=1
-set C%nb%=DISM
- set /a nb+=1
-set C%nb%=sfc
- set /a nb+=1
-set C%nb%=findstr
- set /a nb+=1
-set C%nb%=Mrt
- set /a nb+=1
-set C%nb%=SignatureUpdate
- set /a nb+=1
-set C%nb%=MpCmdRunBootSectorScan
- set /a nb+=1
-set C%nb%=MpCmdRunScanType
- set /a nb+=1
-set C%nb%=pnpunattendauditsystem
- set /a nb+=1
-set C%nb%=mode
- set /a nb+=1
-set C%nb%=mdsched
- set /a nb+=1
-set C%nb%=bcdboot
- set /a nb+=1
-set C%nb%=Wsreset
- set /a nb+=1
-set C%nb%=rstrui
- set /a nb+=1
-set C%nb%=AllUpdateAPP
- set /a nb+=1
-set C%nb%=wingetgooglechrome
- set /a nb+=1
-set C%nb%=wingetMozillaFirefox
- set /a nb+=1
-set C%nb%=wingetVideoLANVLC
- set /a nb+=1
-set C%nb%=wingetAcrobat
- set /a nb+=1
-set C%nb%=winget7zip
- set /a nb+=1
-set C%nb%=KeePass
- set /a nb+=1
-set C%nb%=wuauservStop
- set /a nb+=1
-set C%nb%=cryptSvcStop
- set /a nb+=1
-set C%nb%=bitsStop
- set /a nb+=1
-set C%nb%=net stop msiserver
- set /a nb+=1
-set C%nb%=del
- set /a nb+=1
-set C%nb%=del2
- set /a nb+=1
-set C%nb%=SoftwareDistribution
- set /a nb+=1
-set C%nb%=catroot2
- set /a nb+=1
-set C%nb%=winsockreset
- set /a nb+=1
-set C%nb%=interfaceipreset
- set /a nb+=1
-set C%nb%=advfirewallreset
- set /a nb+=1
-set C%nb%=ipconfigrelease
- set /a nb+=1
-set C%nb%=ipconfigflushdns
- set /a nb+=1
-set C%nb%=winhttp
- set /a nb+=1
-set C%nb%=bitsadmin
- set /a nb+=1
-set C%nb%=DLLWindowsUp
- set /a nb+=1
-set C%nb%=wuauservStart
- set /a nb+=1
-set C%nb%=cryptSvcStart
- set /a nb+=1
-set C%nb%=bitsStart
- set /a nb+=1
-set C%nb%=net Start msiserver
- set /a nb+=1
-set C%nb%=UsoClient StartScan
- set /a nb+=1
-set C%nb%=UsoClient StartDownload
- set /a nb+=1
-set C%nb%=UsoClient StartInstall
- set /a nb+=1
-set C%nb%=UsoClient RestartDevice
- set /a nb+=1
-set C%nb%=shutdownrr
- set /a nb+=1
-set C%nb%=shutdownro
- set /a nb+=1
-set C%nb%=shutdown
- set /a nb+=1
-set C%nb%=Pause
- set /a nb+=1
-set C%nb%=exit
- set /a nb+=1
-set C%nb%=%SFCGREEN%Start%SRESET%
-
- set /a i=1
- :loopInverse
- call set "value=%%C%i%%%"
- if defined value (
-    set "CC%i%=%value%"
-    set /a i+=1
-    goto :loopInverse
- )
-
- set choix=0
- set Start?=0
- set verify=1
- set Security=1
- set Shutdown=0
- set ALL=0
- set chrome=0
- set Firefox=0
- set VLC=0
- set Acrobat=0
- set zip=0
- set KeePass=0
- set bcdboot=0
- set chkdsk=0
- set cleanmgr=0
- set del=0
- set del2=0
- set defrag=0
- set DISM=0
- set mode=0
- set pnpunattend=0
- set findstr=0
- set mdsched=0
- set interfaceipreset=0
- set ipconfig=0
- set Mrt=0
- set SignatureUpdate=0
- set MpCmdRunBootSectorScan=0
- set MpCmdRunScanType=0
- set netsh=0
- set advfirewallreset=0
- set ipconfigrelease=0
- set ipconfigflushdns=0
- set winsockreset=0
- set rstrui=0
- set sfc=0
- set shutdown=0
- set shutdownrr=0
- set shutdownro=0
- set wsreset=0
- set wuauservStop=0
- set cryptSvcStop=0
- set bitsStop=0
- set msiserverStop=0
- set wuauservStart=0
- set cryptSvcStart=0
- set bitsStart=0
- set msiserverStart=0
- set SoftwareDistribution=0
- set catroot2=0
- set winhttp=0
- set bitsadmin=0
- set DLLWindowsUp=0
- set InfoKey=0
- set StartScan=0
- set StartDownload=0
- set StartInstall=0
- set RestartDevice=0
- set pause=1
- set exit=1
- set print=0
- set Ligne=0
-
+echo Variables are starting up, please wait.
+:: ============================================================================================================================
+set A=A
+set A1=Daily Wash
+set A2=Maintenance Wash
+set A3=Washing Repair
+set A4=Last Resort Wash
+set A5=Update All App
+:: ============================================================================================================================
+set S=S
+set S1=Antivirus Malware Scan
+set S2=Force Windows Update
+set S3=Full Windows Update Reset
+set S4=Verificaton system + log
+set S5=Restore system
+set S6=Restart Windows in Recovery Mode
+set S7=Start repair Boot ^/ Startup Windows
+set S8=Dignostic RAM
+set S9=Maintenance disk c
+set S10=Disk Cleanup
+set S11=Delete temporary files
+set S12=Reset the ip interface
+set S13=Reset WS cache
+set S14=Setup Chrome Firefox VLC Acrobat 7zip KeePASS
+set S15=Update All App
+:: ============================================================================================================================
+set Ligne_MenuAS=Ligne_MenuAS
+set AS=AS
+:: ============================================================================================================================
+set T=T
+set T1=USB Protection
+set T2=Auto Ping
+:: ============================================================================================================================
+set D=Colorblind Mode
+set R=Return to the main menu
+set Quiz=Quiz
+set Soleil12345=Soleil12345
+set Vipptore=Vipptore
+set Lymbiratus=Lymbiratus
+set ArispBypass=ArispBypass
+set THE_HAUNTED_COMPUTER=THE_HAUNTED_COMPUTER
+set payload=payload
+set OLD=OldStory
+set GIT=GIT
+set SpinnerRUN=SpinnerRUN
+:: ============================================================================================================================
+set C=C
+set nb=0
+set init=1
+set choix=0
+set Start=%SFCGREEN%Start%SRESET%
+call :algo
+set /a i=1
+:loopInverse
+call set "value=%%C%i%%%"
+if defined value (
+  set "CC%i%=%value%"
+  set /a i+=1
+  goto :loopInverse
+)
+:: ============================================================================================================================
+:: My script Auto
+:: ============================================================================================================================
+set "targetDir=My script"
+if exist "!targetDir!" (
+    set MS=MS
+    set "Ligne_MenuMS=Ligne_MenuMS"
+    set /a count=0
+    for /f "delims=" %%A in ('dir /b /a-d "!targetDir!\*.cmd" "!targetDir!\*.bat" 2^>nul') do (
+        set /a count+=1
+        set "MS!count!=%%A"
+    )
+    set "Ligne_MenuMSMS=Ligne_MenuMS"
+    set "Ligne_MenuMSMS0=separator"
+    set "Ligne_MenuMSMS1= %SRESET%  %SUNDERLINE%%NFCYELLOW%MS%SRESET% %SUNDERLINE%My script%SRESET%"
+    set "Ligne_MenuMSMS2= "
+    call :AutoLigneMenu Ligne_MenuMSMS Ligne_MenuMS noPrefix 0 0
+    call :AutoLigneMenu MS Ligne_MenuMS 0 1 6
+)
+:: ============================================================================================================================
+set init=0
+set Start?=0
+set print=0
+set Ligne=0
+set "wingetPath="
+for /f "delims=" %%i in ('where winget') do (
+    set "wingetPath=%%i"
+)
+:: ============================================================================================================================
 Set /A RAND=(%RANDOM%*38/32768)
-set text= 
+set text=
 set char_sp=char_sp
-
 set char_sp0=[0m🔧
 set char_sp1=[0m🛠️
 set char_sp2=[0m⚙️
@@ -788,57 +480,29 @@ set char_sp34=[0m🐋
 set char_sp35=[0m💻
 set char_sp36=[0m🍉
 set char_sp37=[0m🦄
-set char_sp38=[0m                    ࿐🌊🐋࿐ Computer ࿐࿐ Wash ࿐🐬࿐࿐
+set char_sp38=[0m  ࿐🌊🐋࿐ Computer ࿐࿐ Wash ࿐🐬࿐࿐
 CALL SET char_sp_RAND=%%%char_sp%%RAND%%%
-
+:: ============================================================================================================================
 :: - ARISP = Any reproduction is strictly prohibited -
+:: ============================================================================================================================
 set ARISP=Ligne_MenuARISP
 set "ARISP0= "
-set "ARISP1=%%SFCYELLOW%% -----------------------------------------------------------------------%%SRESET%%"
-set "ARISP2=%%SRESET%%                         ⚠️ SOFTWARE DISCLAIMER ⚠️"
-set "ARISP3=%%SFCYELLOW%% -----------------------------------------------------------------------%%SRESET%%"
-set "ARISP4=%%SRESET%% "
-set "ARISP5=%%SRESET%% IF YOU HAVE PAID FOR THIS SOFTWARE, YOU HAVE BEEN SCAMMED!"
-set "ARISP6=%%SRESET%% This script is completely FREE."
-set "ARISP7= "
-set "ARISP8=%%SRESET%% 👉 The software is provided ""AS IS"", without any warranty."
-set "ARISP9=%%SRESET%% The authors or copyright holders shall NOT be liable for any damages, losses, or claims."
-set "ARISP10= "
-set "ARISP11=%%SFCYELLOW%% -----------------------------------------------------------------------%%SRESET%%"
-set "ARISP12=%%SRESET%%                         ⚙️ USAGE WITH ARGUMENTS"
-set "ARISP13=%%SFCYELLOW%% -----------------------------------------------------------------------%%SRESET%%"
-set "ARISP14= "
-set "ARISP15=%%SRESET%% - Example.cmd A1 S1       → Pre-select options in Custom mode without running."
-set "ARISP16=%%SRESET%% - Example.cmd A1 S1 C55   → Pre-select options and START the program."
-set "ARISP17=%%SRESET%% ⚠️ Warning: C55 will execute the selected actions. Make sure you reviewed them first!"
-set "ARISP18= "
-set "ARISP19=%%SRESET%% ℹ️ Note: Option D (Colorblind Mode) is NOT compatible in argument mode."
-set "ARISP20=%%SRESET%%   You can enable it by modifying line 105 of the script file (change 1 → 0)."
-set "ARISP21= "
-set "ARISP22=%%SFCYELLOW%% -----------------------------------------------------------------------%%SRESET%%"
-set "ARISP23= "
-set "ARISP24=%%SRESET%%%%SFCBLUE%% https:^/^/github.com^/Pastequeosaure^/ComputerWash.cmd^/blob^/main^/ComputerWash.cmd"
-set "ARISP25=%%SRESET%%%%SFCBLUE%% https:^/^/computerwash.wixsite.com^/computer-wash%%SRESET%%"
-set "ARISP26= "
-set "ARISP27=%%SFCRED%%   - %%SRESET%%%%SUNDERLINE%%Press CTRL+C to EXIT%%SRESET%%"
-set "ARISP28=%%SFCGREEN%%   - %%SRESET%%%%SUNDERLINE%%Press ENTER to continue%%SRESET%%"
-set "ARISP29= "
-set "ARISP30=%%SFCYELLOW%% -----------------------------------------------------------------------%%SRESET%%"
-set "ARISP31= "
-:: Auto Ligne ARISP
-set /a count=0
-set /a line=0
-:loopARISP
-call set "value=%%ARISP%count%%%"
-if defined value (
-    set "Ligne_MenuARISP!line!= !value!"
-    set /a line+=1
-    set "Ligne_MenuARISP!line!=."
-    set /a line+=1
-    set /a count+=1
-    goto :loopARISP
-)
-
+set "ARISP1=%%SRESET%%                         ⚠️ SOFTWARE DISCLAIMER ⚠️"
+set "ARISP2=separator"
+set "ARISP3=%%SRESET%% IF YOU HAVE PAID FOR THIS SOFTWARE, YOU HAVE BEEN SCAMMED!"
+set "ARISP4=%%SRESET%% This script is completely FREE."
+set "ARISP5= "
+set "ARISP6=%%SRESET%% 👉 The software is provided ""AS IS"", without any warranty."
+set "ARISP7=%%SRESET%% The authors or copyright holders shall NOT be liable for any damages, losses, or claims."
+set "ARISP8=separator"
+set "ARISP9=%%SRESET%%%%SFCBLUE%% https:^/^/github.com^/Pastequeosaure^/ComputerWash.cmd^/blob^/main^/ComputerWash.cmd"
+set "ARISP10=%%SRESET%%%%SFCBLUE%% https:^/^/computerwash.wixsite.com^/computer-wash%%SRESET%%"
+set "ARISP11=separator"
+set "ARISP12=%%SFCRED%%   - %%SRESET%%%%SUNDERLINE%%Press CTRL+C to EXIT%%SRESET%%"
+set "ARISP13=%%SFCGREEN%%   - %%SRESET%%%%SUNDERLINE%%Press ENTER to continue%%SRESET%%"
+set "ARISP14=separator"
+call :AutoLigneMenu ARISP Ligne_MenuARISP noPrefix 0 0
+:: ============================================================================================================================
 set header=Ligne_Menuheader
 SET "header0=%SFCBLUE%  _____________________________________________________________________"
 SET "header1=%SFCBLUE% /                                                                     \"
@@ -854,31 +518,38 @@ SET "header10=%%NFCMAGENTA%% ^|   %%SRESET%%/)__)    %%NFCMAGENTA%%^|           
 SET "header11=%%NFCMAGENTA%% ^| %%SRESET%% --"--"--  %%NFCMAGENTA%%^|               %%SRESET%%Created by PastequeOsaure                %%NFCMAGENTA%%^|"
 SET "header12=%%NFCMAGENTA%% ^\____________^|________________________________________________________^/%SRESET%"
 SET "header13= "
-if %Cert% EQU 1 (
+if defined Cert (
+  if %Cert% EQU 1 (
     SET "header14= %SRESET%            %SUNDERLINE%%NFCRED%⚠️ unofficial version, it has undergone changes ! ⚠️%SRESET%"
-)
-if %Cert% EQU 0 (
+  )
+  if %Cert% EQU 0 (
     SET "header14= %SRESET%                   %SUNDERLINE%%NFCGREEN%✅ you are on an official version ✅%SRESET%"
+  )
+) else (
+  :: Please do not bypass this.
+  :: You can modify the script without it crashing, without removing the official or unofficial border.
+  :: Furthermore, you have the MS menu to add your own scripts without touching ComputerWash's code!
+  exit
 )
-
-call :AutoLigneMenu header Ligne_Menuheader noPrefix
-
+:: ============================================================================================================================
+call :AutoLigneMenu header Ligne_Menuheader noPrefix 0 0
+:: ============================================================================================================================
 if /I "%Color%"=="0" (
-	set D?=%SFCGREEN%ON%SRESET%
+  set D?=%SFCGREEN%ON%SRESET%
 )
 if /I "%Color%"=="1" (
-    set D?=%SFCRED%OFF%SRESET%
+  set D?=%SFCRED%OFF%SRESET%
 )
 set Other=Other
-set "Other0= "
+set Other0=separator
 set "Other1=%%SRESET%%   %%SUNDERLINE%%Other :%%SRESET%%"
 set "Other2= "
 set "Other3=%%SRESET%%   D ) Colorblind Mode %%D?%%"
 set "Other4=%%SRESET%%   R ) Return to the main menu"
 set "Other5=%%SRESET%%   %%NFCGREEN%%GIT ) Current  ^| ( = or + 2023-03-18 )"
 set "Other6=%%SRESET%%   %%NFCMAGENTA%%OLD ) OldStory ^| ( - 2023-03-18 )"
-call :AutoLigneMenu Other Ligne_MenuOther noPrefix
-
+call :AutoLigneMenu Other Ligne_MenuOther noPrefix 0 0
+:: ============================================================================================================================
 set foot_head=foot_head
 set "foot_head0=%%SFCRED%%  _____________________________________________________________________"
 set "foot_head1=%%SFCRED%% ^/                                                                     ^\"
@@ -890,25 +561,25 @@ set "foot_head6=%%SFCRED%% ^| %%SRESET%% menu for review ^& customization.      
 set "foot_head7=%%SFCRED%% ^\_____________________________________________________________________^/"
 Set /A RAND=(%RANDOM%*10/32768)
 if %RAND%==1 (
-	set "foot_head8=%%NFCGREEN%%  _____________________________________________________________________"
-	set "foot_head9=%%NFCGREEN%% ^/                                                                     ^\"
-	set "foot_head10=%%NFCGREEN%% ^| %%SRESET%% Quiz ) The Secret Computerwash Quiz                               %%NFCGREEN%% ^|"
-	set "foot_head11=%%NFCGREEN%% \_____________________________________________________________________/"
+  set "foot_head8=%%NFCGREEN%%  _____________________________________________________________________"
+  set "foot_head9=%%NFCGREEN%% ^/                                                                     ^\"
+  set "foot_head10=%%NFCGREEN%% ^| %%SRESET%% Quiz ) The Secret Computerwash Quiz                               %%NFCGREEN%% ^|"
+  set "foot_head11=%%NFCGREEN%% \_____________________________________________________________________/"
 )
-call :AutoLigneMenu foot_head Ligne_Menufoot_head noPrefix
-
-
+call :AutoLigneMenu foot_head Ligne_Menufoot_head noPrefix 0 0
+:: ============================================================================================================================
 set USBA=USBA
-set "USBA0=%%SRESET%% %NFCBLUE%Computer Wash USB Protection"
-set "USBA1= "
-set "USBA2=%%SRESET%% - Please select a volume type and its identifier."
-set "USBA3= "
-set "USBA4=%%SRESET%% - example : %%SFCGREEN%%select disk 0"
-set "USBA5=%%SRESET%% - example : %%SFCGREEN%%select volume C"
-set "USBA6= "
-set "USBA7=%%SRESET%% Please wait please wait please wait please wait . .. ..."
-call :AutoLigneMenu USBA Ligne_MenuUSBA noPrefix
-
+set "USBA0= "
+set "USBA1=%%SRESET%% %NFCBLUE%Computer Wash USB Protection"
+set "USBA2= "
+set "USBA3=%%SRESET%% - Please select a volume type and its identifier."
+set "USBA4= "
+set "USBA5=%%SRESET%% - example : %%SFCGREEN%%select disk 0"
+set "USBA6=%%SRESET%% - example : %%SFCGREEN%%select volume C"
+set "USBA7= "
+set "USBA8=%%SRESET%% Please wait please wait please wait please wait . .. ..."
+call :AutoLigneMenu USBA Ligne_MenuUSBA noPrefix 0 0
+:: ============================================================================================================================
 set USBB=USBB
 set "USBB0=%%SRESET%% %NFCBLUE%Computer Wash USB Protection%%SRESET%%"
 set "USBB1= "
@@ -921,359 +592,548 @@ set "USBB7= - 3) attributes disk set readonly"
 set "USBB8= - 4) attributes disk clear readonly"
 set "USBB9= "
 set "USBB10= Any other input will give you a fatal error. The script will close."
-call :AutoLigneMenu USBB Ligne_MenuUSBB noPrefix
-
+call :AutoLigneMenu USBB Ligne_MenuUSBB noPrefix 0 0
+:: ============================================================================================================================
 :Varable_DEV
 set Reset_Ligne_Menu=Ligne_Menu
 set Ligne_Menu=Ligne_Menu
-set Menu0=%SRESET%  
-set Menu1= %SRESET%   %SUNDERLINE%Ligne_Menu :%SRESET% 
-set Menu2=%SRESET% 
-set Menu3= %SRESET%   A ) Automatic
-set Menu4= %SRESET%   S ) Specific
-set Menu5= %SRESET%   T ) Tool
-set Menu6= %SRESET%   C ) Custom
-call :AutoLigneMenu Menu Ligne_Menu noPrefix
-
+set Menu0=separator
+set Menu1= %SRESET%  %SUNDERLINE%Main menu :%SRESET%
+set Menu2=%SRESET%
+set Menu3= %SRESET%  A ) Automatic
+set Menu4= %SRESET%  S ) Specific
+set Menu5= %SRESET%  AS ) Automatic and Specific
+set Menu6= %SRESET%  C ) Custom
+set Menu7=separator
+set Menu8= %SRESET%  %SUNDERLINE%Single Option :%SRESET%
+set Menu9=%SRESET%
+set Menu10= %SRESET%  T ) Tool
+call :AutoLigneMenu Menu Ligne_Menu noPrefix 0 0
 set Ligne_MenuA=Ligne_MenuA
-set Ligne_MenuA0=.
-set Ligne_MenuA1=%SRESET%  %SUNDERLINE%%NFCYELLOW%A%SRESET%%SUNDERLINE%utomatic%SRESET%
-set Ligne_MenuA2=.
-set Ligne_MenuA3=.
-call :AutoLigneMenu A Ligne_MenuA
-
-set Ligne_MenuO=Ligne_MenuO
-set Ligne_MenuO0=.
-set Ligne_MenuO1=%SRESET%  %SUNDERLINE%%NFCYELLOW%T%SRESET%%SUNDERLINE%ool%SRESET% TOOL ONLY
-set Ligne_MenuO2=.
-set Ligne_MenuO3=.
-call :AutoLigneMenu O Ligne_MenuT
-
+set Ligne_MenuAA0=separator
+set Ligne_MenuAA1=%SRESET%  %SUNDERLINE%%NFCYELLOW%A%SRESET%%SUNDERLINE%utomatic%SRESET%
+set "Ligne_MenuAA2= "
+call :AutoLigneMenu Ligne_MenuAA Ligne_MenuAS noPrefix 0 0
+call :AutoLigneMenu A Ligne_MenuAS 0 1 6
+call :AutoLigneMenu Ligne_MenuAA Ligne_MenuA noPrefix 0 0
+call :AutoLigneMenu A Ligne_MenuA 0 1 6
+:: ============================================================================================================================
+set Ligne_MenuT=Ligne_MenuT
+set Ligne_MenuTT0=separator
+set Ligne_MenuTT1=%SRESET%  %SUNDERLINE%%NFCYELLOW%T%SRESET%%SUNDERLINE%ool%SRESET% TOOL ONLY
+set "Ligne_MenuTT2= "
+call :AutoLigneMenu Ligne_MenuTT Ligne_MenuT noPrefix 0 0
+call :AutoLigneMenu T Ligne_MenuT 0 1 6
+:: ============================================================================================================================
 set Ligne_MenuS=Ligne_MenuS
-set Ligne_MenuS0=.
-set Ligne_MenuS1= %SRESET%   %SUNDERLINE%%NFCYELLOW%S%SRESET%%SUNDERLINE%pecific%SRESET%
-set Ligne_MenuS2=.
-set Ligne_MenuS3=.
-call :AutoLigneMenu S Ligne_MenuS
-
+set Ligne_MenuSS0=separator
+set Ligne_MenuSS1= %SRESET%  %SUNDERLINE%%NFCYELLOW%S%SRESET%%SUNDERLINE%pecific%SRESET%
+set "Ligne_MenuSS2= "
+call :AutoLigneMenu Ligne_MenuSS Ligne_MenuAS noPrefix 0 16
+call :AutoLigneMenu S Ligne_MenuAS 0 1 22
+call :AutoLigneMenu Ligne_MenuSS Ligne_MenuS noPrefix 0 0
+call :AutoLigneMenu S Ligne_MenuS 0 1 6
+:: ============================================================================================================================
 set Ligne_MenuC=Ligne_MenuC
-set Ligne_MenuC0=.
-set Ligne_MenuC1= %SRESET%   %SUNDERLINE%%NFCYELLOW%C%SRESET%%SUNDERLINE%ustomizable%SRESET%
-set Ligne_MenuC2=.
-set Ligne_MenuC3=.
-call :AutoLigneMenu C Ligne_MenuC
-
+set Ligne_MenuCC0=separator
+set Ligne_MenuCC1= %SRESET%  %SUNDERLINE%%NFCYELLOW%C%SRESET%%SUNDERLINE%ustomizable%SRESET%
+set "Ligne_MenuCC2= "
+call :AutoLigneMenu Ligne_MenuCC Ligne_MenuC noPrefix 0 0
+call :AutoLigneMenu C Ligne_MenuC 0 1 6
+:: ============================================================================================================================
 :: End auto
+:: ============================================================================================================================
 goto :ARGC_mode_?
-
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 Générateur des lignes printables de menus
-::     (header principal, secondaire, etc.)
-:: ===============================
+::  (header principal, secondaire, etc.)
+:: ============================================================================================================================
 :AutoLigneMenu
 :: %1 = préfixe source (A, S, C, header)
 :: %2 = tableau cible (Ligne_MenuA, Ligne_MenuS, Ligne_Menuheader…)
-:: %3 = "noPrefix" optionnel
-if /i "%~3"=="noPrefix" (
-    set /a count=0
-    set /a line=0
-) else (
-    set /a count=1
-    set /a line=4
-)
+:: %3 = "noPrefix" optionnel "0"
+:: %4 = "Startlignedest"
+:: %5 = "Startlignesources"
+SET /A "count=%~4"
+SET /A "line=%~5"
+:: ============================================================================================================================
 :loopGeneric
 set "value=!%~1%count%!"
 if defined value (
-    if /i "%~3"=="noPrefix" (
-        set "%~2!line!=!value!"
+  if /i "%~3"=="noPrefix" (
+    set "%~2!line!=!value!"
     ) else (
-        set "%~2!line!=%NFCYELLOW% %~1%SRESET%%count%) !value!"
-    )
-    set /a line+=1
-    set "%~2!line!=."
-    set /a line+=1
-    set /a count+=1
-    goto :loopGeneric
+    set "%~2!line!=%NFCYELLOW% %~1%SRESET%%count%) !value!"
+  )
+  set /a line+=1
+  set "%~2!line!=."
+  set /a line+=1
+  set /a count+=1
+  goto :loopGeneric
 )
 goto :eof
+:: ============================================================================================================================
 
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 ARGC_mode_? Puis ?
-:: ===============================
+:: ============================================================================================================================
 :ARGC_mode_?
 set "Choix="
-
-rem Si aucun argument, aller à Interface
+:: ============================================================================================================================
+:: Si aucun argument, aller à Interface
+:: ============================================================================================================================
 if "%1"=="" goto :Interface
-
-rem Vérifie si le premier argument contient "\"
+:: ============================================================================================================================
+:: Vérifie si le premier argument contient "\"
+:: ============================================================================================================================
 echo %1 | find "\" >nul
 if errorlevel 1 (
-    rem Si pas de "\", on l'ajoute à Choix
-    set "Choix=%~1"
-    echo %SRESET%%NFCMAGENTA%Choix défini : %NFCCYAN%!Choix!%SRESET%
+  rem Si pas de "\", on l'ajoute à Choix
+  set "Choix=%~1"
+  echo %SRESET%%NFCMAGENTA%Choix défini : %NFCCYAN%!Choix!%SRESET%
+  shift
+  goto :Preparateur_de_variable
+  ) else (
+  shift
+  goto :ARGC_mode_?
 )
-shift
-goto :Preparateur_de_variable
+:: ============================================================================================================================
 
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 Preparateur de variable puis ARGC_mode_?
-:: ===============================
+:: ============================================================================================================================
 :Preparateur_de_variable
 set /a i=1
 :loopLigne
 call set "value=%%CC%i%%%"
 if defined value (
-    set "C%i%=%value%"
-    set /a i+=1
-    goto :loopLigne
+  set "C%i%=%value%"
+  set /a i+=1
+  goto :loopLigne
 )
 call set "valeur=%%%choix%%%"
 if "%valeur%"=="" (
-	set "choix= "
-    goto :mode_console
+  set "choix= "
+  goto :mode_console
 )
+:: ============================================================================================================================
 if /I "%valeur%"=="SpinnerRUN" (
-	goto :SpinnerRUN
+  goto :SpinnerRUN
 )
-if /I "%valeur%"=="ArispBypass" ( 
-	set Anyreproductionisstrictlyprohibited=0
-	set choix=Ligne_Menu
-	)
+:: ============================================================================================================================
+if /I "%valeur%"=="ArispBypass" (
+  set Anyreproductionisstrictlyprohibited=0
+  set choix=Ligne_Menu
+)
+:: ============================================================================================================================
 if /I "%valeur%"=="THE_HAUNTED_COMPUTER" (
-	call :THE_HAUNTED_COMPUTER
-	set choix=Ligne_Menu
-	)
+  call :THE_HAUNTED_COMPUTER
+  set choix=Ligne_Menu
+)
+:: ============================================================================================================================
 if /I "%valeur%"=="Soleil12345" (
-	call :ADMIN
-	set choix=Ligne_Menu
-	)
+  call :ADMIN
+  set choix=Ligne_Menu
+)
+:: ============================================================================================================================
 if /I "%valeur%"=="Lymbiratus" (
-	call :Lymbiratus
-	set choix=Ligne_Menu
-	)
+  call :Lymbiratus
+  set choix=Ligne_Menu
+)
+:: ============================================================================================================================
 if /I "%valeur%"=="Vipptore" (
-	call :Lymbiratus
-	set choix=Ligne_Menu
-	)
+  call :Lymbiratus
+  set choix=Ligne_Menu
+)
+:: ============================================================================================================================
 if /I "%valeur%"=="GIT" (
-	start https://github.com/Pastequeosaure/ComputerWash.cmd/blob/main/ComputerWash.cmd
-	set choix=Ligne_Menu
+  start https://github.com/Pastequeosaure/ComputerWash.cmd/blob/main/ComputerWash.cmd
+  set choix=Ligne_Menu
 )
+:: ============================================================================================================================
 if /I "%valeur%"=="OldStory" (
-	start https://computerwash.wixsite.com/computer-wash/archives
-	set choix=Ligne_Menu
+  start https://computerwash.wixsite.com/computer-wash/archives
+  set choix=Ligne_Menu
 )
+:: ============================================================================================================================
 if /I "%valeur%"=="Quiz" (
-	call :Quiz
-	set choix=Ligne_Menu
-	)
-::A
+  call :Quiz
+  set choix=Ligne_Menu
+)
+:: ============================================================================================================================
+:: AX
+:: ============================================================================================================================
 if /I "%valeur%"=="Daily Wash" (
-	set DISM=1
-	set sfc=1
-	set choix=C
-	)
+  set DISM=1
+  set sfc=1
+  set choix=C
+)
 if /I "%valeur%"=="Maintenance Wash" (
-	set DISM=1
-	set sfc=1
-	set del=1
-	set del2=1
-	set choix=C
-	)
+  set DISM=1
+  set sfc=1
+  set del=1
+  set del2=1
+  set choix=C
+)
 if /I "%valeur%"=="Washing Repair" (
-	set chkdsk=1
-	set cleanmgr=1
-	set DISM=1
-	set sfc=1
-	set findstr=1
-	set del=1
-	set del2=1
-	set choix=C
-	)
+  set chkdsk=1
+  set cleanmgr=1
+  set DISM=1
+  set sfc=1
+  set findstr=1
+  set del=1
+  set del2=1
+  set choix=C
+)
 if /I "%valeur%"=="Last Resort Wash" (
-	set chkdsk=1
-	set cleanmgr=1
-	set DISM=1
-	set sfc=1
-	set findstr=1
-	set Mrt=1
-	set SignatureUpdate=1
-	set MpCmdRunBootSectorScan=1
-	set MpCmdRunScanType=1
-	set interfaceipreset=1
-	set winsockreset=1
-	set advfirewallreset=1
-	set ipconfigrelease=1
-	set ipconfigflushdns=1
-	set wsreset=1
-	set del=1
-	set del2=1
-	set shutdownrr=1
-	set choix=C
-	)
-
-::S
+  set chkdsk=1
+  set cleanmgr=1
+  set DISM=1
+  set sfc=1
+  set findstr=1
+  set Mrt=1
+  set SignatureUpdate=1
+  set MpCmdRunBootSectorScan=1
+  set MpCmdRunScanType=1
+  set interfaceipreset=1
+  set winsockreset=1
+  set advfirewallreset=1
+  set ipconfigrelease=1
+  set ipconfigflushdns=1
+  set wsreset=1
+  set del=1
+  set del2=1
+  set shutdownrr=1
+  set choix=C
+)
+:: ============================================================================================================================
+:: SXX
+:: ============================================================================================================================
 if /I "%valeur%"=="Antivirus Malware Scan" (
-	set Mrt=1
-	set SignatureUpdate=1
-	set MpCmdRunBootSectorScan=1
-	set MpCmdRunScanType=1
-	set choix=C
-	)
+  set Mrt=1
+  set SignatureUpdate=1
+  set MpCmdRunBootSectorScan=1
+  set MpCmdRunScanType=1
+  set choix=C
+)
 if /I "%valeur%"=="Dignostic RAM" (
-	set mdsched=1
-	set shutdownrr=1
-	set choix=C
-	)
+  set mdsched=1
+  set shutdownrr=1
+  set choix=C
+)
 if /I "%valeur%"=="Maintenance disk c" (
-	set chkdsk=1
-	set choix=C
-	)
+  set chkdsk=1
+  set choix=C
+)
 if /I "%valeur%"=="Disk Cleanup" (
-	set cleanmgr=1
-	set del=1
-	set del2=1
-	set choix=C
-	)
+  set cleanmgr=1
+  set del=1
+  set del2=1
+  set choix=C
+)
 if /I "%valeur%"=="Start repair Boot / Startup Windows" (
-	set bcdboot=1
-	set choix=C
-	)
+  set bcdboot=1
+  set choix=C
+)
 if /I "%valeur%"=="Restore system" (
-	set rstrui=1
-	set choix=C
-	)
+  set rstrui=1
+  set choix=C
+)
 if /I "%valeur%"=="Reset the ip interface" (
-	set interfaceipreset=1
-	set winsockreset=1
-	set advfirewallreset=1
-	set ipconfigrelease=1
-	set ipconfigflushdns=1
-	set choix=C
-	)
+  set interfaceipreset=1
+  set winsockreset=1
+  set advfirewallreset=1
+  set ipconfigrelease=1
+  set ipconfigflushdns=1
+  set choix=C
+)
 if /I "%valeur%"=="Reset WS cache" (
-	set wsreset=1
-	set choix=C
-	)
+  set wsreset=1
+  set choix=C
+)
 if /I "%valeur%"=="Delete temporary files" (
-	set del=1
-	set del2=1
-	set cleanmgr=1
-	set choix=C
-	)
+  set del=1
+  set del2=1
+  set choix=C
+)
 if /I "%valeur%"=="Update driver sys et COM" (
-	set pnpunattend=1
-	set choix=C
-	)
+  set pnpunattend=1
+  set choix=C
+)
 if /I "%valeur%"=="Verificaton system + log" (
-	set DISM=1
-	set sfc=1
-	set findstr=1
-	set choix=C
-	)
+  set DISM=1
+  set sfc=1
+  set findstr=1
+  set choix=C
+)
 if /I "%valeur%"=="Setup Chrome Firefox VLC Acrobat 7zip KeePASS" (
-	set choix=C
-	set chrome=1
-	set Firefox=1
-	set VLC=1
-	set Acrobat=1
-	set zip=1
-	set KeePass=1
+  set choix=C
+  set chrome=1
+  set Firefox=1
+  set VLC=1
+  set Acrobat=1
+  set zip=1
+  set KeePass=1
 )
 if /I "%valeur%"=="Full Windows Update Reset" (
-	set choix=C
-	set wuauservStop=1
-	set wuauservStart=1
-	set cryptSvcStop=1
-	set cryptSvcStart=1
-	set bitsStop=1
-	set bitsStart=1
-	set cbitsStop=1
-	set cbitsStart=1
-	set msiserverStop=1
-	set msiserverStart=1
-	set SoftwareDistribution=1
-	set catroot2=1
-	set winsockreset=1
-	set winhttp=1
-	set bitsadmin=1
-	set DLLWindowsUp=1
-	set shutdownrr=1
+  set choix=C
+  set wuauservStop=1
+  set wuauservStart=1
+  set cryptSvcStop=1
+  set cryptSvcStart=1
+  set bitsStop=1
+  set bitsStart=1
+  set cbitsStop=1
+  set cbitsStart=1
+  set msiserverStop=1
+  set msiserverStart=1
+  set SoftwareDistribution=1
+  set catroot2=1
+  set winsockreset=1
+  set winhttp=1
+  set bitsadmin=1
+  set DLLWindowsUp=1
+  set shutdownrr=1
 )
 if /I "%valeur%"=="Force Windows Update" (
-	set choix=C
-	set StartScan=1
-	set StartDownload=1
-	set StartInstall=1
-	set RestartDevice=1
+  set choix=C
+  set StartScan=1
+  set StartDownload=1
+  set StartInstall=1
+  set RestartDevice=1
 )
 if /I "%valeur%"=="Update All App" (
-	set choix=C
-	set ALL=1
+  set choix=C
+  set ALL=1
 )
 if /I "%valeur%"=="Colorblind Mode" (
-	set choix=Ligne_Menu
-	if /I "%Color%"=="0" (
-		set Color=1
-		set D?=%SFCGREEN%ON%SRESET%
-		call :Color
-	) else (
-		set Color=0
-		set D?=%SFCRED%OFF%SRESET%
-		call :Color
-	)
+  set choix=Ligne_Menu
+  if /I "%Color%"=="0" (
+    set Color=1
+    set D?=%SFCGREEN%ON%SRESET%
+    call :Color
+    ) else (
+    set Color=0
+    set D?=%SFCRED%OFF%SRESET%
+    call :Color
+	goto :Var
+  )
 )
 if /I "%Color%"=="0" (
-	set D?=%SFCGREEN%ON%SRESET%
+  set D?=%SFCGREEN%ON%SRESET%
 )
 if /I "%Color%"=="1" (
-    set D?=%SFCRED%OFF%SRESET%
+  set D?=%SFCRED%OFF%SRESET%
 )
 if /I "%valeur%"=="Return to the main menu" (
-	set choix=Ligne_Menu
-	goto :Preparateur_de_variable
+  set choix=Ligne_Menu
+  goto :Preparateur_de_variable
+)
+:: ============================================================================================================================
+:: CXX
+:: ============================================================================================================================
+call :algo
+call :AutoLigneMenu C Ligne_MenuC 0 1 6
+:: ============================================================================================================================
+CALL SET var=%%%Reset_Ligne_Menu%%choix%%%
+if "%var%"=="" (
+  set var=%Reset_Ligne_Menu%
+)
+set Ligne_Menu=%var%
+if "%var%0"=="" (
+  set var=%Reset_Ligne_Menu%
+)
+:: ============================================================================================================================
+call :AutoLigneMenu Other Ligne_MenuOther noPrefix 0 0
+if /I "%valeur%"=="%SFCGREEN%Start%SRESET%" (
+  set Start?=1
+  set choix=C
+  cls
+  call :Print Ligne_Menuheader 0
+  call :Print Ligne_MenuC 0
+  call :Print Ligne_MenuOther 0
+  call :Print Ligne_Menufoot_head 0
+  echo.
+  echo %NFCGREEN%----------- %SRESET%Starting in 30 seconds. To cancel, close this window. This line acts as a safeguard %NFCGREEN%-----------%SRESET%
+  timeout /t 30 /nobreak >nul
+)
+goto :ARGC_mode_?
+:: ============================================================================================================================
+
+:VERIFY
+:: ============================================================================================================================
+:: SHA256
+:: ============================================================================================================================
+set "logdest=%~dp0\Computer Wash Log.txt"
+if /I "%~dp0"=="%windir%\system32\" (
+  set "logdest=%userProfile%\Desktop\Computer Wash Log.txt"
+  goto afterCopy
+)
+call :template
+set "HASH="
+for /f "tokens=1" %%H in (
+  'certutil -hashfile "%~f0" SHA256 ^| findstr /R "^[0-9A-Fa-f]"'
+) do (
+  set "HASH=%%H"
+  goto HASH_OK
+)
+:HASH_OK
+if not defined HASH exit /b 1
+set "TEMPLATE=!TEMPLATE:~0,64!"
+:: ============================================================================================================================
+:: VERIFY SHA256 via TEMPLATE
+:: ============================================================================================================================
+set VERIFY_OK=1
+<nul set /p "= "
+
+for /L %%I in (0,1,63) do (
+    set "H=!HASH:~%%I,1!"
+    set "T=!TEMPLATE:~%%I,1!"
+
+    if "!T!"=="." (
+        rem Pass
+    ) else if /I "!H!"=="!T!" (
+        rem OK
+    ) else (
+        set VERIFY_OK=0
+    )
 )
 
-call :algo
+if !VERIFY_OK!==1 (
+    set Cert=0
+) else (
+    set Cert=1
+)
+exit /b 1
+:template
+:: ============================================================================================================================
+:: Chemins
+:: ============================================================================================================================
+set "SOURCE=%~f0"
 
-CALL SET var=%%%Reset_Ligne_Menu%%choix%%%
-if "%var%"=="" ( 
-	set var=%Reset_Ligne_Menu%
-	)
-set Ligne_Menu=%var%
-if "%var%0"=="" ( 
-	set var=%Reset_Ligne_Menu%
-	)
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-call :AutoLigneMenu Other Ligne_MenuOther noPrefix
-if /I "%valeur%"=="%SFCGREEN%Start%SRESET%" (
-	set Start?=1
-	set choix=C
-	cls
-	call :Print Ligne_Menuheader 0
-	call :Print Ligne_MenuC 0
-	call :Print Ligne_MenuOther 0
-	call :Print Ligne_Menufoot_head 0
-	echo.
-	echo %NFCGREEN%----------- %SRESET%Starting in 30 seconds. To cancel, close this window. This line acts as a safeguard %NFCGREEN%-----------%SRESET% 
-	timeout /t 30 /nobreak >nul
-	)
-goto :ARGC_mode_?
+if not exist "%SOURCE%" (
+    echo ERREUR : "%SOURCE%" introuvable
+    pause
+    exit /b 1
+)
+:: ============================================================================================================================
+:: Comptage des lignes
+:: ============================================================================================================================
+set LINECOUNT=0
+set OFFSET=1
+for /f "usebackq delims=" %%L in ("%SOURCE%") do (
+    set /a LINECOUNT+=1
+)
+set /a LINECOUNT-=OFFSET
+if %LINECOUNT% LSS 6 (
+    echo ERREUR : pas assez de lignes
+    pause
+    exit /b 1
+)
+set /a STEP=LINECOUNT/6
+if %STEP% LSS 1 set STEP=1
+:: ============================================================================================================================
+:: Extraction de 6 caracteres HEX (zones)
+:: ============================================================================================================================
+set HEXLIST=
+set HEXCOUNT=0
+set INDEX=0
+set /a ZONE_START=STEP+OFFSET
+for /f "usebackq delims=" %%L in ("%SOURCE%") do (
+    set /a INDEX+=1
 
-:: ===============================
+    if !HEXCOUNT! GEQ 6 goto EXTRACT_DONE
+
+    if !INDEX! GEQ !ZONE_START! (
+        call :SAFECHAR "%%L"
+        if "!FOUND!"=="1" (
+            set FOUND=0
+            set /a ZONE_START+=STEP
+        )
+    )
+)
+:EXTRACT_DONE
+if %HEXCOUNT% LSS 6 (
+    exit /b 1
+)
+:: ============================================================================================================================
+set "TPL="
+set POS=0
+set HEXPOS=0
+:BUILD
+if %POS% GEQ 64 goto DONE
+set /a POS+=1
+if %POS%==1  goto PUT
+if %POS%==12 goto PUT
+if %POS%==23 goto PUT
+if %POS%==34 goto PUT
+if %POS%==45 goto PUT
+if %POS%==56 goto PUT
+set "TPL=!TPL!."
+goto BUILD
+:PUT
+call set "CHAR=%%HEXLIST:~%HEXPOS%,1%%"
+set "TPL=!TPL!!CHAR!"
+set /a HEXPOS+=1
+goto BUILD
+:DONE
+set "TEMPLATE=!TPL!"
+exit /b
+:: ============================================================================================================================
+:: Sous-fonction : SAFECHAR
+:: ============================================================================================================================
+:SAFECHAR
+set "STR=%~1"
+set I=0
+set FOUND=0
+:SCAN
+set "C=!STR:~%I%,1!"
+if "!C!"=="" goto :EOF
+if "!C!"=="0" goto OK
+if "!C!"=="1" goto OK
+if "!C!"=="2" goto OK
+if "!C!"=="3" goto OK
+if "!C!"=="4" goto OK
+if "!C!"=="5" goto OK
+if "!C!"=="6" goto OK
+if "!C!"=="7" goto OK
+if "!C!"=="8" goto OK
+if "!C!"=="9" goto OK
+if "!C!"=="a" goto iplpl
+if "!C!"=="b" goto iplpl
+if "!C!"=="c" goto iplpl
+if "!C!"=="d" goto iplpl
+if "!C!"=="e" goto iplpl
+if "!C!"=="f" goto iplpl
+if "!C!"=="A" goto OK
+if "!C!"=="B" goto OK
+if "!C!"=="C" goto OK
+if "!C!"=="D" goto OK
+if "!C!"=="E" goto OK
+if "!C!"=="F" goto OK
+:iplpl
+set /a I+=1
+goto SCAN
+:OK
+set "HEXLIST=!HEXLIST!!C!"
+set /a HEXCOUNT+=1
+set FOUND=1
+goto :EOF
+:: ============================================================================================================================
+
+:: ============================================================================================================================
 :: 🔧 Algo + menu personnalisé
-:: ===============================
+:: ============================================================================================================================
 :algo
 set nb=0
-:: ===============================
-:: 🔧 Bien mettre à jour les variables dans le même ordre ! ( pour Var C )
+:: ============================================================================================================================
+:: 🔧 Algo ( se met a jour automatiquement mettre la nouvelle fonction a l'endrois voulu )
 :: Code 5Ed5wEu5Q6
-:: ===============================
+:: ============================================================================================================================
 if "%Start?%"=="2" (
-	if "%NO_ADMIN%"=="0" (
-		call :CFGOFF
-	)
+  if "%NO_ADMIN%"=="0" (
+    call :CFGOFF
+  )
 )
 call :Create_Restore_Point
 call :System_info
@@ -1324,32 +1184,43 @@ call :StartScan
 call :StartDownload
 call :StartInstall
 if "%Start?%"=="2" (
-	if "%NO_ADMIN%"=="0" (
-		call :CFGON
-	)
+  if "%NO_ADMIN%"=="0" (
+    call :CFGON
+  )
 )
 call :RestartDevice
 call :shutdown
 call :Pause
 call :USB
+call :Auto_Ping
+call :MSA
 call :Exit
-call :AutoLigneMenu C Ligne_MenuC
+if "!init!"=="1" (
+  set /a nb+=1
+  set C!nb!=%SFCGREEN%Start%SRESET%
+)
+:: ============================================================================================================================
 exit /b
+:: ============================================================================================================================
 
-:: ===============================
+
+:: ============================================================================================================================
 :: 🔧 Interface Pilote
-:: ===============================
+:: ============================================================================================================================
 :Interface
- :mode_console
-  cls
+:mode_console
+cls
+:: ============================================================================================================================
+:: Main Menu
+:: ============================================================================================================================
 :Menu_?
 call :Print Ligne_Menuheader 0
 if /I "%NO_ADMIN%"=="1" (
  call :separator "Error admin"
- call :separator " " "only"
  )
 if /I "%Anyreproductionisstrictlyprohibited%"=="1" (
    set Anyreproductionisstrictlyprohibited=0
+   call :separator " " "only"
    call :Print Ligne_MenuARISP 0
    pause >nul
    set choix=Ligne_Menu
@@ -1362,7 +1233,9 @@ if "%Start?%"=="1" (
 call :Print %Ligne_Menu% 0
 call :Print Ligne_MenuOther 0
 call :Print Ligne_Menufoot_head 0
-
+:: ============================================================================================================================
+:: Main PowerShell or CMD ?
+:: ============================================================================================================================
 IF NOT DEFINED FAST_Menu (
     if not exist FAST_Menu.ps1 (
         set FAST_Menu=0
@@ -1370,7 +1243,6 @@ IF NOT DEFINED FAST_Menu (
         set FAST_Menu=1
     )
 )
-
 if /I "%FAST_Menu%"=="1" (
     if /I "%~dp0"=="%windir%\system32\" (
         call :END_Menu
@@ -1389,24 +1261,21 @@ if /I "%FAST_Menu%"=="1" (
 ) else (
     call :END_Menu
 )
-
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 Fonction separator
-:: ===============================
+:: ============================================================================================================================
 :separator
 echo.
-echo|set /p="%SRESET% %NFCRED%-----%NFCGREEN%-----%NFCYELLOW%-----%NFCBLUE%-----%NFCMAGENTA%-----%NFCCYAN%-----%NFCWHITE%-----"
-echo|set /p="%NFCRED%-----%NFCGREEN%-----%NFCYELLOW%-----%NFCBLUE%-----%NFCMAGENTA%-----%NFCCYAN%-----%NFCWHITE%-----"
-echo.
+echo|set /p="%SRESET% %NFCYELLOW%----------%NFCWHITE%----------%NFCYELLOW%----------%NFCWHITE%----------%NFCYELLOW%----------%NFCWHITE%----------%NFCYELLOW%----------%SRESET% "
 echo.
 set "arg=%~2"
 if "%arg%"=="only" exit /b
+echo.
 call :separatorIn_progress %1
 exit /b
-
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 Fonction Affichage In progress...
-:: ===============================
+:: ============================================================================================================================
 :separatorIn_progress
 call :Log %1
 echo|set /p="%SRESET%%date% %TIME%"
@@ -1425,17 +1294,29 @@ if "%arg%"=="%finishText%" (
 echo.
 echo.
 exit /b
+:: ============================================================================================================================
 
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 Fonction Affichage
-:: ===============================
+:: ============================================================================================================================
 :Print
 SET "print=%~1"
 SET /A "ligne=%~2"
 :Menu
+:: ============================================================================================================================
 :: Accès dynamique à la variable "header%ligne%"
+:: ============================================================================================================================
 CALL SET var=%%%print%%ligne%%%
-if "%var%"=="." ( echo. ) else ( CALL echo|set /p="%var%" )
+:: ============================================================================================================================
+if "%var%"=="separator" (
+	call :separator " " only
+) else (
+	if "%var%"=="." (
+		echo.
+	) else (
+		CALL echo|set /p="%var%"
+	)
+)
 SET /A ligne+=1
 IF NOT "%var%"=="" (
     goto :Menu
@@ -1443,26 +1324,28 @@ IF NOT "%var%"=="" (
 	set choix=0
 	exit /b
 )
+:: ============================================================================================================================
 
 :: ===============================
 :: 🔧 Question Pilote
 :: ===============================
- :END_Menu
- echo.
- set print=0
- set Ligne_Menu=%Reset_Ligne_Menu%
- set "choix="
- set /p choix=%SRESET% Select washing program : %SRESET%
- if "%choix%"=="" ( set choix=Ligne_Menu )
- if "%choix%"==" " ( set choix=Ligne_Menu )
- :: Enlever les espaces
- set "choix=%choix: =%"
- ::preparateur de variable
- goto :Preparateur_de_variable
+:END_Menu
+echo.
+set print=0
+set Ligne_Menu=%Reset_Ligne_Menu%
+set "choix="
+set /p choix=%SRESET% Select washing program : %SRESET%
+if "%choix%"=="" ( set choix=Ligne_Menu )
+if "%choix%"==" " ( set choix=Ligne_Menu )
+:: Enlever les espaces
+set "choix=%choix: =%"
+::preparateur de variable
+goto :Preparateur_de_variable
+:: ============================================================================================================================
 
- :: ===============================
+:: ============================================================================================================================
 :: 🔧 Erreur Exit
-:: ===============================
+:: ============================================================================================================================
 :Erreur
 echo.
 echo|set /p="[0m  ERROR ¡¡¡¡ ¡¡¡ ¡¡ ¡ "
@@ -1502,11 +1385,12 @@ echo.
 echo|set /p="[0m                               [31m\_/[0m "
 echo.
 goto :eof
+:: ============================================================================================================================
 
-:: =========================================
+:: ============================================================================================================================
 :: 🏰 Lymbiratus - Knight’s Dungeon Quest
 :: Rogue-like CMD adventure
-:: =========================================
+:: ============================================================================================================================
 :Lymbiratus
 set MAXROOM=40
 call :Spinner_OFF
@@ -1547,6 +1431,7 @@ set "EVENT6=PACT"
 set "EVENT7=THIEF"
 set "EVENT8=TRAP"
 set "EVENT9=INN"
+
 :: --- Intro ---
 :INTRO
 cls
@@ -1554,6 +1439,7 @@ set nbderencontre=0
 set boostnbderencontre=0
 call :Print Ligne_Menuheader 0
 call :separator " " "only"
+echo.
 echo %SFCYELLOW%=========================================%SRESET%
 echo %SFCMAGENTA% 🏰 Lymbiratus - Knight’s Dungeon Quest%SRESET%
 echo %SFCYELLOW%=========================================%SRESET%
@@ -1639,6 +1525,7 @@ goto GAME
 cls
 set /a IDX=%random% %%10
 call :Print Ligne_Menuheader 0
+call :separator " " "only"
 echo.
 echo %SFCYELLOW% =========================================%SRESET%
 echo %SRESET%       🏰 Lymbiratus - %SFCYELLOW%Room %NFCGREEN%!ROOM! %SRESET%/ %NFCRED%!MAXROOM!%SRESET%
@@ -1647,6 +1534,7 @@ call set ROOMNAME=%%ROOMNAME%IDX%%%
 echo.
 echo Location: %SFCMAGENTA% !ROOMNAME!%SRESET%
 call :separator " " "only"
+echo.
 echo Level : %Level%
 :Level?
 set /a nv=%Level%*10
@@ -1687,6 +1575,7 @@ if %XP% GEQ %nv% ( goto :Level? )
 echo.
 echo %SFCGREEN% HP: !HP!/!MAXHP!%SRESET%   %SFCBLUE%ATK: !ATK!%SRESET%   %SFCMAGENTA%DEF: !DEF!%SRESET%   %SFCYELLOW%GOLD: !GOLD!%SRESET%   %SFCWHITE%Keys: !KEYS!%SRESET%
 call :separator " " "only"
+echo.
 if !HP! LEQ 0 goto GAMEOVERdungeon
 :: Random event
 set /a MODROOM=!ROOM! %% 7
@@ -2613,6 +2502,7 @@ goto GAME
 :WIN
 set /a ROOM-=1
 call :separator " " "only"
+echo.
 :: launch fireworks
 for /l %%i in (1,1,10) do (
     cls
@@ -2762,18 +2652,21 @@ set REWARD=0
 set pactrand=0
 set RAND=0
 goto :eof
+:: ============================================================================================================================
 
 :: ===============================
 :: 🔧 Secret THE_HAUNTED_COMPUTER
 :: ===============================
 :THE_HAUNTED_COMPUTER
+:: ============================================================================================================================
 :: The Haunted Computer 👻💻 - CMD Adventure Game
 :: Author: ChatGPT
 :: Description: Mini interactive story with multiple choices and endings
+:: ============================================================================================================================
 :TITLE
 cls
 color 0a
-echo This game is cursed and it's not a joke !
+echo This game is cursed !
 echo.
 echo ==========================================
 echo        👻  THE HAUNTED COMPUTER  💻
@@ -2782,33 +2675,27 @@ echo.
 echo An old terminal is blinking in front of you...
 echo.
 echo 1^) Explore the C:\Ancien directory
-
 echo 2^) Type a random command
-
 echo 3^) Restart the machine
-
 echo.
 set /p choice=What do you want to do? (1-3) : 
 if "%choice%"=="1" goto DIRECTORY
 if "%choice%"=="2" goto RANDOMCMD
 if "%choice%"=="3" goto REBOOT
 goto TITLE
-
+:: ============================================================================================================================
 :DIRECTORY
 call :separator " " "only"
+echo.
 color 0e
 echo You open C:\Ancien ...
 echo.
 echo Inside, you find two strange files:
 echo - ghost.sys
-
 echo - memory.bat
-
 echo.
 echo 1^) Open ghost.sys
-
 echo 2^) Run memory.bat
-
 echo 3^) Leave this folder
 echo.
 set /p choice=Your choice (1-3) : 
@@ -2816,9 +2703,10 @@ if "%choice%"=="1" goto GHOST
 if "%choice%"=="2" goto MEMORY
 if "%choice%"=="3" goto TITLE
 goto DIRECTORY
-
+:: ============================================================================================================================
 :GHOST
 call :separator " " "only"
+echo.
 color 0c
 echo The file opens... suddenly a face appears.
 echo.
@@ -2829,29 +2717,30 @@ call :CFGON
 timeout /t 10 /nobreak >nul
 shutdown /h
 goto :VIRUS
-
+:: ============================================================================================================================
 :MEMORY
 call :separator " " "only"
+echo.
 color 0b
 echo The script runs... a message appears:
 echo.
 echo "Admin password: Soleil12345"
 echo.
 echo 1^) Return to main menu
-
 echo 2^) Try the password
 echo.
 set /p choice=Your choice (1-2) : 
 if "%choice%"=="1" goto TITLE
 if "%choice%"=="2" goto ADMIN
-
+:: ============================================================================================================================
 :RANDOMCMD
 call :separator " " "only"
+echo.
 set /a rand=%random%%%3
 if %rand%==0 goto BUG
 if %rand%==1 goto CLUE
 if %rand%==2 goto VIRUS
-
+:: ============================================================================================================================
 :BUG
 color 0c
 echo The machine displays a fatal error message...
@@ -2861,7 +2750,7 @@ echo.
 echo [CRITICAL_ERROR] SYSTEM HALTED
 echo.
 goto :GAMEOVER
-
+:: ============================================================================================================================
 :CLUE
 color 0a
 echo.
@@ -2870,7 +2759,7 @@ echo "Look inside C:\Ancien"
 echo.
 pause
 goto TITLE
-
+:: ============================================================================================================================
 :VIRUS
 color 0c
 echo ⚠️  A virus is spreading... the screen blurs.
@@ -2879,9 +2768,10 @@ echo "I will stay with you forever… "
 call :CFGOFF
 echo.
 goto :GAMEOVER
-
+:: ============================================================================================================================
 :REBOOT
 call :separator " " "only"
+echo.
 color 07
 echo The machine is restarting...
 echo.
@@ -2894,7 +2784,7 @@ echo.
 shutdown /r /t 60 /c "👻 The computer haunts your restart... 60s left! "
 pause
 goto END
-
+:: ============================================================================================================================
 :ADMIN
 cls
 call :CFGON
@@ -2904,17 +2794,16 @@ for /l %%i in (1,1,30) do (
     call :Firework
     timeout /t 1 >nul
 )
-
 pause
 goto END
-
+:: ============================================================================================================================
 :GAMEOVER
 echo.
 echo *** GAME OVER ***
 echo.
 pause
 goto :THE_HAUNTED_COMPUTER
-
+:: ============================================================================================================================
 :Firework
 set /a r=%random% %%5
 if !r! EQU 0 (set c=%SFCRED%) 
@@ -2941,7 +2830,7 @@ echo|set /p="!c!            You have freed the soul of the haunted computer!%SRE
 echo.
 echo.
 exit /b
-
+:: ============================================================================================================================
 :CFGON
 set Temploop=0
 :Retry_CFGON
@@ -2950,20 +2839,23 @@ powercfg.exe /hibernate on
 set temperror=!ERRORLEVEL!
 if !temperror! GEQ 1 ( Call :Retry CFGON )
 goto :eof
-
+:: ============================================================================================================================
 :CFGOFF
 powercfg.exe /hibernate off
 goto :eof
-
+:: ============================================================================================================================
 :END
 exit /b
-:: ===============================
+:: ============================================================================================================================
+
+:: ============================================================================================================================
 :: 🔧 Secret Quiz
-:: ===============================
+:: ============================================================================================================================
 :Quiz
 call :Spinner_OFF
 cls
 call :Print Ligne_Menuheader 0
+call :separator " " "only"
 echo.
 echo|set /p="%SRESET%  %NFCRED%%SUNDERLINE%Welcome %NFCGREEN%to %NFCYELLOW%the %NFCBLUE%secret %NFCMAGENTA%Computerwash %NFCCYAN%QUIZ%SRESET%%SUNDERLINE% ^!%SRESET% "
 echo.
@@ -2978,14 +2870,19 @@ echo.
 echo|set /p="%SRESET%  Starting in 10 seconds! "
 echo.
 timeout /t 10 /nobreak >nul
+
+:: ============================================================================================================================
 :: Emojis
+:: ============================================================================================================================
 set Emoji0=😍
 set Emoji1=🤓
 set Emoji2=🛠️
 set Emoji3=💻
 
+:: ============================================================================================================================
 :: Commandes et descriptions
 :: Commandes et questions
+:: ============================================================================================================================
 set C1_Desc=Which command checks and repairs disk errors on C:?
 set C1_Cmd=Chkdsk C: /F /R /I
 
@@ -3133,68 +3030,80 @@ set C48_Cmd=Shutdown /r /o
 set C49_Desc=Which command shuts down the computer?
 set C49_Cmd=Shutdown /s
 
+:: ============================================================================================================================
 :: Score
+:: ============================================================================================================================
 set score=0
 
+:: ============================================================================================================================
 :: ===== Main =====
 :: Liste des indices 1..49
+:: ============================================================================================================================
 set Questions=1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49
 
+:: ============================================================================================================================
 :: Tirage 5 questions aléatoires sans répétition
+:: ============================================================================================================================
 for %%I in (1 2 3 4 5) do (
-    set /a count=0
-    for %%X in (!Questions!) do set /a count+=1
-
-    set /a rnd=!random! %% count
-    set idx=0
-    for %%X in (!Questions!) do (
-        if !idx! EQU !rnd! set Qnum=%%X
-        set /a idx+=1
-    )
-
-    :: Supprimer Qnum de la liste
-    set NewQuestions=
-    for %%X in (!Questions!) do (
-        if not %%X==!Qnum! set NewQuestions=!NewQuestions! %%X
-    )
-    set Questions=!NewQuestions!
-
-    call :AskQuestion !Qnum!
+  set /a count=0
+  for %%X in (!Questions!) do set /a count+=1
+  
+  set /a rnd=!random! %% count
+  set idx=0
+  for %%X in (!Questions!) do (
+    if !idx! EQU !rnd! set Qnum=%%X
+    set /a idx+=1
+  )
+  
+  :: Supprimer Qnum de la liste
+  set NewQuestions=
+  for %%X in (!Questions!) do (
+    if not %%X==!Qnum! set NewQuestions=!NewQuestions! %%X
+  )
+  set Questions=!NewQuestions!
+  
+  call :AskQuestion !Qnum!
 )
 
 echo %SBOLD%Quiz finished! Your score: !score! / 5%SRESET%
 if !score! EQU 5 (
-	echo.
-	echo|set /p="[0m5/5 Unloked THE_HAUNTED_COMPUTER"
-	echo.
-	echo.
-	echo|set /p="Will you manage to free the soul of your haunted computer… and unlock the next game ? "
-	echo.
-	echo.
-	set "foot_head8=%%NFCGREEN%%  _____________________________________________________________________"
-	set "foot_head9=%%NFCGREEN%% ^/                                                                     ^\"
-	set "foot_head10=%%NFCGREEN%% ^| %%SRESET%% THE_HAUNTED_COMPUTER ) Will you manage to free the soul of your   %%NFCGREEN%% ^|"
-	set "foot_head11=%%NFCGREEN%% ^| %%SRESET%% haunted computer… and unlock the next game ?                      %%NFCGREEN%% ^|"
-	set "foot_head12=%%NFCGREEN%% \_____________________________________________________________________/"
-call :AutoLigneMenu foot_head Ligne_Menufoot_head noPrefix
+  echo.
+  echo|set /p="[0m5/5 Unloked THE_HAUNTED_COMPUTER"
+  echo.
+  echo.
+  echo|set /p="Will you manage to free the soul of your haunted computer… and unlock the next game ? "
+  echo.
+  echo.
+  set "foot_head8=%%NFCGREEN%%  _____________________________________________________________________"
+  set "foot_head9=%%NFCGREEN%% ^/                                                                     ^\"
+  set "foot_head10=%%NFCGREEN%% ^| %%SRESET%% THE_HAUNTED_COMPUTER ) Will you manage to free the soul of your   %%NFCGREEN%% ^|"
+  set "foot_head11=%%NFCGREEN%% ^| %%SRESET%% haunted computer… and unlock the next game ?                      %%NFCGREEN%% ^|"
+  set "foot_head12=%%NFCGREEN%% \_____________________________________________________________________/"
+  call :AutoLigneMenu foot_head Ligne_Menufoot_head noPrefix 0 0
 )
 pause
 goto :eof
-
+:: ============================================================================================================================
 :: ===== Functions =====
+:: ============================================================================================================================
 :AskQuestion
+:: ============================================================================================================================
 :: %1 = question index
+:: ============================================================================================================================
 set QIndex=%1
-
+:: ============================================================================================================================
 :: Récupération de la question
+:: ============================================================================================================================
 call set "QuestionDesc=%%C%QIndex%_Desc%%"
 call set "QuestionCmd=%%C%QIndex%_Cmd%%"
-
+:: ============================================================================================================================
 :: Emoji aléatoire
+:: ============================================================================================================================
 set /a eidx=!random! %% 4
 call set "Emoji=%%Emoji!eidx!%%"
-
+:: ============================================================================================================================
 :: Génération des mauvaises réponses (3 autres indices différents)
+:: ============================================================================================================================
 set /a b1=(!QIndex! %% 49 +1)
 set /a b2=(!QIndex!+1) %% 49 +1
 set /a b3=(!QIndex!+2) %% 49 +1
@@ -3203,8 +3112,9 @@ call set "Options0=%%C%QIndex%_Cmd%%"
 call set "Options1=%%C%b1%_Cmd%%"
 call set "Options2=%%C%b2%_Cmd%%"
 call set "Options3=%%C%b3%_Cmd%%"
-
+:: ============================================================================================================================
 :: ===== Mélange aléatoire des options =====
+:: ============================================================================================================================
 :shuffle
 set /a order0=!random! %% 4
 set /a order1=!random! %% 4
@@ -3222,9 +3132,11 @@ set OptionsArr0=!Options%order0%!
 set OptionsArr1=!Options%order1%!
 set OptionsArr2=!Options%order2%!
 set OptionsArr3=!Options%order3%!
-
+:: ============================================================================================================================
 :: ===== Affichage =====
+:: ============================================================================================================================
 call :separator " " "only"
+echo.
 echo|set /p="%SRESET% %SBOLD%%NFCCYAN%!Emoji! Question %QIndex%: !Emoji!%SRESET%"
 echo.
 echo.
@@ -3240,11 +3152,14 @@ echo.
 echo|set /p="%SRESET% D) !OptionsArr3! "
 echo.
 echo.
-
+:: ============================================================================================================================
 :: Lecture réponse
+:: ============================================================================================================================
 echo|set /p="%SRESET% Your choice (A/B/C/D) [30s to answer]: "
 choice /c ABCD /t 30 /d A /n
+:: ============================================================================================================================
 :: Convertit %errorlevel% en lettre
+:: ============================================================================================================================
 set temp=%errorlevel%
 set "ans="
 set idx=0
@@ -3256,36 +3171,40 @@ if /i "!ans!"=="A" set idx=0
 if /i "!ans!"=="B" set idx=1
 if /i "!ans!"=="C" set idx=2
 if /i "!ans!"=="D" set idx=3
-
+:: ============================================================================================================================
 :: Vérification de la réponse
+:: ============================================================================================================================
 call set "selected=%%OptionsArr!idx!%%"
 echo.
 if "!selected!"=="!QuestionCmd!" (
-    echo %SFCGREEN% Correct! ✅%SRESET%
-    set /a score+=1
-) else (
-    echo %NFCRED% Wrong ❌ Correct answer: !QuestionCmd!%SRESET%
+  echo %SFCGREEN% Correct! ✅%SRESET%
+  set /a score+=1
+  ) else (
+  echo %NFCRED% Wrong ❌ Correct answer: !QuestionCmd!%SRESET%
 )
-
+:: ============================================================================================================================
 echo.
 echo Loading next question...
 timeout /t 1 >nul
 exit /b
+:: ============================================================================================================================
 
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 Fonction : Spinner Start
-:: ===============================
+:: ============================================================================================================================
 :Spinner_Start
 cd /D "%~dp0".
-if not exist SpinnerRun.txt (
+if /I "%NO_ADMIN%"=="0" (
+  if not exist SpinnerRun.txt (
     type nul > SpinnerRun.txt
     start computerwash.cmd SpinnerRUN
+    timeout /t 120 /nobreak >nul
+  )
 )
 goto :eof
-
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 Fonction : Spinner Stop
-:: ===============================
+:: ============================================================================================================================
 :Spinner_OFF
 cd /D "%~dp0"
 type nul > stop.txt
@@ -3294,10 +3213,9 @@ goto :eof
 
 :SpinnerRUN
 cd /D "%~dp0".
-SET "header14="
-call :AutoLigneMenu header Ligne_Menuheader noPrefix
-
+:: ============================================================================================================================
 :: === SPINNER AUTONOME ===
+:: ============================================================================================================================
 cls
 call :Print Ligne_Menuheader 0
 echo.
@@ -3309,1624 +3227,2116 @@ echo.
 echo|set /p="[0m [32mThis script closes automatically when it finishes running.[0m "
 echo.
 echo.
+:: ============================================================================================================================
 :: Choisir un style de spinner
+:: ============================================================================================================================
 set "spinner=^| ^/ ^- ^\"
-
+:: ============================================================================================================================
 :loopSpinnerRUN
+:: ============================================================================================================================
 :: Vérifier si stop.txt existe
+:: ============================================================================================================================
 if exist stop.txt goto :endloopSpinnerRUN
+:: ============================================================================================================================
 :: Boucle sur les symboles
+:: ============================================================================================================================
 for %%s in (%spinner%) do (
-    <nul set /p="[0m Work in progress... %%s"
-    powershell -command "Start-Sleep -Milliseconds 100" >nul
-    <nul set /p=[1G
+  <nul set /p="[0m Work in progress... %%s"
+  powershell -command "Start-Sleep -Milliseconds 100" >nul
+  <nul set /p=[1G
 )
 powershell -command "Start-Sleep -Milliseconds 100" >nul
 goto :loopSpinnerRUN
-
+:: ============================================================================================================================
 :endloopSpinnerRUN
 del stop.txt
 del SpinnerRun.txt
 exit
+:: ============================================================================================================================
 
-:: ===============================
+:: ============================================================================================================================
 :: 🔧 Algo + menu personnalisé
-:: ===============================
+:: ============================================================================================================================
 :USB
-if /I "%valeur%"=="Computer Wash USB Protection" (
-	cd /D "%~dp0".
-	cls
-	call :Print Ligne_Menuheader 0
-	call :separator "Computer Wash USB Protection" "only"
-	call :Print Ligne_MenuUSBA 0
-	start diskmgmt
-	echo list disk > "%CD%\Computer_Wash_DiskPart.txt"
-	echo list volume >> "%CD%\Computer_Wash_DiskPart.txt"
-	echo exit >> "%CD%\Computer_Wash_DiskPart.txt"
-	diskpart /s Computer_Wash_DiskPart.txt > LOG.txt"
-	call :separator "Computer Wash USB Protection" "only"
-	type LOG.txt
-	echo.
-	set /p choixUSB= Please type the command to execute : 
-	echo !choixUSB! > "%CD%\Computer_Wash_DiskPart.txt"
-	call :separator "Computer Wash USB Protection" "only"
-	call :Print Ligne_MenuUSBB 0
-	echo.
-	set /p choixUSB= %SRESET% Please type the command to execute 1 - 2 - 3 - 4 : %SRESET%
-	if /I "!choixUSB!"=="1" (
-		echo attributes volume set readonly >> "%CD%\Computer_Wash_DiskPart.txt"
-		goto:ProgramUSB
-	)
-	if /I "!choixUSB!"=="2" (
-		echo attributes volume clear readonly >> "%CD%\Computer_Wash_DiskPart.txt"
-		goto:ProgramUSB
-	)
-	if /I "!choixUSB!"=="3" (
-		echo attributes disk set readonly >> "%CD%\Computer_Wash_DiskPart.txt"
-		goto:ProgramUSB
-	)
-	if /I "!choixUSB!"=="4" (
-		echo attributes disk clear readonly >> "%CD%\Computer_Wash_DiskPart.txt"
-		goto:ProgramUSB
-	)
-	powershell -command "Start-Sleep -Milliseconds 500" >nul
-	Call :Erreur
-	timeout /t 60 /nobreak
-	exit
-	:ProgramUSB
-	call :separator "Computer Wash USB Protection" "only"
-	echo exit >> "%CD%\Computer_Wash_DiskPart.txt"
-	diskpart /s "%CD%\Computer_Wash_DiskPart.txt"
-	echo.
-	echo %NFCGREEN% ----------- %SFCGREEN%END %NFCGREEN%----------
-	echo.
-	call :Print Ligne_Menufoot_head 0
-	del Computer_Wash_DiskPart.txt
-	del LOG.txt
-	goto :exitlog
+if /I "!valeur!"=="USB Protection" (
+  cd /D "!~dp0".
+  cls
+  call :Print Ligne_Menuheader Create_Restore_Point
+  call :separator "Computer Wash USB Protection" "only"
+  call :Print Ligne_MenuUSBA 0
+  start diskmgmt
+  echo list disk > "%CD%\Computer_Wash_DiskPart.txt"
+  echo list volume >> "%CD%\Computer_Wash_DiskPart.txt"
+  echo exit >> "%CD%\Computer_Wash_DiskPart.txt"
+  diskpart /s Computer_Wash_DiskPart.txt > LOG.txt"
+  call :separator "Computer Wash USB Protection" "only"
+  type LOG.txt
+  echo.
+  set /p choixUSB= Please type the command to execute :
+  echo !choixUSB! > "%CD%\Computer_Wash_DiskPart.txt"
+  call :separator "Computer Wash USB Protection" "only"
+  call :Print Ligne_MenuUSBB 0
+  echo.
+  set /p choixUSB= %SRESET% Please type the command to execute 1 - 2 - 3 - 4 : %SRESET%
+  if /I "!choixUSB!"=="1" (
+    echo attributes volume set readonly >> "%CD%\Computer_Wash_DiskPart.txt"
+    goto:ProgramUSB
+  )
+  if /I "!choixUSB!"=="2" (
+    echo attributes volume clear readonly >> "%CD%\Computer_Wash_DiskPart.txt"
+    goto:ProgramUSB
+  )
+  if /I "!choixUSB!"=="3" (
+    echo attributes disk set readonly >> "%CD%\Computer_Wash_DiskPart.txt"
+    goto:ProgramUSB
+  )
+  if /I "!choixUSB!"=="4" (
+    echo attributes disk clear readonly >> "%CD%\Computer_Wash_DiskPart.txt"
+    goto:ProgramUSB
+  )
+  powershell -command "Start-Sleep -Milliseconds 500" >nul
+  Call :Erreur
+  timeout /t 60 /nobreak
+  exit
+  :ProgramUSB
+  call :separator "Computer Wash USB Protection" "only"
+  echo exit >> "%CD%\Computer_Wash_DiskPart.txt"
+  diskpart /s "%CD%\Computer_Wash_DiskPart.txt"
+  echo.
+  echo %NFCGREEN% ----------- %SFCGREEN%END %NFCGREEN%----------
+  echo.
+  call :Print Ligne_Menufoot_head 0
+  del Computer_Wash_DiskPart.txt
+  del LOG.txt
+  goto :exitlog
 )
 goto :eof
+:: ============================================================================================================================
+:Auto_Ping
+if /I "!valeur!" NEQ "Auto Ping" ( goto :eof )
+:ResetPing
+set test_mode=1
+Set RANB=0
+Set Pts=.
+Set PtsO=.
+set Loop=0
+:: Récupérer l'adresse de la passerelle par défaut
 
+IF "%gateway%"=="" ( for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /i "Passerelle"') do (
+    set "gateway=%%a"
+    set "gateway=!gateway:~1!"
+	)
+)
+
+IF "%gateway%"=="" (
+  cls
+  call :Print Ligne_Menuheader Create_Restore_Point
+  call :separator "Auto_Ping" "only"
+	echo.
+	echo|set /p="[31m Error"
+	echo.
+	echo|set /p="[31m Network gateway not found please indicate a ping value"
+	echo.
+    echo|set /p="[0m example : 1.1.1.1"
+	echo.
+	echo|set /p="[0m         : 8.8.8.8"
+	echo.
+  call :separator "Auto_Ping" "only"
+  echo.
+	echo|set /p="[0m Ping ?? ? ? [0m Ping :
+	set /p gateway= 
+)
+
+:: REM Récupérer l'adresse de la passerelle par défaut ( Terminer )
+
+:: start interface
+:StartPing
+cls
+call :Print Ligne_Menuheader Create_Restore_Point
+call :separator "Auto_Ping" "only"
+echo.
+echo|set /p="[0m Auto Ping : [33m In Progress ..... .... ... .. ."
+echo.
+call :separator "Auto_Ping" "only"
+echo.
+if !test_mode! EQU 0 ( goto :SuccessAllPings ) else ( goto :ping_start )
+REM SuccessAllPings Auto
+:SuccessAllPings
+echo [34m All Ping OK.
+echo.
+echo [32m Press any key to exit the script.
+echo.
+endlocal
+echo.
+pause > nul 2>&1
+SET gateway=
+SET NBPING=
+set test_mode=1
+goto :exitlog
+
+:: PingInProgress
+:ping_start
+IF NOT DEFINED NBPING (
+	echo|set /p="[0m Sending a "Ping" request with 32 bytes of data."
+	echo.
+  echo|set /p="[0m Please indicate the number of pings to be made : "
+	set /p NBPING=
+	goto :ResetPing
+)
+echo [0m Test_ping_loop.... !Loop!/!NBPING!_OK... color_random..
+echo.
+Set ping_loop=0
+Set Return_line_ping=7
+:Ping
+:loop
+Set /A RAND=(!RANDOM!*97/32768)
+Set Pts=!Pts!!PtsO!
+if !RAND! EQU !RANB! ( goto :loop )
+if !RAND! LEQ 7 (
+	if !RAND! EQU 0 ( set RAND=[0m )
+	if !RAND! EQU 1 ( set RAND=[1m )
+	if !RAND! EQU 2 ( goto :loop )
+	if !RAND! EQU 3 ( goto :loop )
+	if !RAND! EQU 4 ( set RAND=[4m )
+	if !RAND! EQU 5 ( goto :loop )
+	if !RAND! EQU 6 ( goto :loop )
+	::if !RAND! EQU 7 ( set RAND=[7m )
+	if !RAND! EQU 7 ( goto :loop )
+	)
+if !RAND! LEQ 29 (
+	if !RAND! GEQ 8 ( goto :loop )
+	)
+if !RAND! LEQ 37 (
+	if !RAND! GEQ 30 (
+		if !RAND! EQU 30 ( goto :loop )
+		if !RAND! EQU 31 ( set RAND=[31m )
+		if !RAND! EQU 32 ( set RAND=[32m )
+		if !RAND! EQU 33 ( set RAND=[33m )
+		if !RAND! EQU 34 ( set RAND=[34m )
+		if !RAND! EQU 35 ( set RAND=[35m )
+		if !RAND! EQU 36 ( set RAND=[36m )
+		if !RAND! EQU 37 ( set RAND=[37m )
+		)
+	)
+if !RAND! LEQ 89 (
+	if !RAND! GEQ 38 ( goto :loop )
+	)
+if !RAND! LEQ 97 (
+	if !RAND! GEQ 90 (
+		if !RAND! EQU 90 ( set RAND=[90m )
+		if !RAND! EQU 91 ( set RAND=[91m )
+		if !RAND! EQU 92 ( set RAND=[92m )
+		if !RAND! EQU 93 ( set RAND=[93m )
+		if !RAND! EQU 94 ( set RAND=[94m )
+		if !RAND! EQU 95 ( set RAND=[95m )
+		if !RAND! EQU 96 ( set RAND=[96m )
+		if !RAND! EQU 97 ( set RAND=[97m )
+		)
+	)
+Set RANB=!RAND!
+ping -n 1 !gateway! | findstr /i "TTL" >nul
+if !errorlevel! equ 0 (
+    echo|set /p="[0m !RAND!Ping OK [0m "
+    goto :ping_OK
+)
+
+cls
+call :Print Ligne_Menuheader Create_Restore_Point
+call :separator "Auto_Ping" "only"
+echo.
+echo|set /p="[0m Auto Ping : [31mNO PING ERROR ¡¡¡¡ ¡¡¡ ¡¡ ¡"
+echo.
+echo.
+echo|set /p="[0m                       [31m__====-_  _-====__"
+echo.
+echo|set /p="[0m                [31m_--^^^[33m#####[31m//      \\[33m#####[31m^^^--_"
+echo.
+echo|set /p="[0m             [31m_-^[33m##########[31m// (    ) \\[33m##########[31m^-_"
+echo.
+echo|set /p="[0m            [31m-[33m############[31m//  |\^^/|  \\[33m############[31m-"
+echo.
+echo|set /p="[0m          [31m_/[33m############[31m//   ([34m@[31m::[34m@[31m)   [31m\\[33m############[31m\_"
+echo.
+echo|set /p="[0m         [31m/[33m#############[31m((     \\//     ))[33m#############[31m\"
+echo.
+echo|set /p="[0m        [31m-[33m###############[31m\\    (oo)    //[33m###############[31m-"
+echo.
+echo|set /p="[0m       [31m-[33m#################[31m\\  / "" \  //[33m#################[31m-"
+echo.
+echo|set /p="[0m      [31m-[33m###################[31m\\/  (_)  \//[33m###################[31m-"
+echo.
+echo|set /p="[0m     [31m_[33m#[31m/|[33m##########[31m/\[33m######[31m(   ' '   )[33m######[31m/\[33m##########[31m|\[33m#[31m_"
+echo.
+echo|set /p="[0m     [31m|/ |[33m#[31m/\[33m#[31m/\[33m#[31m/\/  \[33m#[31m/\[33m##[31m\    |    /[33m##[31m/\[33m#[31m/  \/\[33m#[31m/\[33m#[31m/\| \|"
+echo.
+echo|set /p="[0m     [31m|/  |/  V  |/  |/  |/ \\   |   // |/ |/  |/  |/  |/  |"
+echo.
+echo|set /p="[0m              [31m([33mO[31m)           \\  |  //      ([33mO[31m)"
+echo.
+echo|set /p="[0m                             [31m\\ | //"
+echo.
+echo|set /p="[0m                              [31m( | )"
+echo.
+echo|set /p="[0m                              [31m( [33mO [31m)"
+echo.
+echo|set /p="[0m                               [31m\_/"
+echo.
+echo.
+echo [0m A PING ERROR HAS BEEN DETECTED THE PING MODE SWITCHES TO INFINITE MODE UNTIL AN OK PING RESETS THE TEST. [41m [0m!RAND!Ping KO [41m [0m
+::PowerShell -Command "[console]::beep(440, 500); [console]::beep(440, 500); [console]::beep(440, 500); [console]::beep(349, 350); [console]::beep(523, 150); [console]::beep(440, 500); [console]::beep(349, 350); [console]::beep(523, 150); [console]::beep(440, 1000); [console]::beep(659, 500); [console]::beep(659, 500); [console]::beep(659, 500); [console]::beep(698, 350); [console]::beep(523, 150); [console]::beep(415, 500); [console]::beep(349, 350); [console]::beep(523, 150); [console]::beep(440, 1000)"
+call :separator "Auto_Ping" "only"
+echo.
+:Error_Ping
+ping -n 1 !gateway! | findstr /i "TTL" >nul
+if !errorlevel! equ 0 (
+    echo|set /p="[0m !RAND!Ping OK [0m "
+	echo|set /p="Reset test"
+	timeout /nobreak 10 > nul 2>&1
+	goto :ResetPing
+)
+goto :Error_Ping
+:ping_OK
+Set Pts=.
+Set /A Loop=!Loop!+1
+Set /A ping_loop=!ping_loop!+1
+if !ping_loop! GEQ !Return_line_ping! (
+	Set /A Return_line_ping=!Return_line_ping!+7
+	echo.
+	)
+if !ping_loop! GEQ 28 ( 
+	if !Loop! GEQ !NBPING! ( goto :EndPing ) else ( goto :StartPing )
+	)
+if !Loop! LSS !NBPING! ( goto :Ping )
+:EndPing
+Set /A Loop=0
+Set /A Return_line_ping=0
+echo.
+set test_mode=0
+goto :StartPing
+:: ============================================================================================================================
 :Exit
 set /a nb+=1
-if /I "%valeur%"=="exit" (
-set choix=C
-if /I "%exit%"=="0" (
-set exit=1
-) else (
-set exit=0
-)
-)
-set "C%nb%=Exit "
-if /I "%exit%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=exit"
+  set exit=1
+  ) else (
+  if /I "!valeur!"=="exit" (
+    set choix=C
+    if /I "!exit!"=="0" (
+      set exit=1
+      ) else (
+      set exit=0
+    )
+  )
+  set "C%nb%=Exit "
+  if /I "!exit!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-	if "%Start?%"=="2" (
-		goto :ALL
-	)
-)
-if /I "%exit%"=="1" (
+    if "!Start?!"=="2" (
+      goto :ALL
+    )
+  )
+  if /I "!exit!"=="1" (
     set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
-	if "%Start?%"=="2" (
-		call :separator exit
-		goto :exitlog
-	)
+    if "!Start?!"=="2" (
+      call :separator exit
+      goto :exitlog
+    )
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :shutdown
 set /a nb+=1
-if /I "%valeur%"=="shutdownrr" (
-set choix=C
-if /I "%shutdownrr%"=="0" (
-set shutdown=0
-set shutdownrr=1
-set shutdownro=0
-) else (
-set shutdownrr=0
+if "!init!"=="1" (
+  set "C%nb%=shutdownrr"
+  set /a nb+=1
+  set "C!nb!=shutdownro"
+  set /a nb+=1
+  set "C!nb!=shutdown"
+  set Shutdown=0
+  set shutdownrr=0
+  set shutdownro=0
+  ) else (
+  if /I "!valeur!"=="shutdownrr" (
+    set choix=C
+    if /I "!shutdownrr!"=="0" (
+      set shutdown=0
+      set shutdownrr=1
+      set shutdownro=0
+      ) else (
+      set shutdownrr=0
+    )
+  )
+  set /a nb+=1
+  if /I "!valeur!"=="shutdownro" (
+    set choix=C
+    if /I "!shutdownro!"=="0" (
+      set shutdown=0
+      set shutdownrr=0
+      set shutdownro=1
+      ) else (
+      set shutdownro=0
+    )
+  )
+  if /I "!valeur!"=="Restart Windows in Recovery Mode" (
+    set choix=C
+    if /I "!shutdownro!"=="0" (
+      set shutdownro=1
+      ) else (
+      set shutdownro=0
+    )
+  )
+  set /a nb+=1
+  if /I "!valeur!"=="shutdown" (
+    set choix=C
+    if /I "!shutdown!"=="0" (
+      set shutdown=1
+      set shutdownrr=0
+      set shutdownro=0
+      ) else (
+      set shutdown=0
+    )
+  )
+  set "C%nb%=Shutdown /s "
+  if /I "!shutdown!"=="0" (
+    set "C!nb!=!C%nb%!%SFCRED%OFF%SRESET%"
+  )
+  if /I "!shutdown!"=="1" (
+    set "C!nb!=!C%nb%!%SFCGREEN%ON%SRESET%"
+    if "!Start?!"=="2" (
+      call :separator "Shutdown /s"
+      Shutdown /s
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+  )
+  set /a nb-=1
+  set "C%nb%=Shutdown /r /o "
+  if /I "!shutdownro!"=="0" (
+    set "C!nb!=!C%nb%!%SFCRED%OFF%SRESET%"
+  )
+  if /I "!shutdownro!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Shutdown /r /o"
+      shutdown /r /o
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C!nb!=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  set /a nb-=1
+  set "C%nb%=Shutdown /r "
+  if /I "!shutdownrr!"=="0" (
+    set "C!nb!=!C%nb%!%SFCRED%OFF%SRESET%"
+  )
+  if /I "!shutdownrr!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Shutdown /r"
+      Shutdown /r
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C!nb!=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  set /a nb+=1
+  set /a nb+=1
 )
-)
-set /a nb+=1
-if /I "%valeur%"=="shutdownro" (
-set choix=C
-if /I "%shutdownro%"=="0" (
-set shutdown=0
-set shutdownrr=0
-set shutdownro=1
-) else (
-set shutdownro=0
-)
-)
-if /I "%valeur%"=="Restart Windows in Recovery Mode" (
-set choix=C
-if /I "%shutdownro%"=="0" (
-set shutdownro=1
-) else (
-set shutdownro=0
-)
-)
-set /a nb+=1
-if /I "%valeur%"=="shutdown" (
-set choix=C
-if /I "%shutdown%"=="0" (
-set shutdown=1
-set shutdownrr=0
-set shutdownro=0
-) else (
-set shutdown=0
-)
-)
-set "C%nb%=Shutdown /s "
-if /I "%shutdown%"=="0" (
-    set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%shutdown%"=="1" (
-    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
-	if "%Start?%"=="2" (
-		call :separator "Shutdown /s"
-		Shutdown /s
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-)
-set /a nb-=1
-set "C%nb%=Shutdown /r /o "
-if /I "%shutdownro%"=="0" (
-    set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%shutdownro%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Shutdown /r /o"
-		shutdown /r /o
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
-)
-set /a nb-=1
-set "C%nb%=Shutdown /r "
-if /I "%shutdownrr%"=="0" (
-    set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%shutdownrr%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Shutdown /r"
-		Shutdown /r
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
-)
-set /a nb+=1
-set /a nb+=1
 goto :eof
-
+:: ============================================================================================================================
 :Pause
 set /a nb+=1
-if /I "%valeur%"=="Pause" (
-set choix=C
-if /I "%pause%"=="0" (
-set pause=1
-) else (
-set pause=0
-)
-)
-set "C%nb%=Pause "
-if /I "%pause%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=Pause"
+  set pause=1
+  ) else (
+  if /I "!valeur!"=="Pause" (
+    set choix=C
+    if /I "!pause!"=="0" (
+      set pause=1
+      ) else (
+      set pause=0
+    )
+  )
+  set "C%nb%=Pause "
+  if /I "!pause!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%pause%"=="1" (
+  )
+  if /I "!pause!"=="1" (
     set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
-	if "%Start?%"=="2" (
-		call :separator "The script has finished executing all the requested commands and will close as soon as you end the pause."
-		pause
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
+    if "!Start?!"=="2" (
+      call :separator "The script has finished executing all the requested commands and will close as soon as you end the pause."
+      pause
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :Create_Restore_Point
 set Temploop=0
-set /a nb+=1
 :Retry_Create_Restore_Point
-if /I "%valeur%"=="Wmic.exe" (
-set choix=C
-if /I "%Security%"=="0" (
-set Security=1
-) else (
-set Security=0
-)
-)
-set "C%nb%=Create Restore Point "
-if /I "%Security%"=="0" (
-	set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%Security%"=="1" (
-    if "%Start?%"=="2" (
-		call :separator "Allows the creation of restore points on the drive if they have not already been created."
-		powershell -Command "if (-not (Get-ComputerRestorePoint -ErrorAction SilentlyContinue)) { Enable-ComputerRestore -Drive 'C:\' }"
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		call :separator "Silently start the System Restore service"
-		net start srservice >nul 2>&1
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		set "DATETIME=%DATE:/=-%_%TIME::=-%"
-		set "DATETIME=%DATETIME: =0%"
-		call set "POINTNAME=AutoRestore_%%DATETIME%%"
-		call set "POINTNAME=%%POINTNAME:~0,40%%"
-		call :separator "Create Restore Point"
-		call powershell -Command "Checkpoint-Computer -Description '%%POINTNAME%%' -RestorePointType 'MODIFY_SETTINGS'"
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry Create_Restore_Point )
-	)
-	    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+set /a nb+=1
+if "!init!"=="1" (
+  set "C%nb%=Wmic.exe"
+  set Security=1
+  ) else (
+  if /I "!valeur!"=="Wmic.exe" (
+    set choix=C
+    if /I "!Security!"=="0" (
+      set Security=1
+      ) else (
+      set Security=0
+    )
+  )
+  set "C%nb%=Create Restore Point "
+  if /I "!Security!"=="0" (
+    set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
+  )
+  if /I "!Security!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Allows the creation of restore points on the drive if they have not already been created."
+      powershell -Command "if (-not (Get-ComputerRestorePoint -ErrorAction SilentlyContinue)) { Enable-ComputerRestore -Drive 'C:\' }"
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      call :separator "Silently start the System Restore service"
+      net start srservice >nul 2>&1
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      set "DATETIME=%DATE:/=-%_%TIME::=-!"
+      set "DATETIME=%DATETIME: =0!"
+      call set "POINTNAME=AutoRestore_%%DATETIME%!"
+      call set "POINTNAME=%%POINTNAME:~0,40%!"
+      call :separator "Create Restore Point"
+      call powershell -Command "Checkpoint-Computer -Description '%%POINTNAME%%' -RestorePointType 'MODIFY_SETTINGS'"
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry Create_Restore_Point )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :System_info
 set /a nb+=1
-if /I "%valeur%"=="System info" (
-	set choix=C
-	if /I "%wmicsoftwarelicensingservice%"=="0" (
-		set wmicsoftwarelicensingservice=1
-	) else (
-		set wmicsoftwarelicensingservice=0
-	)
-)
-set "C%nb%=Windows KEY + Info System "
-if /I "%wmicsoftwarelicensingservice%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=System info"
+  ) else (
+  if /I "!valeur!"=="System info" (
+    set choix=C
+    if /I "!wmicsoftwarelicensingservice!"=="0" (
+      set wmicsoftwarelicensingservice=1
+      ) else (
+      set wmicsoftwarelicensingservice=0
+    )
+  )
+  set "C%nb%=Windows KEY + Info System "
+  if /I "!wmicsoftwarelicensingservice!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%wmicsoftwarelicensingservice%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "System info"
-   		systeminfo | find /i "Microsoft windows"
-   		echo|set /p="Windows KEY :                               "
-   		powershell -Command "(Get-WmiObject -Query 'Select * from SoftwareLicensingService').OA3xOriginalProductKey"
-		start msinfo32
-		timeout 60
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!wmicsoftwarelicensingservice!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "System info"
+      systeminfo | find /i "Microsoft windows"
+      echo|set /p="Windows KEY :                               "
+      powershell -Command "(Get-WmiObject -Query 'Select * from SoftwareLicensingService').OA3xOriginalProductKey"
+      start msinfo32
+      timeout 60
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :Chkdsk
 set /a nb+=1
-if /I "%valeur%"=="Chkdsk" (
-set choix=C
-if /I "%chkdsk%"=="0" (
-set chkdsk=1
-) else (
-set chkdsk=0
-)
-)
-set "C%nb%=Chkdsk C: /F /R /I "
-if /I "%chkdsk%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=Chkdsk"
+  set chkdsk=0
+  ) else (
+  if /I "!valeur!"=="Chkdsk" (
+    set choix=C
+    if /I "!chkdsk!"=="0" (
+      set chkdsk=1
+      ) else (
+      set chkdsk=0
+    )
+  )
+  set "C%nb%=Chkdsk C: /F /R /I "
+  if /I "!chkdsk!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%chkdsk%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Chkdsk C: /F /R /I"
-		echo O^R | chkdsk c: /F /R /I
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!chkdsk!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Chkdsk C: /F /R /I"
+      echo O^R | chkdsk c: /F /R /I
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
 
 :Defragmentation
 set Temploop=0
 set /a nb+=1
-:Retry_Defragmentation
-if /I "%valeur%"=="Defragmentation" (
-set choix=C
-if /I "%defrag%"=="0" (
-set defrag=1
-) else (
-set defrag=0
-)
-)
-set "C%nb%=Defrag C: /U /V "
-if /I "%defrag%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=Defragmentation"
+  set defrag=0
+  ) else (
+  :Retry_Defragmentation
+  if /I "!valeur!"=="Defragmentation" (
+    set choix=C
+    if /I "!defrag!"=="0" (
+      set defrag=1
+      ) else (
+      set defrag=0
+    )
+  )
+  set "C%nb%=Defrag C: /U /V "
+  if /I "!defrag!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%defrag%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Defrag C: /U /V"
-		Defrag C: /U /V
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry Defragmentation )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!defrag!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Defrag C: /U /V"
+      Defrag C: /U /V
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry Defragmentation )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :cleanmgr
 set /a nb+=1
-if /I "%valeur%"=="cleanmgr" (
-set choix=C
-if /I "%cleanmgr%"=="0" (
-set cleanmgr=1
-) else (
-set cleanmgr=0
-)
-)
-set "C%nb%=Cleanmgr /sagerun:65535 "
-if /I "%cleanmgr%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=cleanmgr"
+  set cleanmgr=0
+  ) else (
+  if /I "!valeur!"=="cleanmgr" (
+    set choix=C
+    if /I "!cleanmgr!"=="0" (
+      set cleanmgr=1
+      ) else (
+      set cleanmgr=0
+    )
+  )
+  set "C%nb%=Cleanmgr /sagerun:65535 "
+  if /I "!cleanmgr!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%cleanmgr%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Cleanmgr /sagerun:65535"
-		Cleanmgr /sagerun:65535
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!cleanmgr!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Cleanmgr /sagerun:65535"
+      Cleanmgr /sagerun:65535
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :DISM
 set Temploop=0
 set /a nb+=1
 :Retry_DISM
-if /I "%valeur%"=="DISM" (
-set choix=C
-if /I "%DISM%"=="0" (
-set DISM=1
-) else (
-set DISM=0
-)
-)
-set "C%nb%=DISM.exe /Online /Cleanup-image /Restorehealth "
-if /I "%DISM%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=DISM"
+  set DISM=0
+  ) else (
+  if /I "!valeur!"=="DISM" (
+    set choix=C
+    if /I "!DISM!"=="0" (
+      set DISM=1
+      ) else (
+      set DISM=0
+    )
+  )
+  set "C%nb%=DISM.exe /Online /Cleanup-image /Restorehealth "
+  if /I "!DISM!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%DISM%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "DISM.exe /Online /Cleanup-image /Restorehealth"
-		DISM.exe /Online /Cleanup-image /Restorehealth
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry DISM )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!DISM!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "DISM.exe /Online /Cleanup-image /Restorehealth"
+      DISM.exe /Online /Cleanup-image /Restorehealth
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry DISM )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :Sfcscannow
 set Temploop=0
 set /a nb+=1
 :Retry_Sfcscannow
-if /I "%valeur%"=="sfc" (
-set choix=C
-if /I "%sfc%"=="0" (
-set sfc=1
-) else (
-set sfc=0
-)
-)
-set "C%nb%=Sfc /scannow "
-if /I "%sfc%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=sfc"
+  set sfc=0
+  ) else (
+  if /I "!valeur!"=="sfc" (
+    set choix=C
+    if /I "!sfc!"=="0" (
+      set sfc=1
+      ) else (
+      set sfc=0
+    )
+  )
+  set "C%nb%=Sfc /scannow "
+  if /I "!sfc!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%sfc%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Sfc /scannow"
-		Sfc /scannow
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry Sfcscannow )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!sfc!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Sfc /scannow"
+      Sfc /scannow
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry Sfcscannow )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :findstr
 set /a nb+=1
-if /I "%valeur%"=="findstr" (
-set choix=C
-if /I "%findstr%"=="0" (
-set findstr=1
-) else (
-set findstr=0
-)
-)
-set "C%nb%=Log SFC  "
-if /I "%findstr%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=findstr"
+  set findstr=0
+  ) else (
+  if /I "!valeur!"=="findstr" (
+    set choix=C
+    if /I "!findstr!"=="0" (
+      set findstr=1
+      ) else (
+      set findstr=0
+    )
+  )
+  set "C%nb%=Log SFC  "
+  if /I "!findstr!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%findstr%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Findstr /c:""[SR]"" %windir%\Logs\CBS\CBS.log In Progress..."
-		findstr /c:"[SR]" %windir%\Logs\CBS\CBS.log >>"%logdest%"
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!findstr!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Findstr /c:""[SR]"" %windir%\Logs\CBS\CBS.log In Progress..."
+      findstr /c:"[SR]" %windir%\Logs\CBS\CBS.log >>"!logdest!"
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :Mrt
 set /a nb+=1
-if /I "%valeur%"=="Mrt" (
-set choix=C
-if /I "%Mrt%"=="0" (
-set Mrt=1
-) else (
-set Mrt=0
-)
-)
-set "C%nb%=Mrt.exe (This may take several hours) "
-if /I "%Mrt%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=Mrt"
+  set Mrt=0
+  ) else (
+  if /I "!valeur!"=="Mrt" (
+    set choix=C
+    if /I "!Mrt!"=="0" (
+      set Mrt=1
+      ) else (
+      set Mrt=0
+    )
+  )
+  set "C%nb%=Mrt.exe (This may take several hours) "
+  if /I "!Mrt!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%Mrt%"=="1" (
-	if "%Start?%"=="2" (
-		Call :Spinner_Start
-		call :separator "Mrt.exe This may take several hours"
-		Mrt.exe /F:Y /Q
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		call :Spinner_OFF
-		
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!Mrt!"=="1" (
+    if "!Start?!"=="2" (
+      Call :Spinner_Start
+      call :separator "Mrt.exe This may take several hours"
+      Mrt.exe /F:Y /Q
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      call :Spinner_OFF
+      
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :SignatureUpdate
 set Temploop=0
 set /a nb+=1
 :Retry_SignatureUpdate
-if /I "%valeur%"=="SignatureUpdate" (
-set choix=C
-if /I "%SignatureUpdate%"=="0" (
-set SignatureUpdate=1
-) else (
-set SignatureUpdate=0
-)
-)
-set "C%nb%=MpCmdRun.exe -SignatureUpdate "
-if /I "%SignatureUpdate%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=SignatureUpdate"
+  set SignatureUpdate=0
+  ) else (
+  if /I "!valeur!"=="SignatureUpdate" (
+    set choix=C
+    if /I "!SignatureUpdate!"=="0" (
+      set SignatureUpdate=1
+      ) else (
+      set SignatureUpdate=0
+    )
+  )
+  set "C%nb%=MpCmdRun.exe -SignatureUpdate "
+  if /I "!SignatureUpdate!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%SignatureUpdate%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "MpCmdRun.exe -SignatureUpdate"
-		"%ProgramFiles%\Windows Defender\MpCmdRun.exe" -SignatureUpdate
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry SignatureUpdate )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!SignatureUpdate!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "MpCmdRun.exe -SignatureUpdate"
+      "!ProgramFiles%\Windows Defender\MpCmdRun.exe" -SignatureUpdate
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry SignatureUpdate )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :MpCmdRunBootSectorScan
 set Temploop=0
 set /a nb+=1
 :Retry_:MpCmdRunBootSectorScan
-if /I "%valeur%"=="MpCmdRunBootSectorScan" (
-set choix=C
-if /I "%MpCmdRunBootSectorScan%"=="0" (
-set MpCmdRunBootSectorScan=1
-) else (
-set MpCmdRunBootSectorScan=0
-)
-)
-set "C%nb%=MpCmdRun.exe -Scan -ScanType -BootSectorScan "
-if /I "%MpCmdRunBootSectorScan%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=MpCmdRunBootSectorScan"
+  set MpCmdRunBootSectorScan=0
+  ) else (
+  if /I "!valeur!"=="MpCmdRunBootSectorScan" (
+    set choix=C
+    if /I "!MpCmdRunBootSectorScan!"=="0" (
+      set MpCmdRunBootSectorScan=1
+      ) else (
+      set MpCmdRunBootSectorScan=0
+    )
+  )
+  set "C%nb%=MpCmdRun.exe -Scan -ScanType -BootSectorScan "
+  if /I "!MpCmdRunBootSectorScan!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%MpCmdRunBootSectorScan%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "MpCmdRun.exe -Scan -ScanType -BootSectorScan"
-		Call :Spinner_Start
-		"%ProgramFiles%\Windows Defender\MpCmdRun.exe" -Scan -ScanType -BootSectorScan
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		call :Spinner_OFF
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!MpCmdRunBootSectorScan!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "MpCmdRun.exe -Scan -ScanType -BootSectorScan"
+      Call :Spinner_Start
+      "!ProgramFiles%\Windows Defender\MpCmdRun.exe" -Scan -ScanType -BootSectorScan
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      call :Spinner_OFF
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :MpCmdRunScanType
 set /a nb+=1
-if /I "%valeur%"=="MpCmdRunScanType" (
-set choix=C
-if /I "%MpCmdRunScanType%"=="0" (
-set MpCmdRunScanType=1
-) else (
-set MpCmdRunScanType=0
-)
-)
-set "C%nb%=MpCmdRun.exe -Scan -ScanType 2 "
-if /I "%MpCmdRunScanType%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=MpCmdRunScanType"
+  set MpCmdRunScanType=0
+  ) else (
+  if /I "!valeur!"=="MpCmdRunScanType" (
+    set choix=C
+    if /I "!MpCmdRunScanType!"=="0" (
+      set MpCmdRunScanType=1
+      ) else (
+      set MpCmdRunScanType=0
+    )
+  )
+  set "C%nb%=MpCmdRun.exe -Scan -ScanType 2 "
+  if /I "!MpCmdRunScanType!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%MpCmdRunScanType%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "MpCmdRun.exe -Scan -ScanType 2"
-		Call :Spinner_Start
-		"%ProgramFiles%\Windows Defender\MpCmdRun.exe" -Scan -ScanType 2
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		call :Spinner_OFF
-		
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!MpCmdRunScanType!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "MpCmdRun.exe -Scan -ScanType 2"
+      Call :Spinner_Start
+      "!ProgramFiles%\Windows Defender\MpCmdRun.exe" -Scan -ScanType 2
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      call :Spinner_OFF
+      
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :pnpunattendauditsystem
 set /a nb+=1
-if /I "%valeur%"=="pnpunattendauditsystem" (
-set choix=C
-if /I "%pnpunattend%"=="0" (
-set pnpunattend=1
-) else (
-set pnpunattend=0
-)
-)
-set "C%nb%=Pnpunattend auditsystem /s /l "
-if /I "%pnpunattend%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=pnpunattendauditsystem"
+  set pnpunattend=0
+  ) else (
+  if /I "!valeur!"=="pnpunattendauditsystem" (
+    set choix=C
+    if /I "!pnpunattend!"=="0" (
+      set pnpunattend=1
+      ) else (
+      set pnpunattend=0
+    )
+  )
+  set "C%nb%=Pnpunattend auditsystem /s /l "
+  if /I "!pnpunattend!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%pnpunattend%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Pnpunattend auditsystem /s /l"
-		pnpunattend auditsystem /s /l
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!pnpunattend!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Pnpunattend auditsystem /s /l"
+      pnpunattend auditsystem /s /l
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :mode
 set /a nb+=1
-if /I "%valeur%"=="mode" (
-set choix=C
-if /I "%mode%"=="0" (
-set mode=1
-) else (
-set mode=0
-)
-)
-set "C%nb%=Mode "
-if /I "%mode%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=mode"
+  set mode=0
+  ) else (
+  if /I "!valeur!"=="mode" (
+    set choix=C
+    if /I "!mode!"=="0" (
+      set mode=1
+      ) else (
+      set mode=0
+    )
+  )
+  set "C%nb%=Mode "
+  if /I "!mode!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%mode%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Mode"
-		mode
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!mode!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Mode"
+      mode
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :mdsched
 set /a nb+=1
-if /I "%valeur%"=="mdsched" (
-set choix=C
-if /I "%mdsched%"=="0" (
-set mdsched=1
-) else (
-set mdsched=0
-)
-)
-set "C%nb%=Mdsched "
-if /I "%mdsched%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=mdsched"
+  set mdsched=0
+  ) else (
+  if /I "!valeur!"=="mdsched" (
+    set choix=C
+    if /I "!mdsched!"=="0" (
+      set mdsched=1
+      ) else (
+      set mdsched=0
+    )
+  )
+  set "C%nb%=Mdsched "
+  if /I "!mdsched!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%mdsched%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Mdsched"
-		mdsched
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!mdsched!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Mdsched"
+      mdsched
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :bcdbootsfall
 set Temploop=0
 set /a nb+=1
 :Retry_bcdbootsfall
-if /I "%valeur%"=="bcdboot" (
-set choix=C
-if /I "%bcdboot%"=="0" (
-set bcdboot=1
-) else (
-set bcdboot=0
-)
-)
-set "C%nb%=bcdboot C:\Windows /s C: /f ALL "
-if /I "%bcdboot%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=bcdboot"
+  set bcdboot=0
+  ) else (
+  if /I "!valeur!"=="bcdboot" (
+    set choix=C
+    if /I "!bcdboot!"=="0" (
+      set bcdboot=1
+      ) else (
+      set bcdboot=0
+    )
+  )
+  set "C%nb%=bcdboot C:\Windows /s C: /f ALL "
+  if /I "!bcdboot!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%bcdboot%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "bcdboot C:\Windows /s C: /f ALL"
-		bcdboot C:\Windows /s C: /f ALL
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry bcdbootsfall )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!bcdboot!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "bcdboot C:\Windows /s C: /f ALL"
+      bcdboot C:\Windows /s C: /f ALL
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry bcdbootsfall )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :wsreset
 set /a nb+=1
-if /I "%valeur%"=="wsreset" (
-set choix=C
-if /I "%wsreset%"=="0" (
-set wsreset=1
-) else (
-set wsreset=0
-)
-)
-set "C%nb%=Wsreset "
-if /I "%wsreset%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=Wsreset"
+  set wsreset=0
+  ) else (
+  if /I "!valeur!"=="wsreset" (
+    set choix=C
+    if /I "!wsreset!"=="0" (
+      set wsreset=1
+      ) else (
+      set wsreset=0
+    )
+  )
+  set "C%nb%=Wsreset "
+  if /I "!wsreset!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%wsreset%"=="1" (
-	if "%Start?%"=="2" (
-		Call :Spinner_Start
-		call :separator "Wsreset"
-		wsreset
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		call :Spinner_OFF
-		
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!wsreset!"=="1" (
+    if "!Start?!"=="2" (
+      Call :Spinner_Start
+      call :separator "Wsreset"
+      wsreset
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      call :Spinner_OFF
+      
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :rstrui
 set /a nb+=1
-if /I "%valeur%"=="rstrui" (
-set choix=C
-if /I "%rstrui%"=="0" (
-set rstrui=1
-) else (
-set rstrui=0
-)
-)
-set "C%nb%=Rstrui.exe "
-if /I "%rstrui%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=rstrui"
+  set rstrui=0
+  ) else (
+  if /I "!valeur!"=="rstrui" (
+    set choix=C
+    if /I "!rstrui!"=="0" (
+      set rstrui=1
+      ) else (
+      set rstrui=0
+    )
+  )
+  set "C%nb%=Rstrui.exe "
+  if /I "!rstrui!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%rstrui%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Rstrui.exe"
-		rstrui.exe
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!rstrui!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Rstrui.exe"
+      rstrui.exe
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :AllUpdateAPP
 set Temploop=0
 set /a nb+=1
 :Retry_AllUpdateAPP
-if /I "%valeur%"=="AllUpdateAPP" (
-set choix=C
-if /I "%ALL%"=="0" (
-set ALL=1
-) else (
-set ALL=0
-)
-)
-set "C%nb%=winget upgrade --all --silent --accept-package-agreements --accept-source-agreements "
-
-if /I "%ALL%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=AllUpdateAPP"
+  set ALL=0
+  ) else (
+  if /I "!valeur!"=="AllUpdateAPP" (
+    set choix=C
+    if /I "!ALL!"=="0" (
+      set ALL=1
+      ) else (
+      set ALL=0
+    )
+  )
+  set "C%nb%=Winget upgrade --all --silent --accept-package-agreements --accept-source-agreements "
+  
+  if /I "!ALL!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%ALL%"=="1" (
-	if "%Start?%"=="2" (
-	call :separator "All Update APP"
-	winget upgrade --all --silent --accept-package-agreements --accept-source-agreements
-	set temperror=!ERRORLEVEL!
-    Call :LOGERRORLEVEL !temperror!
-	if !temperror! GEQ 1 ( Call :Retry AllUpdateAPP )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!ALL!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "All Update APP"
+      %wingetPath% upgrade --all --silent --accept-package-agreements --accept-source-agreements
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry AllUpdateAPP )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :wingetgooglechrome
 set /a nb+=1
-if /I "%valeur%"=="wingetgooglechrome" (
-set choix=C
-if /I "%chrome%"=="0" (
-set chrome=1
-) else (
-set chrome=0
-)
-)
-set "C%nb%=Winget install google.chrome "
-if /I "%chrome%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=wingetgooglechrome"
+  set chrome=0
+  ) else (
+  if /I "!valeur!"=="wingetgooglechrome" (
+    set choix=C
+    if /I "!chrome!"=="0" (
+      set chrome=1
+      ) else (
+      set chrome=0
+    )
+  )
+  set "C%nb%=Winget install google.chrome "
+  if /I "!chrome!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%chrome%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "google.chrome"
-		winget install "Google.Chrome" --silent --accept-package-agreements --accept-source-agreements
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!chrome!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "google.chrome"
+      %wingetPath% install "Google.Chrome" --silent --accept-package-agreements --accept-source-agreements
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :wingetMozillaFirefox
 set /a nb+=1
-if /I "%valeur%"=="wingetMozillaFirefox" (
-set choix=C
-if /I "%Firefox%"=="0" (
-set Firefox=1
-) else (
-set Firefox=0
-)
-)
-set "C%nb%=Winget install Mozilla.Firefox "
-if /I "%Firefox%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=wingetMozillaFirefox"
+  set Firefox=0
+  ) else (
+  if /I "!valeur!"=="wingetMozillaFirefox" (
+    set choix=C
+    if /I "!Firefox!"=="0" (
+      set Firefox=1
+      ) else (
+      set Firefox=0
+    )
+  )
+  set "C%nb%=Winget install Mozilla.Firefox "
+  if /I "!Firefox!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%Firefox%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Install Mozilla.Firefox"
-		winget install "Mozilla.Firefox" --silent --accept-package-agreements --accept-source-agreements
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!Firefox!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Install Mozilla.Firefox"
+      %wingetPath% install "Mozilla.Firefox" --silent --accept-package-agreements --accept-source-agreements
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :wingetVideoLANVLC
 set /a nb+=1
-if /I "%valeur%"=="wingetVideoLANVLC" (
-set choix=C
-if /I "%VLC%"=="0" (
-set VLC=1
-) else (
-set VLC=0
-)
-)
-set "C%nb%=Winget install VideoLAN.VLC "
-if /I "%VLC%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=wingetVideoLANVLC"
+  set VLC=0
+  ) else (
+  if /I "!valeur!"=="wingetVideoLANVLC" (
+    set choix=C
+    if /I "!VLC!"=="0" (
+      set VLC=1
+      ) else (
+      set VLC=0
+    )
+  )
+  set "C%nb%=Winget install VideoLAN.VLC "
+  if /I "!VLC!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%VLC%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Install VideoLAN.VLC"
-		winget install "VideoLAN.VLC" --silent --accept-package-agreements --accept-source-agreements
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!VLC!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Install VideoLAN.VLC"
+      %wingetPath% install "VideoLAN.VLC" --silent --accept-package-agreements --accept-source-agreements
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :wingetAcrobat
 set /a nb+=1
-if /I "%valeur%"=="wingetAcrobat" (
-set choix=C
-if /I "%Acrobat%"=="0" (
-set Acrobat=1
-) else (
-set Acrobat=0
-)
-)
-set "C%nb%=Winget install Adobe.Acrobat.Reader.64-bit "
-if /I "%Acrobat%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=wingetAcrobat"
+  set Acrobat=0
+  ) else (
+  if /I "!valeur!"=="wingetAcrobat" (
+    set choix=C
+    if /I "!Acrobat!"=="0" (
+      set Acrobat=1
+      ) else (
+      set Acrobat=0
+    )
+  )
+  set "C%nb%=Winget install Adobe.Acrobat.Reader.64-bit "
+  if /I "!Acrobat!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%Acrobat%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Install Adobe.Acrobat.Reader.64-bit"
-		winget install "Adobe.Acrobat.Reader.64-bit" --silent --accept-package-agreements --accept-source-agreements
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-		set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!Acrobat!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Install Adobe.Acrobat.Reader.64-bit"
+      %wingetPath% install "Adobe.Acrobat.Reader.64-bit" --silent --accept-package-agreements --accept-source-agreements
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :winget7zip
 set /a nb+=1
-if /I "%valeur%"=="winget7zip" (
-set choix=C
-if /I "%zip%"=="0" (
-set zip=1
-) else (
-set zip=0
-)
-)
-set "C%nb%=Winget install 7zip.7zip "
-if /I "%zip%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=winget7zip"
+  set zip=0
+  ) else (
+  if /I "!valeur!"=="winget7zip" (
+    set choix=C
+    if /I "!zip!"=="0" (
+      set zip=1
+      ) else (
+      set zip=0
+    )
+  )
+  set "C%nb%=Winget install 7zip.7zip "
+  if /I "!zip!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%zip%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Install 7zip.7zip"
-		winget install "7zip.7zip" --silent --accept-package-agreements --accept-source-agreements
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!zip!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Install 7zip.7zip"
+      %wingetPath% install "7zip.7zip" --silent --accept-package-agreements --accept-source-agreements
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :KeePass
 set /a nb+=1
-if /I "%valeur%"=="KeePass" (
-set choix=C
-if /I "%KeePass%"=="0" (
-set KeePass=1
-) else (
-set KeePass=0
-)
-)
-set "C%nb%=Winget install DominikReichl.KeePass "
-if /I "%KeePass%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=KeePass"
+  set KeePass=0
+  ) else (
+  if /I "!valeur!"=="KeePass" (
+    set choix=C
+    if /I "!KeePass!"=="0" (
+      set KeePass=1
+      ) else (
+      set KeePass=0
+    )
+  )
+  set "C%nb%=Winget install DominikReichl.KeePass "
+  if /I "!KeePass!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%KeePass%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Install DominikReichl.KeePass"
-		winget install "DominikReichl.KeePass" --silent --accept-package-agreements --accept-source-agreements
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!KeePass!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Install DominikReichl.KeePass"
+      %wingetPath% install "DominikReichl.KeePass" --silent --accept-package-agreements --accept-source-agreements
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :wuauservStop
 set Temploop=0
 set /a nb+=1
 :Retry_wuauservStop
-if /I "%valeur%"=="wuauservStop" (
-set choix=C
-if /I "%wuauservStop%"=="0" (
-set wuauservStop=1
-) else (
-set wuauservStop=0
-)
-)
-set "C%nb%=net stop wuauservStop "
-if /I "%wuauservStop%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=wuauservStop"
+  set wuauservStop=0
+  ) else (
+  if /I "!valeur!"=="wuauservStop" (
+    set choix=C
+    if /I "!wuauservStop!"=="0" (
+      set wuauservStop=1
+      ) else (
+      set wuauservStop=0
+    )
+  )
+  set "C%nb%=net stop wuauservStop "
+  if /I "!wuauservStop!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%wuauservStop%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Stopping services... net stop wuauservStop"
-		net stop wuauserv 2>&1
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry wuauservStop )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!wuauservStop!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Stopping services... net stop wuauservStop"
+      net stop wuauserv 2>&1
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry wuauservStop )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :cryptSvcStop
 set Temploop=0
 set /a nb+=1
-if /I "%valeur%"=="cryptSvcStop" (
-set choix=C
-if /I "%cryptSvcStop%"=="0" (
-set cryptSvcStop=1
-) else (
-set cryptSvcStop=0
-)
-)
-set "C%nb%=net stop cryptSvc "
-if /I "%cryptSvcStop%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=cryptSvcStop"
+  set cryptSvcStop=0
+  ) else (
+  if /I "!valeur!"=="cryptSvcStop" (
+    set choix=C
+    if /I "!cryptSvcStop!"=="0" (
+      set cryptSvcStop=1
+      ) else (
+      set cryptSvcStop=0
+    )
+  )
+  set "C%nb%=net stop cryptSvc "
+  if /I "!cryptSvcStop!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%cryptSvcStop%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Stopping services... net stop cryptSvc"
-		net stop cryptSvc 2>&1
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!cryptSvcStop!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Stopping services... net stop cryptSvc"
+      net stop cryptSvc 2>&1
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :bitsStop
 set Temploop=0
 set /a nb+=1
 :Retry_bitsStop
-if /I "%valeur%"=="bitsStop" (
-set choix=C
-if /I "%bitsStop%"=="0" (
-set bitsStop=1
-) else (
-set bitsStop=0
-)
-)
-set "C%nb%=net stop bits "
-if /I "%bitsStop%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=bitsStop"
+  set bitsStop=0
+  ) else (
+  if /I "!valeur!"=="bitsStop" (
+    set choix=C
+    if /I "!bitsStop!"=="0" (
+      set bitsStop=1
+      ) else (
+      set bitsStop=0
+    )
+  )
+  set "C%nb%=net stop bits "
+  if /I "!bitsStop!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%bitsStop%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Stopping services... net stop bits"
-		net stop bits 2>&1
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry bitsStop )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!bitsStop!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Stopping services... net stop bits"
+      net stop bits 2>&1
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry bitsStop )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :msiserverStop
 set Temploop=0
 set /a nb+=1
 :Retry_msiserverStop
-if /I "%valeur%"=="net stop msiserver" (
-set choix=C
-if /I "%msiserverStop%"=="0" (
-set msiserverStop=1
-) else (
-set msiserverStop=0
-)
-)
-set "C%nb%=net stop msiserver "
-if /I "%msiserverStop%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=net stop msiserver"
+  set msiserverStop=0
+  ) else (
+  if /I "!valeur!"=="net stop msiserver" (
+    set choix=C
+    if /I "!msiserverStop!"=="0" (
+      set msiserverStop=1
+      ) else (
+      set msiserverStop=0
+    )
+  )
+  set "C%nb%=net stop msiserver "
+  if /I "!msiserverStop!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%msiserverStop%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Stopping services... net stop msiserver"
-		net stop msiserver 2>&1
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry msiserverStop )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!msiserverStop!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Stopping services... net stop msiserver"
+      net stop msiserver 2>&1
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry msiserverStop )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :del
 set /a nb+=1
-if /I "%valeur%"=="del" (
-set choix=C
-if /I "%del%"=="0" (
-set del=1
-) else (
-set del=0
-)
-)
-set "C%nb%=Del /S /F /Q %temp% "
-if /I "%del%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=del"
+  set del=0
+  ) else (
+  if /I "!valeur!"=="del" (
+    set choix=C
+    if /I "!del!"=="0" (
+      set del=1
+      ) else (
+      set del=0
+    )
+  )
+  set "C%nb%=Del /S /F /Q %temp% "
+  if /I "!del!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%del%"=="1" (
-	if "%Start?%"=="2" (
-		if %NO_ADMIN% EQU 0 (
-		call :separator "Del /S /F /Q %temp%"
-		del /S /F /Q %temp%
-		set temperror=!ERRORLEVEL!
+  )
+  if /I "!del!"=="1" (
+    if "!Start?!"=="2" (
+      if %NO_ADMIN% EQU 0 (
+        call :separator "Del /S /F /Q %temp%"
+        del /S /F /Q %temp%
+        set temperror=!ERRORLEVEL!
         Call :LOGERRORLEVEL !temperror!
-		)
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+      )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :del2
 set /a nb+=1
-if /I "%valeur%"=="del2" (
-set choix=C
-if /I "%del2%"=="0" (
-set del2=1
-) else (
-set del2=0
-)
-)
-set "C%nb%=Del /S /F /Q %Windir%\Temp "
-if /I "%del2%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=del2"
+  set del2=0
+  ) else (
+  if /I "!valeur!"=="del2" (
+    set choix=C
+    if /I "!del2!"=="0" (
+      set del2=1
+      ) else (
+      set del2=0
+    )
+  )
+  set "C%nb%=Del /S /F /Q %Windir%\Temp "
+  if /I "!del2!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%del2%"=="1" (
-	if "%Start?%"=="2" (
-		if %NO_ADMIN% EQU 0 (
-		call :separator "Del /S /F /Q %Windir%\Temp"
-		del /S /F /Q %Windir%\Temp
-		set temperror=!ERRORLEVEL!
+  )
+  if /I "!del2!"=="1" (
+    if "!Start?!"=="2" (
+      if %NO_ADMIN% EQU 0 (
+        call :separator "Del /S /F /Q %Windir%\Temp"
+        del /S /F /Q %Windir%\Temp
+        set temperror=!ERRORLEVEL!
         Call :LOGERRORLEVEL !temperror!
-		)
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+      )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :SoftwareDistribution
 set Temploop=0
 set /a nb+=1
 :Retry_SoftwareDistribution
-if /I "%valeur%"=="SoftwareDistribution" (
-set choix=C
-if /I "%SoftwareDistribution%"=="0" (
-set SoftwareDistribution=1
-) else (
-set SoftwareDistribution=0
-)
-)
-set "C%nb%=rd /s /q %windir%\SoftwareDistribution "
-if /I "%SoftwareDistribution%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=SoftwareDistribution"
+  set SoftwareDistribution=0
+  ) else (
+  if /I "!valeur!"=="SoftwareDistribution" (
+    set choix=C
+    if /I "!SoftwareDistribution!"=="0" (
+      set SoftwareDistribution=1
+      ) else (
+      set SoftwareDistribution=0
+    )
+  )
+  set "C%nb%=rd /s /q %windir%\SoftwareDistribution "
+  if /I "!SoftwareDistribution!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%SoftwareDistribution%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "rd /s /q %windir%\SoftwareDistribution"
-		rd /s /q %windir%\SoftwareDistribution
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry SoftwareDistribution )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!SoftwareDistribution!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "rd /s /q %windir%\SoftwareDistribution"
+      rd /s /q %windir%\SoftwareDistribution
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry SoftwareDistribution )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :catroot2
 set Temploop=0
 set /a nb+=1
 :Retry_catroot2
-if /I "%valeur%"=="catroot2" (
-set choix=C
-if /I "%catroot2%"=="0" (
-set catroot2=1
-) else (
-set catroot2=0
-)
-)
-set "C%nb%=rd /s /q %windir%\System32\catroot2 "
-if /I "%catroot2%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=catroot2"
+  set catroot2=0
+  ) else (
+  if /I "!valeur!"=="catroot2" (
+    set choix=C
+    if /I "!catroot2!"=="0" (
+      set catroot2=1
+      ) else (
+      set catroot2=0
+    )
+  )
+  set "C%nb%=rd /s /q %windir%\System32\catroot2 "
+  if /I "!catroot2!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%catroot2%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "rd /s /q %windir%\System32\catroot2"
-		rd /s /q %windir%\System32\catroot2
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry catroot2 )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!catroot2!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "rd /s /q %windir%\System32\catroot2"
+      rd /s /q %windir%\System32\catroot2
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry catroot2 )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :winsockreset
 set Temploop=0
 set /a nb+=1
 :Retry_winsockreset
-if /I "%valeur%"=="winsockreset" (
-set choix=C
-if /I "%winsockreset%"=="0" (
-set winsockreset=1
-) else (
-set winsockreset=0
-)
-)
-set "C%nb%=Netsh winsock reset "
-if /I "%winsockreset%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=winsockreset"
+  set winsockreset=0
+  ) else (
+  if /I "!valeur!"=="winsockreset" (
+    set choix=C
+    if /I "!winsockreset!"=="0" (
+      set winsockreset=1
+      ) else (
+      set winsockreset=0
+    )
+  )
+  set "C%nb%=Netsh winsock reset "
+  if /I "!winsockreset!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%winsockreset%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Netsh winsock reset"
-		netsh winsock reset
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry winsockreset )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!winsockreset!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Netsh winsock reset"
+      netsh winsock reset
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry winsockreset )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :interfaceipreset
 set Temploop=0
 set /a nb+=1
 :Retry_interfaceipreset
-if /I "%valeur%"=="interfaceipreset" (
-set choix=C
-if /I "%interfaceipreset%"=="0" (
-set interfaceipreset=1
-) else (
-set interfaceipreset=0
-)
-)
-set "C%nb%=Netsh interface ip reset "
-if /I "%interfaceipreset%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=interfaceipreset"
+  set interfaceipreset=0
+  ) else (
+  if /I "!valeur!"=="interfaceipreset" (
+    set choix=C
+    if /I "!interfaceipreset!"=="0" (
+      set interfaceipreset=1
+      ) else (
+      set interfaceipreset=0
+    )
+  )
+  set "C%nb%=Netsh interface ip reset "
+  if /I "!interfaceipreset!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%interfaceipreset%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Netsh interface ip reset"
-		netsh interface ip reset
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry interfaceipreset )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!interfaceipreset!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Netsh interface ip reset"
+      netsh interface ip reset
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry interfaceipreset )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :advfirewallreset
 set Temploop=0
 set /a nb+=1
 :Retry_advfirewallreset
-if /I "%valeur%"=="advfirewallreset" (
-set choix=C
-if /I "%advfirewallreset%"=="0" (
-set advfirewallreset=1
-) else (
-set advfirewallreset=0
-)
-)
-set "C%nb%=Netsh advfirewall reset "
-if /I "%advfirewallreset%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=advfirewallreset"
+  set advfirewallreset=0
+  ) else (
+  if /I "!valeur!"=="advfirewallreset" (
+    set choix=C
+    if /I "!advfirewallreset!"=="0" (
+      set advfirewallreset=1
+      ) else (
+      set advfirewallreset=0
+    )
+  )
+  set "C%nb%=Netsh advfirewall reset "
+  if /I "!advfirewallreset!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%advfirewallreset%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Netsh advfirewall reset"
-		netsh advfirewall reset
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry advfirewallreset )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!advfirewallreset!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Netsh advfirewall reset"
+      netsh advfirewall reset
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry advfirewallreset )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :ipconfigrelease
 set Temploop=0
 set /a nb+=1
 :Retry_ipconfigrelease
-if /I "%valeur%"=="ipconfigrelease" (
-set choix=C
-if /I "%ipconfigrelease%"=="0" (
-set ipconfigrelease=1
-) else (
-set ipconfigrelease=0
-)
-)
-set "C%nb%=Ipconfig /release "
-if /I "%ipconfigrelease%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=ipconfigrelease"
+  set ipconfigrelease=0
+  ) else (
+  if /I "!valeur!"=="ipconfigrelease" (
+    set choix=C
+    if /I "!ipconfigrelease!"=="0" (
+      set ipconfigrelease=1
+      ) else (
+      set ipconfigrelease=0
+    )
+  )
+  set "C%nb%=Ipconfig /release "
+  if /I "!ipconfigrelease!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%ipconfigrelease%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Ipconfig /release"
-		ipconfig /release
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry ipconfigrelease )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!ipconfigrelease!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Ipconfig /release"
+      ipconfig /release
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry ipconfigrelease )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :ipconfigflushdns
 set Temploop=0
 set /a nb+=1
 :Retry_ipconfigflushdns
-if /I "%valeur%"=="ipconfigflushdns" (
-set choix=C
-if /I "%ipconfigflushdns%"=="0" (
-set ipconfigflushdns=1
-) else (
-set ipconfigflushdns=0
-)
-)
-set "C%nb%=Ipconfig /flushdns "
-if /I "%ipconfigflushdns%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=ipconfigflushdns"
+  set ipconfigflushdns=0
+  ) else (
+  if /I "!valeur!"=="ipconfigflushdns" (
+    set choix=C
+    if /I "!ipconfigflushdns!"=="0" (
+      set ipconfigflushdns=1
+      ) else (
+      set ipconfigflushdns=0
+    )
+  )
+  set "C%nb%=Ipconfig /flushdns "
+  if /I "!ipconfigflushdns!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%ipconfigflushdns%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Ipconfig /flushdns"
-		ipconfig /flushdns
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry ipconfigflushdns )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!ipconfigflushdns!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Ipconfig /flushdns"
+      ipconfig /flushdns
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry ipconfigflushdns )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :iwinhttp
 set Temploop=0
 set /a nb+=1
 :Retry_iwinhttp
-if /I "%valeur%"=="winhttp" (
-set choix=C
-if /I "%winhttp%"=="0" (
-set winhttp=1
-) else (
-set winhttp=0
-)
-)
-set "C%nb%=netsh winhttp reset proxy "
-if /I "%winhttp%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=winhttp"
+  set winhttp=0
+  ) else (
+  if /I "!valeur!"=="winhttp" (
+    set choix=C
+    if /I "!winhttp!"=="0" (
+      set winhttp=1
+      ) else (
+      set winhttp=0
+    )
+  )
+  set "C%nb%=netsh winhttp reset proxy "
+  if /I "!winhttp!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%winhttp%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "netsh winhttp reset proxy"
-		netsh winhttp reset proxy
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry iwinhttp )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!winhttp!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "netsh winhttp reset proxy"
+      netsh winhttp reset proxy
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry iwinhttp )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :bitsadminresetallusers
 set Temploop=0
 set /a nb+=1
 :Retry_bitsadminresetallusers
-if /I "%valeur%"=="bitsadmin" (
-set choix=C
-if /I "%bitsadmin%"=="0" (
-set bitsadmin=1
-) else (
-set bitsadmin=0
-)
-)
-set "C%nb%=bitsadmin /reset /allusers "
-if /I "%bitsadmin%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=bitsadmin"
+  set bitsadmin=0
+  ) else (
+  if /I "!valeur!"=="bitsadmin" (
+    set choix=C
+    if /I "!bitsadmin!"=="0" (
+      set bitsadmin=1
+      ) else (
+      set bitsadmin=0
+    )
+  )
+  set "C%nb%=bitsadmin /reset /allusers "
+  if /I "!bitsadmin!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%bitsadmin%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "bitsadmin /reset /allusers 2>&1"
-		bitsadmin /reset /allusers 2>&1
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry bitsadminresetallusers )
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!bitsadmin!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "bitsadmin /reset /allusers 2>&1"
+      bitsadmin /reset /allusers 2>&1
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry bitsadminresetallusers )
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :DLLWindowsUp
 set /a nb+=1
-if /I "%valeur%"=="DLLWindowsUp" (
-set choix=C
-if /I "%DLLWindowsUp%"=="0" (
-set DLLWindowsUp=1
-) else (
-set DLLWindowsUp=0
-)
-)
-set "C%nb%=Re-registering Windows Update DLLs... "
-if /I "%DLLWindowsUp%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=DLLWindowsUp"
+  set DLLWindowsUp=0
+  ) else (
+  if /I "!valeur!"=="DLLWindowsUp" (
+    set choix=C
+    if /I "!DLLWindowsUp!"=="0" (
+      set DLLWindowsUp=1
+      ) else (
+      set DLLWindowsUp=0
+    )
+  )
+  set "C%nb%=Re-registering Windows Update DLLs... "
+  if /I "!DLLWindowsUp!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%DLLWindowsUp%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "Re-registering Windows Update DLLs..."
-		call :ReRegister_WindowsUpdate_DLLs
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!DLLWindowsUp!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "Re-registering Windows Update DLLs..."
+      call :ReRegister_WindowsUpdate_DLLs
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ------------------------------------------------------------------------------------------------------------------------------
 :ReRegister_WindowsUpdate_DLLs
 for %%i in (
-    atl.dll urlmon.dll mshtml.dll shdocvw.dll browseui.dll jscript.dll vbscript.dll scrrun.dll
-    msxml.dll msxml3.dll msxml6.dll actxprxy.dll softpub.dll wintrust.dll dssenh.dll rsaenh.dll
-    gpkcsp.dll sccbase.dll slbcsp.dll cryptdlg.dll oleaut32.dll ole32.dll shell32.dll initpki.dll
-    wuapi.dll wuaueng.dll wuaueng1.dll wucltui.dll wups.dll wups2.dll wuweb.dll qmgr.dll
-    qmgrprxy.dll wucltux.dll muweb.dll wuwebv.dll
-) do regsvr32.exe /s %%i
+  atl.dll urlmon.dll mshtml.dll shdocvw.dll browseui.dll jscript.dll vbscript.dll scrrun.dll
+  msxml.dll msxml3.dll msxml6.dll actxprxy.dll softpub.dll wintrust.dll dssenh.dll rsaenh.dll
+  gpkcsp.dll sccbase.dll slbcsp.dll cryptdlg.dll oleaut32.dll ole32.dll shell32.dll initpki.dll
+  wuapi.dll wuaueng.dll wuaueng1.dll wucltui.dll wups.dll wups2.dll wuweb.dll qmgr.dll
+  qmgrprxy.dll wucltux.dll muweb.dll wuwebv.dll
+  ) do regsvr32.exe /s %%i
 set temperror=!ERRORLEVEL!
 Call :LOGERRORLEVEL !temperror!
 if !temperror! GEQ 1 ( Call :Retry DLLWindowsUp )
 echo|set /p="✅ Windows Update has been completely reset !"
 echo.
 goto :eof
-
+:: ============================================================================================================================
 :wuauservStart
 set /a nb+=1
-if /I "%valeur%"=="wuauservStart" (
-set choix=C
-if /I "%wuauservStart%"=="0" (
-set wuauservStart=1
-) else (
-set wuauservStart=0
-)
-)
-set "C%nb%=net Start wuauservStart "
-if /I "%wuauservStart%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=wuauservStart"
+  set wuauservStart=0
+  ) else (
+  if /I "!valeur!"=="wuauservStart" (
+    set choix=C
+    if /I "!wuauservStart!"=="0" (
+      set wuauservStart=1
+      ) else (
+      set wuauservStart=0
+    )
+  )
+  set "C%nb%=net Start wuauservStart "
+  if /I "!wuauservStart!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%wuauservStart%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "net Start wuauservStart"
-		net start wuauserv 2>&1
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!wuauservStart!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "net Start wuauservStart"
+      net start wuauserv 2>&1
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :cryptSvcStart
 set /a nb+=1
-if /I "%valeur%"=="cryptSvcStart" (
-set choix=C
-if /I "%cryptSvcStart%"=="0" (
-set cryptSvcStart=1
-) else (
-set cryptSvcStart=0
-)
-)
-set "C%nb%=net Start cryptSvc "
-if /I "%cryptSvcStart%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=cryptSvcStart"
+  set cryptSvcStart=0
+  ) else (
+  if /I "!valeur!"=="cryptSvcStart" (
+    set choix=C
+    if /I "!cryptSvcStart!"=="0" (
+      set cryptSvcStart=1
+      ) else (
+      set cryptSvcStart=0
+    )
+  )
+  set "C%nb%=net Start cryptSvc "
+  if /I "!cryptSvcStart!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%cryptSvcStart%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "net Start cryptSvc"
-		net Start cryptSvc 2>&1
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!cryptSvcStart!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "net Start cryptSvc"
+      net Start cryptSvc 2>&1
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :bitsStart
 set /a nb+=1
-if /I "%valeur%"=="bitsStart" (
-set choix=C
-if /I "%bitsStart%"=="0" (
-set bitsStart=1
-) else (
-set bitsStart=0
-)
-)
-set "C%nb%=net Start bits "
-if /I "%bitsStart%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=bitsStart"
+  set bitsStart=0
+  ) else (
+  if /I "!valeur!"=="bitsStart" (
+    set choix=C
+    if /I "!bitsStart!"=="0" (
+      set bitsStart=1
+      ) else (
+      set bitsStart=0
+    )
+  )
+  set "C%nb%=net Start bits "
+  if /I "!bitsStart!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%bitsStart%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "net Start bits"
-		net Start bits 2>&1
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!bitsStart!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "net Start bits"
+      net Start bits 2>&1
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :msiserverStart
 set /a nb+=1
-if /I "%valeur%"=="net Start msiserver" (
-set choix=C
-if /I "%msiserverStart%"=="0" (
-set msiserverStart=1
-) else (
-set msiserverStart=0
-)
-)
-set "C%nb%=net Start msiserver "
-if /I "%msiserverStart%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=net Start msiserver"
+  set msiserverStart=0
+  ) else (
+  if /I "!valeur!"=="net Start msiserver" (
+    set choix=C
+    if /I "!msiserverStart!"=="0" (
+      set msiserverStart=1
+      ) else (
+      set msiserverStart=0
+    )
+  )
+  set "C%nb%=net Start msiserver "
+  if /I "!msiserverStart!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%msiserverStart%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "net Start msiserver"
-		net Start msiserver >nul 2>&1
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!msiserverStart!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "net Start msiserver"
+      net Start msiserver >nul 2>&1
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :StartScan
 set Temploop=0
 set /a nb+=1
 :Retry_StartScan
-if /I "%valeur%"=="UsoClient StartScan" (
-set choix=C
-if /I "%StartScan%"=="0" (
-set StartScan=1
-) else (
-set StartScan=0
-)
-)
-set "C%nb%=UsoClient StartScan "
-if /I "%StartScan%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=UsoClient StartScan"
+  set StartScan=0
+  ) else (
+  if /I "!valeur!"=="UsoClient StartScan" (
+    set choix=C
+    if /I "!StartScan!"=="0" (
+      set StartScan=1
+      ) else (
+      set StartScan=0
+    )
+  )
+  set "C%nb%=UsoClient StartScan "
+  if /I "!StartScan!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%StartScan%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "UsoClient StartScan"
-		Call :Spinner_Start
-		UsoClient StartScan
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry StartScan )
-		Call :Spinner_OFF
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!StartScan!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "UsoClient StartScan"
+      Call :Spinner_Start
+      UsoClient StartScan
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry StartScan )
+      Call :Spinner_OFF
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :StartDownload
 set Temploop=0
 set /a nb+=1
 :Retry_StartDownload
-if /I "%valeur%"=="UsoClient StartDownload" (
-set choix=C
-if /I "%StartDownload%"=="0" (
-set StartDownload=1
-) else (
-set StartDownload=0
-)
-)
-set "C%nb%=UsoClient StartDownload "
-if /I "%StartDownload%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=UsoClient StartDownload"
+  set StartDownload=0
+  ) else (
+  if /I "!valeur!"=="UsoClient StartDownload" (
+    set choix=C
+    if /I "!StartDownload!"=="0" (
+      set StartDownload=1
+      ) else (
+      set StartDownload=0
+    )
+  )
+  set "C%nb%=UsoClient StartDownload "
+  if /I "!StartDownload!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%StartDownload%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "UsoClient StartDownload"
-		Call :Spinner_Start
-		UsoClient StartDownload
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry StartDownload )
-		Call :Spinner_OFF
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!StartDownload!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "UsoClient StartDownload"
+      Call :Spinner_Start
+      UsoClient StartDownload
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry StartDownload )
+      Call :Spinner_OFF
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :StartInstall
 set Temploop=0
 set /a nb+=1
 :Retry_StartInstall
-if /I "%valeur%"=="UsoClient StartInstall" (
-set choix=C
-if /I "%StartInstall%"=="0" (
-set StartInstall=1
-) else (
-set StartInstall=0
-)
-)
-set "C%nb%=UsoClient StartInstall "
-if /I "%StartInstall%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=UsoClient StartInstall"
+  set StartInstall=0
+  ) else (
+  if /I "!valeur!"=="UsoClient StartInstall" (
+    set choix=C
+    if /I "!StartInstall!"=="0" (
+      set StartInstall=1
+      ) else (
+      set StartInstall=0
+    )
+  )
+  set "C%nb%=UsoClient StartInstall"
+  if /I "!StartInstall!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%StartInstall%"=="1" (
-	if "%Start?%"=="2" (
-		Call :Spinner_Start
-		call :separator "UsoClient StartInstall"
-		UsoClient StartInstall
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		if !temperror! GEQ 1 ( Call :Retry StartInstall )
-		Call :Spinner_OFF
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!StartInstall!"=="1" (
+    if "!Start?!"=="2" (
+      Call :Spinner_Start
+      call :separator "UsoClient StartInstall"
+      UsoClient StartInstall
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      if !temperror! GEQ 1 ( Call :Retry StartInstall )
+      Call :Spinner_OFF
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :RestartDevice
 set /a nb+=1
-if /I "%valeur%"=="UsoClient RestartDevice" (
-set choix=C
-if /I "%RestartDevice%"=="0" (
-set RestartDevice=1
-) else (
-set RestartDevice=0
-)
-)
-set "C%nb%=UsoClient RestartDevice "
-if /I "%RestartDevice%"=="0" (
+if "!init!"=="1" (
+  set "C%nb%=UsoClient RestartDevice"
+  set RestartDevice=0
+  ) else (
+  if /I "!valeur!"=="UsoClient RestartDevice" (
+    set choix=C
+    if /I "!RestartDevice!"=="0" (
+      set RestartDevice=1
+      ) else (
+      set RestartDevice=0
+    )
+  )
+  set "C%nb%=UsoClient RestartDevice "
+  if /I "!RestartDevice!"=="0" (
     set "C%nb%=!C%nb%!%SFCRED%OFF%SRESET%"
-)
-if /I "%RestartDevice%"=="1" (
-	if "%Start?%"=="2" (
-		call :separator "UsoClient RestartDevice"
-		Call :Spinner_Start
-		UsoClient RestartDevice
-		set temperror=!ERRORLEVEL!
-        Call :LOGERRORLEVEL !temperror!
-		Call :Spinner_OFF
-	)
-	set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
+  if /I "!RestartDevice!"=="1" (
+    if "!Start?!"=="2" (
+      call :separator "UsoClient RestartDevice"
+      Call :Spinner_Start
+      UsoClient RestartDevice
+      set temperror=!ERRORLEVEL!
+      Call :LOGERRORLEVEL !temperror!
+      Call :Spinner_OFF
+    )
+    set "C%nb%=!C%nb%!%SFCGREEN%ON%SRESET%"
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :Log
-cd /D "%~dp0".
-if /I "%LOG%"=="1" (
-	echo " |----------------| Start :                             | " >> "%logdest%"
-	echo " |- %TIME% --| %1" >> "%logdest%"
-	echo " |                |                                     | " >> "%logdest%"
+if /I "!LOG!"=="1" (
+  echo " |----------------| Start :                             | " >> "!logdest!"
+  echo " |- %TIME% --| %1" >> "!logdest!"
+  echo " |                |                                     | " >> "!logdest!"
 )
 goto :eof
-
+:: ============================================================================================================================
 :LOGERRORLEVEL
-if /I "%LOG%"=="1" (
-	echo " |                | Error level output :                | " >> "%logdest%"
-	echo " |- %TIME% --| %1" >> "%logdest%"
-	echo " |----------------|-------------------------------------| " >> "%logdest%"
+if /I "!LOG!"=="1" (
+  echo " |                | Error level output :                | " >> "!logdest!"
+  echo " |- %TIME% --| %1" >> "!logdest!"
+  echo " |----------------|-------------------------------------| " >> "!logdest!"
 )
 goto :eof
-
+:: ============================================================================================================================
 :Retry
 call :separator "Fail_Retry"
 set /a Temploop+=1
 set "Retry=Retry_%~1"
 if !Temploop! LEQ 5 (
-    if !temperror! GEQ 1 (
-        echo [Retry] Relance !Retry! (Temploop=!Temploop!, ErrorLevel=!temperror!)
-        call :!Retry!
-    )
+  if !temperror! GEQ 1 (
+    echo [Retry] Relance !Retry! (Temploop=!Temploop!, ErrorLevel=!temperror!)
+    call :!Retry!
+  )
 )
 goto :eof
-
+:: ============================================================================================================================
 :Safe_Stop_txt
 timeout 3 /nobreak >nul
 if exist stop.txt (
-    del stop.txt
+  del stop.txt
 )
 goto :eof
-
+:: ============================================================================================================================
 :del_admin
 if exist Admin.txt (
-	del Admin.txt
+  del Admin.txt
 )
 goto :eof
-
+:: ============================================================================================================================
 :Exit_del_admin
 timeout 1 /nobreak >nul
 if exist Admin.txt (
-	del Admin.txt
-	if /I "!copy!"=="1" (
-		if not exist copy.txt (
-			goto :eof
-		)
-	)
-	goto :exitlog
+  del Admin.txt
+  if /I "!copy!"=="1" (
+    if not exist copy.txt (
+      goto :eof
+    )
+  )
+  goto :exitlog
+)
+goto :eof
+:: ============================================================================================================================
+:: My script Auto
+:: ============================================================================================================================
+:MSA
+set "prefixMS=!choix:~0,2!"
+if /I "!prefixMS!"=="MS" (
+  if defined valeur (
+    if /I "!valeur!" NEQ "MS" (
+      cd /D "%~dp0".
+      cd !targetDir!
+      start !valeur!
+      goto :exitlog
+    )
+  )
 )
 goto :eof
 
+:: ============================================================================================================================
+:: PowerCFG on
+:: ============================================================================================================================
 :CFGON
 set Temploop=0
 :Retry_CFGON
@@ -4935,19 +5345,25 @@ powercfg.exe /hibernate on
 set temperror=!ERRORLEVEL!
 if !temperror! GEQ 1 ( Call :Retry CFGON )
 goto :eof
-
+:: ============================================================================================================================
+:: PowerCFG off
+:: ============================================================================================================================
 :CFGOFF
 powercfg.exe /hibernate off
 goto :eof
-
+:: ============================================================================================================================
 :END
 exit /b
+:: ============================================================================================================================
 
+:: ============================================================================================================================
+:: Exit + Exit Log
+:: ============================================================================================================================
 :exitlog
 if /I "%LOG%"=="1" (
-	echo " |- %TIME% --| Exit                                | " >> "%logdest%"
-	echo " \______________________________________________________/ " >> "%logdest%"
+  echo " |- %TIME% --| Exit                                | " >> "%logdest%"
+  echo " \______________________________________________________/ " >> "%logdest%"
 )
 call :Spinner_OFF
+:: ============================================================================================================================
 Exit
-
