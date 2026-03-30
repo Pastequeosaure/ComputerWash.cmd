@@ -1,4 +1,4 @@
-set NONCE=16548322
+set NONCE=38954856
 
 :: ============================================================================================================================
 
@@ -63,7 +63,7 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2026.03.05.22.00
+set V=V.2026.03.27.18.57
 :: |______________________________________________________|
 :: |                                                      |
 :: | Update  : PastequeOsaure V 2026.03.05.22.00          |
@@ -3446,41 +3446,7 @@ call :separator "Auto_Ping" "only"
 echo.
 echo|set /p="[0m Auto Ping : [31mNO PING ERROR ¡¡¡¡ ¡¡¡ ¡¡ ¡"
 echo.
-echo.
-echo|set /p="[0m                       [31m__====-_  _-====__"
-echo.
-echo|set /p="[0m                [31m_--^^^[33m#####[31m//      \\[33m#####[31m^^^--_"
-echo.
-echo|set /p="[0m             [31m_-^[33m##########[31m// (    ) \\[33m##########[31m^-_"
-echo.
-echo|set /p="[0m            [31m-[33m############[31m//  |\^^/|  \\[33m############[31m-"
-echo.
-echo|set /p="[0m          [31m_/[33m############[31m//   ([34m@[31m::[34m@[31m)   [31m\\[33m############[31m\_"
-echo.
-echo|set /p="[0m         [31m/[33m#############[31m((     \\//     ))[33m#############[31m\"
-echo.
-echo|set /p="[0m        [31m-[33m###############[31m\\    (oo)    //[33m###############[31m-"
-echo.
-echo|set /p="[0m       [31m-[33m#################[31m\\  / "" \  //[33m#################[31m-"
-echo.
-echo|set /p="[0m      [31m-[33m###################[31m\\/  (_)  \//[33m###################[31m-"
-echo.
-echo|set /p="[0m     [31m_[33m#[31m/|[33m##########[31m/\[33m######[31m(   ' '   )[33m######[31m/\[33m##########[31m|\[33m#[31m_"
-echo.
-echo|set /p="[0m     [31m|/ |[33m#[31m/\[33m#[31m/\[33m#[31m/\/  \[33m#[31m/\[33m##[31m\    |    /[33m##[31m/\[33m#[31m/  \/\[33m#[31m/\[33m#[31m/\| \|"
-echo.
-echo|set /p="[0m     [31m|/  |/  V  |/  |/  |/ \\   |   // |/ |/  |/  |/  |/  |"
-echo.
-echo|set /p="[0m              [31m([33mO[31m)           \\  |  //      ([33mO[31m)"
-echo.
-echo|set /p="[0m                             [31m\\ | //"
-echo.
-echo|set /p="[0m                              [31m( | )"
-echo.
-echo|set /p="[0m                              [31m( [33mO [31m)"
-echo.
-echo|set /p="[0m                               [31m\_/"
-echo.
+call :Erreur
 echo.
 echo [0m A PING ERROR HAS BEEN DETECTED THE PING MODE SWITCHES TO INFINITE MODE UNTIL AN OK PING RESETS THE TEST. [41m [0m!RAND!Ping KO [41m [0m
 ::PowerShell -Command "[console]::beep(440, 500); [console]::beep(440, 500); [console]::beep(440, 500); [console]::beep(349, 350); [console]::beep(523, 150); [console]::beep(440, 500); [console]::beep(349, 350); [console]::beep(523, 150); [console]::beep(440, 1000); [console]::beep(659, 500); [console]::beep(659, 500); [console]::beep(659, 500); [console]::beep(698, 350); [console]::beep(523, 150); [console]::beep(415, 500); [console]::beep(349, 350); [console]::beep(523, 150); [console]::beep(440, 1000)"
@@ -3742,6 +3708,8 @@ if "!init!"=="1" (
       echo|set /p="Windows KEY :                               "
       powershell -Command "(Get-WmiObject -Query 'Select * from SoftwareLicensingService').OA3xOriginalProductKey"
       start msinfo32
+      powercfg /batteryreport /output "%~dp0\battery-report.html"
+      start msedge -inprivate battery-report.html
       timeout 60
       set temperror=!ERRORLEVEL!
       Call :LOGERRORLEVEL !temperror!
