@@ -1,4 +1,4 @@
-set NONCE=6902835
+set NONCE=51558591
 
 :: ============================================================================================================================
 
@@ -63,10 +63,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2026.04.12.15.07
+set V=V.2026.04.11.17.17
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2026.04.10.20.35          |
+:: | Update  : PastequeOsaure V 2026.04.11.17.17          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -234,6 +234,9 @@ if /I "!ME!"=="!ME:%TEMP%=!" (
   ) else (
   set copy=1
 )
+if /I "%~dp0"=="%windir%\system32\" (
+  cd %temp%
+)
 call :del_admin
 :: ============================================================================================================================
 :: 🔧 Admin ?
@@ -244,10 +247,17 @@ if %errorlevel% neq 0 ( goto :Admin ) else ( goto :copyAdmin )
 :: ============================================================================================================================
 :Admin
 set vbs=%temp%\getadmin.vbs
-echo Set UAC = CreateObject^("Shell.Application"^)>> "%vbs%"
-echo UAC.ShellExecute "%~s0", "payload %~sdp0 %*", "", "runas", 1 >> "%vbs%"
+set "CWPATH=%~s0"
+set "CWARGS=payload %~sdp0 %*"
+echo Set UAC = CreateObject^("Shell.Application"^) > "%vbs%"
+echo Dim p >> "%vbs%"
+echo Dim a >> "%vbs%"
+echo p = "!CWPATH!" >> "%vbs%"
+echo a = "!CWARGS!" >> "%vbs%"
+echo UAC.ShellExecute "cmd.exe", "/c """ ^& p ^& """ " ^& a, "", "runas", 1 >> "%vbs%"
 "%temp%\getadmin.vbs"
 del "%temp%\getadmin.vbs"
+:: ============================================================================================================================
 call :separator "Error admin" " "
 call :Erreur
 call :separator "Mode No admin 30s .... ... .. ."
@@ -325,7 +335,7 @@ if /I "%copy%"=="1" (
   type nul > copy.txt
   call :exitlog
   exit /b
-)
+) else ( goto :afterCopy )
 :: ============================================================================================================================
 
 :: ============================================================================================================================
@@ -333,7 +343,7 @@ if /I "%copy%"=="1" (
 :: ============================================================================================================================
 :afterCopy
 if /I "%LOG%"=="1" (
-  echo . > "%CD%\Computer Wash Log.txt"
+  echo . > "%logdest%"
   echo "  ______________________________________________________  " >> "%logdest%"
   echo " /                                                      \ " >> "%logdest%"
   echo " | Computer Wash LOG EDITION V 0.5 - %DATE%         | " >> "%logdest%"
@@ -361,7 +371,7 @@ goto :Var
 :: Code 5Ed5wEu5Q6
 :: ============================================================================================================================
 :Var
-if exist "%temp%\ComputerWashUpdate\" (
+if exist "%temp%\ComputerWashUpdate" (
     rd /s /q "%temp%\ComputerWashUpdate"
 )
 call :delSpinnerRunDEL
