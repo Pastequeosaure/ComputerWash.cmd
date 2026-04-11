@@ -1,4 +1,4 @@
-set NONCE=38954856
+set NONCE=23704064
 
 :: ============================================================================================================================
 
@@ -63,10 +63,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2026.03.27.18.57
+set V=V.2026.04.10.22.24
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2026.03.05.22.00          |
+:: | Update  : PastequeOsaure V 2026.04.10.20.35          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -350,6 +350,10 @@ goto :Var
 :: Code 5Ed5wEu5Q6
 :: ============================================================================================================================
 :Var
+if exist "%temp%\ComputerWashUpdate\" (
+    rd /s /q "%temp%\ComputerWashUpdate"
+)
+call :delSpinnerRunDEL
 echo Variables are starting up, please wait.
 :: ============================================================================================================================
 set A=A
@@ -495,8 +499,8 @@ set "ARISP5= "
 set "ARISP6=%%SRESET%% 👉 The software is provided ""AS IS"", without any warranty."
 set "ARISP7=%%SRESET%% The authors or copyright holders shall NOT be liable for any damages, losses, or claims."
 set "ARISP8=separator"
-set "ARISP9=%%SRESET%%%%SFCBLUE%% https:^/^/github.com^/Pastequeosaure^/ComputerWash.cmd^/blob^/main^/ComputerWash.cmd"
-set "ARISP10=%%SRESET%%%%SFCBLUE%% https:^/^/computerwash.wixsite.com^/computer-wash%%SRESET%%"
+set "ARISP9=%%SRESET%%%%SFCBLUE%% https:^/^/pastequeosaure.freeboxos.fr"
+set "ARISP10=%%SRESET%%%%SFCBLUE%% https:^/^/github.com^/Pastequeosaure^/ComputerWash.cmd^/blob^/main^/ComputerWash.cmd"
 set "ARISP11=separator"
 set "ARISP12=%%SFCRED%%   - %%SRESET%%%%SUNDERLINE%%Press CTRL+C to EXIT%%SRESET%%"
 set "ARISP13=%%SFCGREEN%%   - %%SRESET%%%%SUNDERLINE%%Press ENTER to continue%%SRESET%%"
@@ -548,6 +552,16 @@ set "Other3=%%SRESET%%   D ) Colorblind Mode %%D?%%"
 set "Other4=%%SRESET%%   R ) Return to the main menu"
 set "Other5=%%SRESET%%   %%NFCGREEN%%GIT ) Current  ^| ( = or + 2023-03-18 )"
 set "Other6=%%SRESET%%   %%NFCMAGENTA%%OLD ) OldStory ^| ( - 2023-03-18 )"
+set i=0
+for /f "delims=" %%i in ('curl -s https://pastequeosaure.freeboxos.fr/version') do set i=%%i
+if "%i%"=="%V%" (
+    set "Other7= "
+    set "Other8=%%SRESET%%   %%SUNDERLINE%%%%NFCYELLOW%%No updates available%%SRESET%%"
+) else (
+    set UP=UPDATE
+    set "Other7= "
+    set "Other8=%%SRESET%%   %%NFCGREEN%%UP) %%SRESET%%UPDATE Available"
+)
 call :AutoLigneMenu Other Ligne_MenuOther noPrefix 0 0
 :: ============================================================================================================================
 set foot_head=foot_head
@@ -715,6 +729,9 @@ call set "valeur=%%%choix%%%"
 if "%valeur%"=="" (
   set "choix= "
   goto :mode_console
+)
+if /I "%valeur%"=="UPDATE" (
+  goto :update
 )
 :: ============================================================================================================================
 if /I "%valeur%"=="SpinnerRUN" (
@@ -964,10 +981,10 @@ goto :ARGC_mode_?
 :: ============================================================================================================================
 :: SHA256
 :: ============================================================================================================================
-set "logdest=%~dp0\Computer Wash Log.txt"
 if /I "%~dp0"=="%windir%\system32\" (
   set "logdest=%userProfile%\Desktop\Computer Wash Log.txt"
-  goto afterCopy
+) else (
+    set "logdest=%~dp0\Computer Wash Log.txt"
 )
 call :template
 set "HASH="
@@ -3198,7 +3215,7 @@ if /I "%NO_ADMIN%"=="0" (
   if not exist SpinnerRun.txt (
     type nul > SpinnerRun.txt
     start computerwash.cmd SpinnerRUN
-    timeout /t 120 /nobreak >nul
+    timeout /t 30 /nobreak >nul
   )
 )
 goto :eof
@@ -3250,16 +3267,48 @@ goto :loopSpinnerRUN
 :: ============================================================================================================================
 :endloopSpinnerRUN
 del stop.txt
-del SpinnerRun.txt
+call :delSpinnerRunDEL
 exit
 :: ============================================================================================================================
+
+:delSpinnerRunDEL
+if exist SpinnerRun.txt del SpinnerRun.txt
+goto :eof
 
 :: ============================================================================================================================
 :: 🔧 Algo + menu personnalisé
 :: ============================================================================================================================
+:update
+call :separator "Update..."
+call :separator "WEB ???"
+ping -n 1 pastequeosaure.freeboxos.fr | findstr /i "TTL" >nul
+set temperror=!ERRORLEVEL!
+Call :LOGERRORLEVEL !temperror!
+if !temperror! neq 0 (
+  call :Erreur
+  goto :Var
+)
+if /I "%~dp0"=="%windir%\system32\" (
+  cd %temp%
+) else (
+  cd /D "%~dp0".
+)
+call :curl_Update
+start ComputerWash.cmd
+exit
+
+:curl_Update
+mkdir ComputerWashUpdate
+cd ComputerWashUpdate
+call :separator "DL ComputerWash.cmd"
+curl -s https://pastequeosaure.freeboxos.fr/download -o "ComputerWash.cmd"
+set temperror=!ERRORLEVEL!
+Call :LOGERRORLEVEL !temperror!
+goto :eof
+:: ============================================================================================================================
 :USB
 if /I "!valeur!"=="USB Protection" (
-  cd /D "!~dp0".
+  cd /D "%~dp0".
   cls
   call :Print Ligne_Menuheader Create_Restore_Point
   call :separator "Computer Wash USB Protection" "only"
@@ -3268,7 +3317,7 @@ if /I "!valeur!"=="USB Protection" (
   echo list disk > "%CD%\Computer_Wash_DiskPart.txt"
   echo list volume >> "%CD%\Computer_Wash_DiskPart.txt"
   echo exit >> "%CD%\Computer_Wash_DiskPart.txt"
-  diskpart /s Computer_Wash_DiskPart.txt > LOG.txt"
+  diskpart /s Computer_Wash_DiskPart.txt > LOG.txt
   call :separator "Computer Wash USB Protection" "only"
   type LOG.txt
   echo.
@@ -3708,6 +3757,11 @@ if "!init!"=="1" (
       echo|set /p="Windows KEY :                               "
       powershell -Command "(Get-WmiObject -Query 'Select * from SoftwareLicensingService').OA3xOriginalProductKey"
       start msinfo32
+      if /I "%~dp0"=="%windir%\system32\" (
+        powercfg /batteryreport /output "logdest=%userProfile%\Desktop\battery-report.html"
+      ) else (
+        powercfg /batteryreport /output "%~dp0\battery-report.html"
+      )
       powercfg /batteryreport /output "%~dp0\battery-report.html"
       start msedge -inprivate battery-report.html
       timeout 60
