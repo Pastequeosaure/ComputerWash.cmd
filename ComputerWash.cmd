@@ -1,4 +1,4 @@
-set NONCE=23704064
+set NONCE=6902835
 
 :: ============================================================================================================================
 
@@ -63,7 +63,7 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2026.04.10.22.24
+set V=V.2026.04.12.15.07
 :: |______________________________________________________|
 :: |                                                      |
 :: | Update  : PastequeOsaure V 2026.04.10.20.35          |
@@ -254,6 +254,9 @@ call :separator "Mode No admin 30s .... ... .. ."
 call :separator " " "only"
 set Temploop=0
 set NO_ADMIN=1
+if /I "%~dp0"=="%windir%\system32\" (
+  cd %temp%
+)
 type nul > NO_Admin.txt
 :checkNO_ADMIN
 timeout /t 1 /nobreak >nul
@@ -263,6 +266,7 @@ if !Temploop! LEQ 30 (
   goto :checkNO_ADMIN
 )
 set Temploop=0
+cd /D "%~dp0".
 goto :afterCopy
 :: ============================================================================================================================
 
@@ -270,6 +274,10 @@ goto :afterCopy
 :: 🔧 Copy puis Initialisation des variables
 :: ============================================================================================================================
 :copyAdmin
+if /I "%~dp0"=="%windir%\system32\" (
+  cd %temp%
+)
+:: ============================================================================================================================
 if exist stop.txt (
   del stop.txt
 )
@@ -311,6 +319,9 @@ if /I "%copy%"=="1" (
   )
 :: ============================================================================================================================
   start %windir%\system32\ComputerWash.cmd !arglist!
+  if /I "%~dp0"=="%windir%\system32\" (
+    cd %temp%
+  )
   type nul > copy.txt
   call :exitlog
   exit /b
