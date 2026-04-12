@@ -1,4 +1,4 @@
-set NONCE=30349870
+set NONCE=15927129
 
 :: ============================================================================================================================
 
@@ -63,10 +63,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2026.04.12.11.20
+set V=V.2026.04.12.19.30
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2026.04.12.11.20          |
+:: | Update  : PastequeOsaure V 2026.04.12.19.30          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -1517,6 +1517,8 @@ echo.
 echo %NFCYELLOW% 3)%SRESET% Guardian  - Stronger defense, less attack
 echo     HP: 15, ATK: 2, DEF: 1, GOLD: 5, KEYS: 1
 echo.
+echo = PastequeOsaure Score Room 112 lv 18 HP: -7/51 ATK: 17 DEF: 14 GOLD: 10 Keys: 0 =
+echo.
 set /p CHARCHOICE=Choose your hero (1-3): 
 
 set XP=0
@@ -2302,16 +2304,17 @@ if "!choice!"=="1" (
         )
 		goto NEXTROOM
     )
-if "!choice!"=="2" (
-        echo %SFCGREEN% 👍 You sneak past safely.%SRESET%
-		:: Toujours ouvrir le coffre et donner de l'or
-	    set /a goldfound=%random% %%10 + 1
-	    set /a GOLD+=goldfound
-	    echo %SFCYELLOW% 💰 You open the Gold Chest and find !goldfound! gold!%SRESET%
-	    goto NEXTROOM
-	    )
-    goto :TRAP_CHEST
 )
+if "!choice!"=="2" (
+    echo %SFCGREEN% 👍 You sneak past safely.%SRESET%
+	:: Toujours ouvrir le coffre et donner de l'or
+    set /a goldfound=%random% %%10 + 1
+    set /a GOLD+=goldfound
+    echo %SFCYELLOW% 💰 You open the Gold Chest and find !goldfound! gold!%SRESET%
+    goto NEXTROOM
+)
+goto :TRAP_CHEST
+
 
 if "!choice!"=="2" (
     set /a damage=%random% %%3 +1
