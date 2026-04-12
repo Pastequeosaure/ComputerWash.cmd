@@ -1,4 +1,4 @@
-set NONCE=3360472
+set NONCE=30349870
 
 :: ============================================================================================================================
 
@@ -63,10 +63,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2026.04.11.22.31
+set V=V.2026.04.12.11.20
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2026.04.11.17.17          |
+:: | Update  : PastequeOsaure V 2026.04.12.11.20          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -378,11 +378,19 @@ call :delSpinnerRunDEL
 echo Variables are starting up, please wait.
 :: ============================================================================================================================
 set A=A
-set A1=Daily Wash
-set A2=Maintenance Wash
-set A3=Washing Repair
-set A4=Last Resort Wash
-set A5=Update All App
+set nb=0
+set /a nb+=1
+set A%nb%=Daily Wash
+set /a nb+=1
+set A%nb%=Maintenance Wash
+set /a nb+=1
+set A%nb%=Washing Repair
+set /a nb+=1
+set A%nb%=Last Resort Wash
+set /a nb+=1
+set A%nb%=Update All App
+set nbA=%nb%
+set nb=0
 :: ============================================================================================================================
 set S=S
 set S1=Antivirus Malware Scan
@@ -664,8 +672,10 @@ set Ligne_MenuS=Ligne_MenuS
 set Ligne_MenuSS0=separator
 set Ligne_MenuSS1= %SRESET%  %SUNDERLINE%%NFCYELLOW%S%SRESET%%SUNDERLINE%pecific%SRESET%
 set "Ligne_MenuSS2= "
-call :AutoLigneMenu Ligne_MenuSS Ligne_MenuAS noPrefix 0 16
-call :AutoLigneMenu S Ligne_MenuAS 0 1 22
+set /a nbA=nbA*2+6
+call :AutoLigneMenu Ligne_MenuSS Ligne_MenuAS noPrefix 0 %nbA%
+set /a nbA+=6
+call :AutoLigneMenu S Ligne_MenuAS 0 1 %nbA%
 call :AutoLigneMenu Ligne_MenuSS Ligne_MenuS noPrefix 0 0
 call :AutoLigneMenu S Ligne_MenuS 0 1 6
 :: ============================================================================================================================
