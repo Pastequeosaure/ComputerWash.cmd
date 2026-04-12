@@ -1,4 +1,4 @@
-set NONCE=51558591
+set NONCE=3360472
 
 :: ============================================================================================================================
 
@@ -63,7 +63,7 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2026.04.11.17.17
+set V=V.2026.04.11.22.31
 :: |______________________________________________________|
 :: |                                                      |
 :: | Update  : PastequeOsaure V 2026.04.11.17.17          |
@@ -3783,7 +3783,6 @@ if "!init!"=="1" (
       ) else (
         powercfg /batteryreport /output "%~dp0\battery-report.html"
       )
-      powercfg /batteryreport /output "%~dp0\battery-report.html"
       start msedge -inprivate battery-report.html
       timeout 60
       set temperror=!ERRORLEVEL!
