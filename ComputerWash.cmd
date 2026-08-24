@@ -1,4 +1,4 @@
-set NONCE=15927129
+set NONCE=957313
 
 :: ============================================================================================================================
 
@@ -37,11 +37,11 @@ setlocal EnableDelayedExpansion
 :: |                Computer Wash Ulitmate                |
 :: |______________________________________________________|
 :: |                                                      |
-:: |    https://computerwash.wixsite.com/computer-wash    |
+:: |          https://pastequeosaure.duckdns.org          |
+:: |  https://github.com/PastequeOsaure/ComputerWash.cmd  |
 :: |______________________________________________________|
 :: |                                                      |
 :: | Created : PastequeOsaure V 0.0              17/09/19 |
-:: |         : -... . ..- ...- . - .... --- -- .- ...     |
 :: |------------------------------------------------------|
 :: |                  ⚠️ DISCLAIMER ⚠️                   |
 :: |------------------------------------------------------|
@@ -63,10 +63,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2026.04.12.19.30
+set V=V.2026.08.22.15.00
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2026.04.12.19.30          |
+:: | Update  : PastequeOsaure V 2026.08.22.15.00          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -249,12 +249,24 @@ if %errorlevel% neq 0 ( goto :Admin ) else ( goto :copyAdmin )
 set vbs=%temp%\getadmin.vbs
 set "CWPATH=%~s0"
 set "CWARGS=payload %~sdp0 %*"
+
 echo Set UAC = CreateObject^("Shell.Application"^) > "%vbs%"
 echo Dim p >> "%vbs%"
 echo Dim a >> "%vbs%"
+echo Dim shell >> "%vbs%"
+echo Dim wtPath >> "%vbs%"
 echo p = "!CWPATH!" >> "%vbs%"
 echo a = "!CWARGS!" >> "%vbs%"
-echo UAC.ShellExecute "cmd.exe", "/c """ ^& p ^& """ " ^& a, "", "runas", 1 >> "%vbs%"
+echo Set shell = CreateObject^("WScript.Shell"^) >> "%vbs%"
+echo wtPath = shell.ExpandEnvironmentStrings^("%LocalAppData%\Microsoft\WindowsApps\wt.exe"^) >> "%vbs%"
+echo Dim fso >> "%vbs%"
+echo Set fso = CreateObject^("Scripting.FileSystemObject"^) >> "%vbs%"
+echo If fso.FileExists^(wtPath^) Then >> "%vbs%"
+echo     UAC.ShellExecute "wt.exe", "cmd /c """ ^& p ^& """ " ^& a, "", "runas", 1 >> "%vbs%"
+echo Else >> "%vbs%"
+echo     UAC.ShellExecute "cmd.exe", "/c """ ^& p ^& """ " ^& a, "", "runas", 1 >> "%vbs%"
+echo End If >> "%vbs%"
+
 "%temp%\getadmin.vbs"
 del "%temp%\getadmin.vbs"
 :: ============================================================================================================================
@@ -414,7 +426,10 @@ set AS=AS
 :: ============================================================================================================================
 set T=T
 set T1=USB Protection
-set T2=Auto Ping
+set T2=Auto Pingc
+=============================================================================================================================
+set EBI=EBI
+set infobase=0
 :: ============================================================================================================================
 set D=Colorblind Mode
 set R=Return to the main menu
@@ -520,7 +535,7 @@ CALL SET char_sp_RAND=%%%char_sp%%RAND%%%
 :: ============================================================================================================================
 set ARISP=Ligne_MenuARISP
 set "ARISP0= "
-set "ARISP1=%%SRESET%%                         ⚠️ SOFTWARE DISCLAIMER ⚠️"
+set "ARISP1=%%SRESET%%                       ⚠️ SOFTWARE DISCLAIMER ⚠️"
 set "ARISP2=separator"
 set "ARISP3=%%SRESET%% IF YOU HAVE PAID FOR THIS SOFTWARE, YOU HAVE BEEN SCAMMED!"
 set "ARISP4=%%SRESET%% This script is completely FREE."
@@ -528,7 +543,7 @@ set "ARISP5= "
 set "ARISP6=%%SRESET%% 👉 The software is provided ""AS IS"", without any warranty."
 set "ARISP7=%%SRESET%% The authors or copyright holders shall NOT be liable for any damages, losses, or claims."
 set "ARISP8=separator"
-set "ARISP9=%%SRESET%%%%SFCBLUE%% https:^/^/pastequeosaure.freeboxos.fr"
+set "ARISP9=%%SRESET%%%%SFCBLUE%% https:^/^/pastequeosaure.duckdns.org"
 set "ARISP10=%%SRESET%%%%SFCBLUE%% https:^/^/github.com^/Pastequeosaure^/ComputerWash.cmd^/blob^/main^/ComputerWash.cmd"
 set "ARISP11=separator"
 set "ARISP12=%%SFCRED%%   - %%SRESET%%%%SUNDERLINE%%Press CTRL+C to EXIT%%SRESET%%"
@@ -553,7 +568,7 @@ SET "header12=%%NFCMAGENTA%% ^\____________^|___________________________________
 SET "header13= "
 if defined Cert (
   if %Cert% EQU 1 (
-    SET "header14= %SRESET%            %SUNDERLINE%%NFCRED%⚠️ unofficial version, it has undergone changes ! ⚠️%SRESET%"
+    SET "header14= %SRESET%            %SUNDERLINE%%NFCRED%⚠️ unofficial version, it has undergone changes ⚠️%SRESET%"
   )
   if %Cert% EQU 0 (
     SET "header14= %SRESET%                   %SUNDERLINE%%NFCGREEN%✅ you are on an official version ✅%SRESET%"
@@ -582,7 +597,13 @@ set "Other4=%%SRESET%%   R ) Return to the main menu"
 set "Other5=%%SRESET%%   %%NFCGREEN%%GIT ) Current  ^| ( = or + 2023-03-18 )"
 set "Other6=%%SRESET%%   %%NFCMAGENTA%%OLD ) OldStory ^| ( - 2023-03-18 )"
 set i=0
-for /f "delims=" %%i in ('curl -s https://pastequeosaure.freeboxos.fr/version') do set i=%%i
+
+ping -n 1 pastequeosaure.duckdns.org | findstr /i "TTL" >nul
+set temperror=!ERRORLEVEL!
+if !temperror! neq 0 (
+  set i=%V%
+)
+for /f "delims=" %%i in ('curl -s https://pastequeosaure.duckdns.org/version') do set i=%%i
 if "%i%"=="%V%" (
     set "Other7= "
     set "Other8=%%SRESET%%   %%SUNDERLINE%%%%NFCYELLOW%%No updates available%%SRESET%%"
@@ -591,6 +612,7 @@ if "%i%"=="%V%" (
     set "Other7= "
     set "Other8=%%SRESET%%   %%NFCGREEN%%UP) %%SRESET%%UPDATE Available"
 )
+SET "Other9=Power?"
 call :AutoLigneMenu Other Ligne_MenuOther noPrefix 0 0
 :: ============================================================================================================================
 set foot_head=foot_head
@@ -727,7 +749,7 @@ set "Choix="
 :: ============================================================================================================================
 :: Si aucun argument, aller à Interface
 :: ============================================================================================================================
-if "%1"=="" goto :Interface
+if "%1"=="" goto :Menu_?
 :: ============================================================================================================================
 :: Vérifie si le premier argument contient "\"
 :: ============================================================================================================================
@@ -759,10 +781,17 @@ if defined value (
 call set "valeur=%%%choix%%%"
 if "%valeur%"=="" (
   set "choix= "
-  goto :mode_console
+  goto :Menu_?
 )
 if /I "%valeur%"=="UPDATE" (
   goto :update
+)
+if /I "%valeur%"=="EBI" (
+  if "%infobase%"=="0" (
+    set infobase=1
+  ) else (
+    set infobase=0
+  )
 )
 :: ============================================================================================================================
 if /I "%valeur%"=="SpinnerRUN" (
@@ -1255,17 +1284,15 @@ exit /b
 :: ============================================================================================================================
 :: 🔧 Interface Pilote
 :: ============================================================================================================================
-:Interface
-:mode_console
-cls
 :: ============================================================================================================================
 :: Main Menu
 :: ============================================================================================================================
 :Menu_?
+cls
 call :Print Ligne_Menuheader 0
 if /I "%NO_ADMIN%"=="1" (
  call :separator "Error admin"
- )
+)
 if /I "%Anyreproductionisstrictlyprohibited%"=="1" (
    set Anyreproductionisstrictlyprohibited=0
    call :separator " " "only"
@@ -1358,11 +1385,13 @@ CALL SET var=%%%print%%ligne%%%
 :: ============================================================================================================================
 if "%var%"=="separator" (
 	call :separator " " only
+) else if "%var%"=="Power?" (
+  call :Infobase
 ) else (
-	if "%var%"=="." (
-		echo.
-	) else (
-		CALL echo|set /p="%var%"
+  if "%var%"=="." (
+    echo.
+  ) else (
+    CALL echo|set /p="%var%"
 	)
 )
 SET /A ligne+=1
@@ -3248,7 +3277,7 @@ cd /D "%~dp0".
 if /I "%NO_ADMIN%"=="0" (
   if not exist SpinnerRun.txt (
     type nul > SpinnerRun.txt
-    start computerwash.cmd SpinnerRUN
+    start computerwash.cmd payload SpinnerRUN
     timeout /t 30 /nobreak >nul
   )
 )
@@ -3315,7 +3344,7 @@ goto :eof
 :update
 call :separator "Update..."
 call :separator "WEB ???"
-ping -n 1 pastequeosaure.freeboxos.fr | findstr /i "TTL" >nul
+ping -n 1 1.1.1.1 | findstr /i "TTL" >nul
 set temperror=!ERRORLEVEL!
 Call :LOGERRORLEVEL !temperror!
 if !temperror! neq 0 (
@@ -3335,7 +3364,7 @@ exit
 mkdir ComputerWashUpdate
 cd ComputerWashUpdate
 call :separator "DL ComputerWash.cmd"
-curl -s https://pastequeosaure.freeboxos.fr/download -o "ComputerWash.cmd"
+curl -s https://pastequeosaure.duckdns.org/download -o "ComputerWash.cmd"
 set temperror=!ERRORLEVEL!
 Call :LOGERRORLEVEL !temperror!
 goto :eof
@@ -5387,6 +5416,164 @@ if /I "!prefixMS!"=="MS" (
     )
   )
 )
+goto :eof
+
+:: =============================================
+:: Vérifie si une batterie est détectée
+:: =============================================
+:Infobase
+call :separator " " "only"
+echo.
+echo|set /p="%%SRESET%%   %%SUNDERLINE%%Basic Information :%%SRESET%%"
+echo.
+echo.
+echo|set /p="%%SRESET%%   %%NFCBLUE%%EBI ) %%SRESET%%Extended Basic Information "
+if "%infobase%"=="0" (
+  echo|set /p="%SFCRED%OFF%SRESET%"
+  ) else (
+    echo|set /p="%SFCGREEN%ON%SRESET%"
+  )
+echo.
+echo.
+set "Battery="
+for /f %%G in ('powershell -command "Get-WmiObject Win32_Battery | Select-Object -ExpandProperty BatteryStatus" 2^>nul') do set "Battery=%%G"
+if not defined Battery (
+    echo %NFCRED%[ERREUR] Aucune batterie detectee%SRESET%
+    goto :eof
+)
+
+:: =============================================
+:: ⚡ POWER
+:: =============================================
+if "%Battery%"=="" (
+    echo|set /p="%SRESET%   🖥️  DESKTOP PC  No battery detected"
+) else if "%Battery%"=="1" (
+    echo|set /p="%SRESET%   🔋  ON BATTERY  Battery discharging"
+) else if "%Battery%"=="2" (
+    echo|set /p="%SRESET%   ⚡  AC POWER  Battery connected to AC power"
+) else if "%Battery%"=="3" (
+    echo|set /p="%SRESET%   ✅  AC POWER  Battery fully charged"
+) else if "%Battery%"=="4" (
+    echo|set /p="%SRESET%   ⚠️   WARNING  Battery low"
+) else if "%Battery%"=="5" (
+    echo|set /p="%SRESET%   🚨  CRITICAL  BATTERY PLUG IN IMMEDIATELY"
+    powershell -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('Critical battery! Plug in immediately!', 'BATTERY ALERT', 'OK', 'Error')"
+) else if "%Battery%"=="6" (
+    echo|set /p="%SRESET%   🔌  CHARGING  Battery charging"
+) else if "%Battery%"=="7" (
+    echo|set /p="%SRESET%   🔌  CHARGING  Battery high"
+) else if "%Battery%"=="8" (
+    echo|set /p="%SRESET%   🔌⚠️   CHARGING  Battery low"
+) else if "%Battery%"=="9" (
+    echo|set /p="%SRESET%   🔌🚨  CHARGING  Battery critical"
+) else if "%Battery%"=="10" (
+    echo|set /p="%SRESET%   ❓  UNKNOWN STATUS  Battery state unknown"
+) else if "%Battery%"=="11" (
+    echo|set /p="%SRESET%   🔋  Battery partially charged"
+) else (
+    echo|set /p="%SRESET%   ❓  [UNKNOWN]  Unrecognized battery status : %Battery%"
+)
+echo.
+if "%infobase%"=="0" ( goto :eof )
+echo.
+:: =============================================
+:: 🖥️ SYSTEM
+:: =============================================
+for /f "tokens=3*" %%A in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v "CurrentBuild" 2^>nul') do set "WinBuild=%%A"
+for /f "tokens=3*" %%A in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v "DisplayVersion" 2^>nul') do set "WinDisplay=%%A"
+if %WinBuild% GEQ 22000 (set "WinName=Windows 11") else (set "WinName=Windows 10")
+
+for /f "tokens=*" %%A in ('powershell -command "[System.Environment]::Is64BitOperatingSystem ? 'x64' : 'x86'" 2^>nul') do set "Arch=%%A"
+
+for /f "tokens=*" %%A in ('powershell -command "$u = (Get-Date) - (gcim Win32_OperatingSystem).LastBootUpTime; '{0}d {1}h {2}m' -f $u.Days,$u.Hours,$u.Minutes" 2^>nul') do set "Uptime=%%A"
+
+for /f "tokens=*" %%A in ('powershell -command "(gcim Win32_Processor).Name.Trim()" 2^>nul') do set "CPUName=%%A"
+for /f "tokens=*" %%A in ('powershell -command "(gcim Win32_Processor).LoadPercentage" 2^>nul') do set "CPULoad=%%A"
+
+for /f "tokens=*" %%A in ('powershell -command "$r = gcim Win32_OperatingSystem; [math]::Round(($r.TotalVisibleMemorySize - $r.FreePhysicalMemory)/1MB,1)" 2^>nul') do set "RAMUsed=%%A"
+for /f "tokens=*" %%A in ('powershell -command "[math]::Round((gcim Win32_OperatingSystem).TotalVisibleMemorySize/1MB,1)" 2^>nul') do set "RAMTotal=%%A"
+
+for /f "tokens=*" %%A in ('powershell -command "$d = Get-PSDrive C; [math]::Round($d.Free/1GB,1)" 2^>nul') do set "DiskFree=%%A"
+for /f "tokens=*" %%A in ('powershell -command "$d = Get-PSDrive C; [math]::Round(($d.Used+$d.Free)/1GB,1)" 2^>nul') do set "DiskTotal=%%A"
+
+echo|set /p="%SRESET%   🪟  %WinName%  %WinDisplay%  Build %WinBuild%  %Arch%"
+echo.
+echo|set /p="%SRESET%   🧠  CPU  %CPUName%  %CPULoad%%%"
+echo.
+echo|set /p="%SRESET%   🐏  RAM  %RAMUsed% GB / %RAMTotal% GB"
+echo.
+echo|set /p="%SRESET%   ⏱️  Uptime  %Uptime%"
+echo.
+echo.
+:: =============================================
+:: 🌐 NETWORK
+:: =============================================
+for /f "tokens=2 delims=:" %%A in ('ipconfig ^| findstr /i "IPv4"') do (
+    set "IP=%%A"
+    goto :gotip
+)
+:gotip
+set "IP=%IP: =%"
+::for /f "tokens=*" %%A in ('curl -s --max-time 3 https://api.ipify.org 2^>nul') do set "PublicIP=%%A"
+
+echo|set /p="%SRESET%   🌐  Local IP  %IP%"
+::echo.
+::echo|set /p="%SRESET%   🛰️   Public IP  %PublicIP%"
+::echo.
+echo.
+:: =============================================
+:: 💾 STORAGE
+:: =============================================
+for /f "tokens=*" %%A in ('powershell -command "Get-Disk -Number 0 | Select-Object -ExpandProperty HealthStatus" 2^>nul') do set "DiskHealth=%%A"
+if /i "%DiskHealth%"=="Healthy" (
+    echo|set /p="%SRESET%   💾  DISK C  Healthy ✅  %DiskFree% GB free / %DiskTotal% GB"
+) else if /i "%DiskHealth%"=="Warning" (
+    echo|set /p="%SRESET%   💾  DISK C  Warning ⚠️  %DiskFree% GB free / %DiskTotal% GB"
+) else if /i "%DiskHealth%"=="Unhealthy" (
+    echo|set /p="%SRESET%   💾  DISK C  Unhealthy 🚨  %DiskFree% GB free / %DiskTotal% GB"
+) else (
+    echo|set /p="%SRESET%   💾  DISK C  Unknown ❓  %DiskFree% GB free / %DiskTotal% GB"
+)
+echo.
+echo.
+:: =============================================
+:: 🔒 SECURITY & SESSION
+:: =============================================
+for /f "tokens=*" %%A in ('powershell -command "(Get-MpComputerStatus).AntivirusEnabled" 2^>nul') do set "Defender=%%A"
+for /f "tokens=*" %%A in ('powershell -command "(Get-NetFirewallProfile -Profile Domain,Public,Private | Where-Object Enabled -eq True).Count" 2^>nul') do set "FWCount=%%A"
+for /f "tokens=*" %%A in ('powershell -command "(New-Object -ComObject Microsoft.Update.Session).CreateUpdateSearcher().Search('IsInstalled=0 and Type=''Software''').Updates.Count" 2^>nul') do set "Updates=%%A"
+
+if /i "%Defender%"=="True" (
+    echo|set /p="%SRESET%   🛡️  Defender  Enabled ✅"
+) else (
+    echo|set /p="%SRESET%   🛡️  Defender  Disabled 🚨"
+)
+if "%FWCount%"=="3" (
+    echo|set /p="%SRESET%   🔥  Firewall  All profiles ON ✅"
+) else if "%FWCount%"=="0" (
+    echo|set /p="%SRESET%   🔥  Firewall  All profiles OFF 🚨"
+) else (
+    echo|set /p="%SRESET%   🔥  Firewall  Partial ⚠️  (%FWCount%/3 profiles)"
+)
+echo.
+if "%Updates%"=="0" (
+    echo|set /p="%SRESET%   🔄  Windows Update  Up to date ✅"
+) else (
+    echo|set /p="%SRESET%   🔄  Windows Update  %Updates% update(s) pending ⚠️"
+)
+echo.
+echo.
+
+for /f "tokens=*" %%A in ('powershell -command "[System.Security.Principal.WindowsIdentity]::GetCurrent().Name" 2^>nul') do set "UserName=%%A"
+for /f "tokens=*" %%A in ('powershell -command "([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)" 2^>nul') do set "IsAdmin=%%A"
+
+if /i "%IsAdmin%"=="True" (
+    echo|set /p="%SRESET%   👤  %UserName%  Admin 🔓"
+) else (
+    echo|set /p="%SRESET%   👤  %UserName%  Standard 🔒"
+)
+
+
 goto :eof
 
 :: ============================================================================================================================

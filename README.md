@@ -2,16 +2,16 @@
 
 > *The Windows maintenance tool that got out of hand (in the best possible way.)*
 
-[![Version](https://img.shields.io/badge/version-V.2026.04.12.11.20-blue)](https://pastequeosaure.freeboxos.fr)
-[![Language](https://img.shields.io/badge/language-CMD-black)](https://pastequeosaure.freeboxos.fr)
+[![Version](https://img.shields.io/badge/version-V.2026.04.12.11.20-blue)](https://pastequeosaure.duckdns.org/)
+[![Language](https://img.shields.io/badge/language-CMD-black)](https://pastequeosaure.duckdns.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Lines](https://img.shields.io/badge/lines-5000%2B-red)](https://pastequeosaure.freeboxos.fr)
+[![Lines](https://img.shields.io/badge/lines-5000%2B-red)](https://pastequeosaure.duckdns.org/)
 
 ![Main_menu](Screenshot/Main_menu.png)
 
 **ComputerWash.cmd** is a native Windows CMD maintenance script started in 2019. No dependencies. No PowerShell. No Python. Just `.cmd` pushed as far as it can go.
 
-🌐 **Website:** [https://pastequeosaure.freeboxos.fr](https://pastequeosaure.freeboxos.fr)
+🌐 **Website:** [https://pastequeosaure.duckdns.org/](https://pastequeosaure.duckdns.org/)
 
 ---
 
@@ -50,7 +50,7 @@ Despite being a single `.cmd` file, ComputerWash implements several recognized s
 
 **PastequeOsaure** Building CMD scripts since 2019 because why not.
 
-- 🌐 [pastequeosaure.freeboxos.fr](https://pastequeosaure.freeboxos.fr)
+- 🌐 [pastequeosaure.freeboxos.fr](https://pastequeosaure.duckdns.org/)
 - 🐙 GitHub: [@PastequeOsaure](https://github.com/PastequeOsaure)
 
 ---
