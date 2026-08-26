@@ -2,7 +2,7 @@
 
 > *The Windows maintenance tool that got out of hand (in the best possible way.)*
 
-[![Version](https://img.shields.io/badge/version-V.2026.04.12.11.20-blue)](https://pastequeosaure.duckdns.org/)
+[![Version](https://img.shields.io/badge/version-V.2026.08.25.23.13-blue)](https://pastequeosaure.duckdns.org/)
 [![Language](https://img.shields.io/badge/language-CMD-black)](https://pastequeosaure.duckdns.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Lines](https://img.shields.io/badge/lines-5000%2B-red)](https://pastequeosaure.duckdns.org/)
@@ -50,7 +50,7 @@ Despite being a single `.cmd` file, ComputerWash implements several recognized s
 
 **PastequeOsaure** Building CMD scripts since 2019 because why not.
 
-- 🌐 [pastequeosaure.freeboxos.fr](https://pastequeosaure.duckdns.org/)
+- 🌐 [pastequeosaure.duckdns.org](https://pastequeosaure.duckdns.org/)
 - 🐙 GitHub: [@PastequeOsaure](https://github.com/PastequeOsaure)
 
 ---

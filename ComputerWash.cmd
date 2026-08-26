@@ -1,4 +1,4 @@
-set NONCE=957313
+set NONCE=2719881
 
 :: ============================================================================================================================
 
@@ -63,10 +63,10 @@ setlocal EnableDelayedExpansion
 :: |                                                      |
 :: | Version Number :                                     |
 :: |                                                      |
-set V=V.2026.08.22.15.00
+set V=V.2026.08.25.23.13
 :: |______________________________________________________|
 :: |                                                      |
-:: | Update  : PastequeOsaure V 2026.08.22.15.00          |
+:: | Update  : PastequeOsaure V 2026.08.25.23.13          |
 :: |                                                      |
 :: |    Participation :                                   |
 :: |    |                                                 |
@@ -253,22 +253,29 @@ set "CWARGS=payload %~sdp0 %*"
 echo Set UAC = CreateObject^("Shell.Application"^) > "%vbs%"
 echo Dim p >> "%vbs%"
 echo Dim a >> "%vbs%"
-echo Dim shell >> "%vbs%"
-echo Dim wtPath >> "%vbs%"
 echo p = "!CWPATH!" >> "%vbs%"
 echo a = "!CWARGS!" >> "%vbs%"
-echo Set shell = CreateObject^("WScript.Shell"^) >> "%vbs%"
-echo wtPath = shell.ExpandEnvironmentStrings^("%LocalAppData%\Microsoft\WindowsApps\wt.exe"^) >> "%vbs%"
-echo Dim fso >> "%vbs%"
-echo Set fso = CreateObject^("Scripting.FileSystemObject"^) >> "%vbs%"
-echo If fso.FileExists^(wtPath^) Then >> "%vbs%"
-echo     UAC.ShellExecute "wt.exe", "cmd /c """ ^& p ^& """ " ^& a, "", "runas", 1 >> "%vbs%"
-echo Else >> "%vbs%"
-echo     UAC.ShellExecute "cmd.exe", "/c """ ^& p ^& """ " ^& a, "", "runas", 1 >> "%vbs%"
-echo End If >> "%vbs%"
+
+reg query "HKLM\SYSTEM\CurrentControlSet\Control\MiniNT" >nul 2>&1
+if !ERRORLEVEL! EQU 0 (
+    echo UAC.ShellExecute "cmd.exe", "/c """ ^& p ^& """ " ^& a, "", "runas", 1 >> "%vbs%"
+) else (
+  powershell -NoProfile -Command "if (Get-AppxPackage -Name Microsoft.WindowsTerminal) { exit 0 } else { exit 1 }"
+  if !ERRORLEVEL! EQU 0 (
+    where wt.exe >nul 2>&1
+    if !ERRORLEVEL! EQU 0 (
+      echo UAC.ShellExecute "wt.exe", "cmd /c """ ^& p ^& """ " ^& a, "", "runas", 1 >> "%vbs%"
+    ) else (
+      echo UAC.ShellExecute "cmd.exe", "/c """ ^& p ^& """ " ^& a, "", "runas", 1 >> "%vbs%"
+    )
+  ) else (
+    echo UAC.ShellExecute "cmd.exe", "/c """ ^& p ^& """ " ^& a, "", "runas", 1 >> "%vbs%"
+  )
+)
 
 "%temp%\getadmin.vbs"
 del "%temp%\getadmin.vbs"
+
 :: ============================================================================================================================
 call :separator "Error admin" " "
 call :Erreur
@@ -281,7 +288,6 @@ if /I "%~dp0"=="%windir%\system32\" (
 )
 type nul > NO_Admin.txt
 :checkNO_ADMIN
-timeout /t 1 /nobreak >nul
 call :Exit_del_admin
 set /a Temploop+=1
 if !Temploop! LEQ 30 (
@@ -426,8 +432,8 @@ set AS=AS
 :: ============================================================================================================================
 set T=T
 set T1=USB Protection
-set T2=Auto Pingc
-=============================================================================================================================
+set T2=Auto Ping
+:: ============================================================================================================================
 set EBI=EBI
 set infobase=0
 :: ============================================================================================================================
@@ -783,9 +789,11 @@ if "%valeur%"=="" (
   set "choix= "
   goto :Menu_?
 )
+:: ============================================================================================================================
 if /I "%valeur%"=="UPDATE" (
   goto :update
 )
+:: ============================================================================================================================
 if /I "%valeur%"=="EBI" (
   if "%infobase%"=="0" (
     set infobase=1
@@ -3357,8 +3365,21 @@ if /I "%~dp0"=="%windir%\system32\" (
   cd /D "%~dp0".
 )
 call :curl_Update
-start ComputerWash.cmd
-exit
+cls
+set "Update0= "
+set "Update1= For security reasons, the script no longer runs its automatic update."
+set "Update2= "
+set "Update3= Please run the computerwash.cmd file to complete the process or run the updated file."
+set "Update4= "
+set "Update5= Press Enter to exit and open the folder containing the downloaded files."
+call :AutoLigneMenu Update Ligne_Update noPrefix 0 0
+set Ligne_Menu=Ligne_Update
+call :Print Ligne_Menuheader 0
+call :Print %Ligne_Menu% 0
+call :Print Ligne_Menufoot_head 0
+pause
+explorer.exe .
+goto :exitlog
 
 :curl_Update
 mkdir ComputerWashUpdate
@@ -5502,7 +5523,7 @@ echo|set /p="%SRESET%   🧠  CPU  %CPUName%  %CPULoad%%%"
 echo.
 echo|set /p="%SRESET%   🐏  RAM  %RAMUsed% GB / %RAMTotal% GB"
 echo.
-echo|set /p="%SRESET%   ⏱️  Uptime  %Uptime%"
+echo|set /p="%SRESET%   ⏱️   Uptime  %Uptime%"
 echo.
 echo.
 :: =============================================
@@ -5544,9 +5565,9 @@ for /f "tokens=*" %%A in ('powershell -command "(Get-NetFirewallProfile -Profile
 for /f "tokens=*" %%A in ('powershell -command "(New-Object -ComObject Microsoft.Update.Session).CreateUpdateSearcher().Search('IsInstalled=0 and Type=''Software''').Updates.Count" 2^>nul') do set "Updates=%%A"
 
 if /i "%Defender%"=="True" (
-    echo|set /p="%SRESET%   🛡️  Defender  Enabled ✅"
+    echo|set /p="%SRESET%   🛡️   Defender  Enabled ✅"
 ) else (
-    echo|set /p="%SRESET%   🛡️  Defender  Disabled 🚨"
+    echo|set /p="%SRESET%   🛡️   Defender  Disabled 🚨"
 )
 if "%FWCount%"=="3" (
     echo|set /p="%SRESET%   🔥  Firewall  All profiles ON ✅"
